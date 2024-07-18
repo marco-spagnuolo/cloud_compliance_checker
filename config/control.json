@@ -1,0 +1,273 @@
+{
+  "controls": [
+    {
+      "id": "3.1.1",
+      "name": "Limit system access to authorized users, processes acting on behalf of authorized users, and devices (including other systems)",
+      "description": "Ensure access control policies are established and procedures are implemented.",
+      "criteria": [
+        {
+          "description": "Instance has a specific security group",
+          "check_function": "checkSecurityGroup",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.2",
+      "name": "Limit system access to the types of transactions and functions that authorized users are permitted to execute",
+      "description": "Ensure only authorized transactions and functions are allowed.",
+      "criteria": [
+        {
+          "description": "Instance has IAM roles attached",
+          "check_function": "checkIAMRoles",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.3",
+      "name": "Control the flow of CUI in accordance with approved authorizations.",
+      "description": "Ensure CUI flow is controlled.",
+      "criteria": [
+        {
+          "description": "Instance has flow logs enabled",
+          "check_function": "checkFlowLogs",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.4",
+      "name": "Separate the duties of individuals to reduce the risk of malevolent activity without collusion.",
+      "description": "Ensure duties are separated.",
+      "criteria": [
+        {
+          "description": "Instance has roles with separate duties",
+          "check_function": "checkSeparateDuties",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.5",
+      "name": "Employ the principle of least privilege, including for specific security functions and privileged accounts.",
+      "description": "Ensure least privilege access is enforced.",
+      "criteria": [
+        {
+          "description": "Instance uses least privilege for IAM roles",
+          "check_function": "checkLeastPrivilege",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.6",
+      "name": "Use non-privileged accounts or roles when accessing nonsecurity functions.",
+      "description": "Ensure non-privileged accounts are used for nonsecurity functions.",
+      "criteria": [
+        {
+          "description": "Instance uses non-privileged roles for nonsecurity functions",
+          "check_function": "checkNonPrivilegedAccounts",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.7",
+      "name": "Prevent non-privileged users from executing privileged functions and capture the execution of such functions in audit logs.",
+      "description": "Ensure non-privileged users are prevented from executing privileged functions.",
+      "criteria": [
+        {
+          "description": "Instance prevents non-privileged users from executing privileged functions",
+          "check_function": "checkPreventPrivilegedFunctions",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.8",
+      "name": "Limit unsuccessful logon attempts.",
+      "description": "Ensure unsuccessful logon attempts are limited.",
+      "criteria": [
+        {
+          "description": "Instance limits unsuccessful logon attempts",
+          "check_function": "checkLogonAttempts",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.9",
+      "name": "Provide privacy and security notices consistent with applicable CUI rules.",
+      "description": "Ensure privacy and security notices are provided.",
+      "criteria": [
+        {
+          "description": "Instance provides privacy and security notices",
+          "check_function": "checkPrivacyNotices",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.10",
+      "name": "Use session lock with pattern-hiding displays to prevent access and viewing of data after a period of inactivity.",
+      "description": "Ensure session lock with pattern-hiding displays is used.",
+      "criteria": [
+        {
+          "description": "Instance uses session lock with pattern-hiding displays",
+          "check_function": "checkSessionLock",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.11",
+      "name": "Terminate (automatically) a user session after a defined condition.",
+      "description": "Ensure user sessions are terminated automatically after a defined condition.",
+      "criteria": [
+        {
+          "description": "Instance automatically terminates user sessions after a defined condition",
+          "check_function": "checkSessionTermination",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.12",
+      "name": "Monitor and control remote access sessions.",
+      "description": "Ensure remote access sessions are monitored and controlled.",
+      "criteria": [
+        {
+          "description": "Instance monitors and controls remote access sessions",
+          "check_function": "checkRemoteAccessMonitoring",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.13",
+      "name": "Employ cryptographic mechanisms to protect the confidentiality of remote access sessions.",
+      "description": "Ensure remote access sessions are encrypted.",
+      "criteria": [
+        {
+          "description": "Instance uses encryption for remote access sessions",
+          "check_function": "checkRemoteAccessEncryption",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.14",
+      "name": "Route remote access via managed access control points.",
+      "description": "Ensure remote access is routed via managed access control points.",
+      "criteria": [
+        {
+          "description": "Instance routes remote access via managed access control points",
+          "check_function": "checkRemoteAccessRouting",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.15",
+      "name": "Authorize remote execution of privileged commands and remote access to security-relevant information.",
+      "description": "Ensure remote execution of privileged commands and access to security-relevant information are authorized.",
+      "criteria": [
+        {
+          "description": "Instance authorizes remote execution of privileged commands",
+          "check_function": "checkRemoteExecutionAuthorization",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.16",
+      "name": "Authorize wireless access prior to allowing such connections.",
+      "description": "Ensure wireless access is authorized before connections are allowed.",
+      "criteria": [
+        {
+          "description": "Instance authorizes wireless access before connections",
+          "check_function": "checkWirelessAccessAuthorization",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.17",
+      "name": "Protect wireless access using authentication and encryption.",
+      "description": "Ensure wireless access is protected using authentication and encryption.",
+      "criteria": [
+        {
+          "description": "Instance uses authentication and encryption for wireless access",
+          "check_function": "checkWirelessAccessProtection",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.18",
+      "name": "Control connection of mobile devices.",
+      "description": "Ensure connection of mobile devices is controlled.",
+      "criteria": [
+        {
+          "description": "Instance controls connection of mobile devices",
+          "check_function": "checkMobileDeviceConnection",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.19",
+      "name": "Encrypt CUI on mobile devices and mobile computing platforms.",
+      "description": "Ensure CUI on mobile devices and platforms is encrypted.",
+      "criteria": [
+        {
+          "description": "Instance encrypts CUI on mobile devices",
+          "check_function": "checkMobileDeviceEncryption",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.20",
+      "name": "Verify and control/limit connections to and use of external systems.",
+      "description": "Ensure connections to external systems are verified and controlled.",
+      "criteria": [
+        {
+          "description": "Instance controls connections to external systems",
+          "check_function": "checkExternalSystemConnections",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.21",
+      "name": "Limit use of organizational portable storage devices on external systems.",
+      "description": "Ensure use of organizational portable storage devices on external systems is limited.",
+      "criteria": [
+        {
+          "description": "Instance limits use of portable storage devices on external systems",
+          "check_function": "checkPortableStorageUse",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.22",
+      "name": "Control CUI posted or processed on publicly accessible systems.",
+      "description": "Ensure CUI on publicly accessible systems is controlled.",
+      "criteria": [
+        {
+          "description": "Instance controls CUI on publicly accessible systems",
+          "check_function": "checkPublicCUIControl",
+          "value": 5
+        }
+      ]
+    }
+  ],
+  "responses": {
+    "Implemented": 0,
+    "Planned to be implemented": -5,
+    "Not Applicable": 0
+  }
+}
