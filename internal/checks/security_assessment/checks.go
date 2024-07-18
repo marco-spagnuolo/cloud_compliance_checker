@@ -1,4 +1,4 @@
-package checks
+package security_assessment
 
 import (
 	"cloud_compliance_checker/models"

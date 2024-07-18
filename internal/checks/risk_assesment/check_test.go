@@ -1,4 +1,4 @@
-package checks
+package risk_assesment
 
 import (
 	"testing"

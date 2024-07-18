@@ -1,4 +1,4 @@
-package checks
+package id_auth
 
 import (
 	"cloud_compliance_checker/models"

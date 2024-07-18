@@ -8,6 +8,11 @@ import (
 	"cloud_compliance_checker/internal/checks/access_control/system"
 	"cloud_compliance_checker/internal/checks/audit_and_accountability"
 	"cloud_compliance_checker/internal/checks/config_management"
+	"cloud_compliance_checker/internal/checks/id_auth"
+	"cloud_compliance_checker/internal/checks/protection"
+	"cloud_compliance_checker/internal/checks/risk_assesment"
+	"cloud_compliance_checker/internal/checks/security_assessment"
+
 	"cloud_compliance_checker/models"
 	"fmt"
 
@@ -96,6 +101,43 @@ func evaluateCriteria(svc configserviceiface.ConfigServiceAPI, instance *ec2.Ins
 		return config_management.CheckSoftwarePolicies(svc)
 	case "CheckUserInstalledSoftware":
 		return config_management.CheckUserInstalledSoftware(svc)
+	case "CheckBoundaryProtection":
+		return protection.CheckBoundaryProtection()
+	case "CheckCryptographicProtection":
+		return protection.CheckCryptographicProtection()
+	case "CheckInformationTransmissionProtection":
+		return protection.CheckInformationTransmissionProtection()
+	case "CheckSystemUsers":
+		return id_auth.CheckSystemUsers()
+	case "CheckAuthentication":
+		return id_auth.CheckAuthentication()
+	case "CheckMFA":
+		return id_auth.CheckMFA()
+	case "CheckReplayResistantAuthentication":
+		return id_auth.CheckReplayResistantAuthentication()
+	case "CheckIdentifierReusePrevention":
+		return id_auth.CheckIdentifierReusePrevention()
+	case "CheckIdentifierDisabling":
+		return id_auth.CheckIdentifierDisabling()
+	case "CheckPasswordComplexity":
+		return id_auth.CheckPasswordComplexity()
+	case "CheckPasswordReuseProhibition":
+		return id_auth.CheckPasswordReuseProhibition()
+	case "CheckTemporaryPasswordUsage":
+		return id_auth.CheckTemporaryPasswordUsage()
+	case "CheckPasswordEncryption":
+		return id_auth.CheckPasswordEncryption()
+	case "CheckObscuredFeedback":
+		return id_auth.CheckObscuredFeedback()
+	case "CheckRiskAssessment":
+		return risk_assesment.CheckRiskAssessment(svc)
+	case "CheckVulnerabilityScanning":
+		return risk_assesment.CheckVulnerabilityScanning()
+	case "CheckSecurityAssessmentProcedures":
+		return security_assessment.CheckSecurityAssessmentProcedures()
+	case "CheckSecurityControlAssessments":
+		return security_assessment.CheckSecurityControlAssessments()
+
 	default:
 		return models.ComplianceResult{
 			Description: criteria.Description,
