@@ -2,15 +2,15 @@
 SSH into your EC2 instance and install OSQuery:
 For Amazon Linux 2:
 
-bash
+```bash
 sudo yum install -y osquery
-
+```
 For Ubuntu:
 
-bash
+```bash
 sudo apt-get update
 sudo apt-get install -y osquery
-
+```
 ## 3. Configure OSQuery
 
 Create the OSQuery configuration file /etc/osquery/osquery.conf:
