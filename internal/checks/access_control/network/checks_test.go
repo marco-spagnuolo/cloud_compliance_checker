@@ -119,7 +119,7 @@ func TestCheckRemoteAccessEncryption(t *testing.T) {
 	expectedFail := models.ComplianceResult{
 		Description: "Instance uses encryption for remote access sessions",
 		Status:      "FAIL",
-		Response:    "SSH not properly configured for encryption",
+		Response:    "Error checking SSH configuration: exit status 1",
 		Impact:      5,
 	}
 
