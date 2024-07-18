@@ -110,7 +110,7 @@ func defaultCheckSystemClockSyncWithNTP(ntpServer string) (bool, error) {
 	return false, nil
 }
 
-// The remaining functions are unchanged, but use the struct for dependencies
+// 3.3.1 - Create and retain system audit logs and records to the extent needed to enable the monitoring, analysis, investigation, and reporting of unlawful or unauthorized system activity.
 func (a *AuditAndAccountability) CheckAuditLogs() models.ComplianceResult {
 	logs, err := a.FetchWazuhLogs()
 	if err != nil {

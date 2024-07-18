@@ -263,6 +263,390 @@
           "value": 5
         }
       ]
+    },
+    {
+      "id": "3.2.1",
+      "name": "Establish and maintain baseline configurations and inventories of organizational information systems (including hardware, software, firmware, and documentation) throughout the respective system development life cycles.",
+      "description": "Ensure baseline configurations and inventories are maintained.",
+      "criteria": [
+        {
+          "description": "Instance maintains baseline configurations and inventories",
+          "check_function": "checkBaselineConfigurations",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.2.2",
+      "name": "Establish and enforce security configuration settings for information technology products employed in organizational information systems.",
+      "description": "Ensure security configuration settings are enforced.",
+      "criteria": [
+        {
+          "description": "Instance enforces security configuration settings",
+          "check_function": "checkSecurityConfigurationSettings",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.2.3",
+      "name": "Track, review, approve/disapprove, and audit changes to information systems.",
+      "description": "Ensure changes to information systems are tracked, reviewed, and audited.",
+      "criteria": [
+        {
+          "description": "Instance tracks, reviews, and audits changes",
+          "check_function": "checkChangeManagement",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.2.4",
+      "name": "Analyze the security impact of changes prior to implementation.",
+      "description": "Ensure security impact of changes is analyzed prior to implementation.",
+      "criteria": [
+        {
+          "description": "Instance analyzes security impact of changes",
+          "check_function": "checkSecurityImpactAnalysis",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.2.5",
+      "name": "Define, document, approve, and enforce physical and logical access restrictions associated with changes to information systems.",
+      "description": "Ensure access restrictions associated with changes are enforced.",
+      "criteria": [
+        {
+          "description": "Instance enforces access restrictions for changes",
+          "check_function": "checkAccessRestrictionsForChanges",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.2.6",
+      "name": "Employ the principle of least functionality by configuring the information system to provide only essential capabilities.",
+      "description": "Ensure information system provides only essential capabilities.",
+      "criteria": [
+        {
+          "description": "Instance is configured to provide only essential capabilities",
+          "check_function": "checkLeastFunctionality",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.2.7",
+      "name": "Restrict, disable, or prevent the use of nonessential programs, functions, ports, protocols, and services.",
+      "description": "Ensure nonessential programs, functions, ports, protocols, and services are restricted, disabled, or prevented.",
+      "criteria": [
+        {
+          "description": "Instance restricts, disables, or prevents nonessential programs and services",
+          "check_function": "checkNonessentialPrograms",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.2.8",
+      "name": "Apply deny-by-exception (blacklist) policy to prevent the use of unauthorized software or deny-all, permit-by-exception (whitelist) policy to allow the execution of authorized software.",
+      "description": "Ensure deny-by-exception or permit-by-exception policies are applied.",
+      "criteria": [
+        {
+          "description": "Instance applies deny-by-exception or permit-by-exception policies",
+          "check_function": "checkSoftwarePolicies",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.2.9",
+      "name": "Control and monitor user-installed software.",
+      "description": "Ensure user-installed software is controlled and monitored.",
+      "criteria": [
+        {
+          "description": "Instance controls and monitors user-installed software",
+          "check_function": "checkUserInstalledSoftware",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.3.1",
+      "name": "Create and retain system audit logs and records to the extent needed to enable the monitoring, analysis, investigation, and reporting of unlawful or unauthorized system activity.",
+      "description": "Ensure system audit logs and records are created and retained.",
+      "criteria": [
+        {
+          "description": "Instance creates and retains system audit logs",
+          "check_function": "checkAuditLogs",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.3.2",
+      "name": "Ensure that the actions of individual system users can be uniquely traced to those users so they can be held accountable for their actions.",
+      "description": "Ensure actions of system users can be traced.",
+      "criteria": [
+        {
+          "description": "Instance traces actions of individual system users",
+          "check_function": "checkUserTraceability",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.3.3",
+      "name": "Review and update logged events.",
+      "description": "Ensure logged events are reviewed and updated.",
+      "criteria": [
+        {
+          "description": "Instance reviews and updates logged events",
+          "check_function": "checkLoggedEventsReview",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.3.4",
+      "name": "Alert in the event of an audit logging process failure.",
+      "description": "Ensure alerts are generated in the event of an audit logging process failure.",
+      "criteria": [
+        {
+          "description": "Instance alerts in the event of audit logging process failure",
+          "check_function": "checkAuditLoggingFailure",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.3.5",
+      "name": "Correlate audit record review, analysis, and reporting processes for investigation and response to indications of unlawful, unauthorized, suspicious, or unusual activity.",
+      "description": "Ensure audit records are correlated for investigation and response.",
+      "criteria": [
+        {
+          "description": "Instance correlates audit records for investigation",
+          "check_function": "checkAuditCorrelation",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.3.6",
+      "name": "Provide audit reduction and report generation to support on-demand analysis and reporting.",
+      "description": "Ensure audit reduction and report generation is provided.",
+      "criteria": [
+        {
+          "description": "Instance provides audit reduction and report generation",
+          "check_function": "checkAuditReduction",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.3.7",
+      "name": "Provide a system capability that compares and synchronizes internal system clocks with an authoritative source to generate time stamps for audit records.",
+      "description": "Ensure system clocks are synchronized with an authoritative source.",
+      "criteria": [
+        {
+          "description": "Instance synchronizes system clocks with an authoritative source",
+          "check_function": "checkTimeSynchronization",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.4.1",
+      "name": "Create and retain system audit logs and records to the extent needed to enable the monitoring, analysis, investigation, and reporting of unlawful or unauthorized system activity.",
+      "description": "Ensure system audit logs and records are created and retained.",
+      "criteria": [
+        {
+          "description": "Instance creates and retains system audit logs",
+          "check_function": "checkAuditLogs",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.4.2",
+      "name": "Ensure that the actions of individual system users can be uniquely traced to those users so they can be held accountable for their actions.",
+      "description": "Ensure actions of system users can be traced.",
+      "criteria": [
+        {
+          "description": "Instance traces actions of individual system users",
+          "check_function": "checkUserTraceability",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.4.3",
+      "name": "Review and update logged events.",
+      "description": "Ensure logged events are reviewed and updated.",
+      "criteria": [
+        {
+          "description": "Instance reviews and updates logged events",
+          "check_function": "checkLoggedEventsReview",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.4.4",
+      "name": "Alert in the event of an audit logging process failure.",
+      "description": "Ensure alerts are generated in the event of an audit logging process failure.",
+      "criteria": [
+        {
+          "description": "Instance alerts in the event of audit logging process failure",
+          "check_function": "checkAuditLoggingFailure",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.4.5",
+      "name": "Correlate audit record review, analysis, and reporting processes for investigation and response to indications of unlawful, unauthorized, suspicious, or unusual activity.",
+      "description": "Ensure audit records are correlated for investigation and response.",
+      "criteria": [
+        {
+          "description": "Instance correlates audit records for investigation",
+          "check_function": "checkAuditCorrelation",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.4.6",
+      "name": "Provide audit reduction and report generation to support on-demand analysis and reporting.",
+      "description": "Ensure audit reduction and report generation is provided.",
+      "criteria": [
+        {
+          "description": "Instance provides audit reduction and report generation",
+          "check_function": "checkAuditReduction",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.4.7",
+      "name": "Provide a system capability that compares and synchronizes internal system clocks with an authoritative source to generate time stamps for audit records.",
+      "description": "Ensure system clocks are synchronized with an authoritative source.",
+      "criteria": [
+        {
+          "description": "Instance synchronizes system clocks with an authoritative source",
+          "check_function": "checkTimeSynchronization",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.5.1",
+      "name": "Establish and maintain baseline configurations and inventories of organizational information systems (including hardware, software, firmware, and documentation) throughout the respective system development life cycles.",
+      "description": "Ensure baseline configurations and inventories are maintained.",
+      "criteria": [
+        {
+          "description": "Instance maintains baseline configurations and inventories",
+          "check_function": "checkBaselineConfigurations",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.5.2",
+      "name": "Establish and enforce security configuration settings for information technology products employed in organizational information systems.",
+      "description": "Ensure security configuration settings are enforced.",
+      "criteria": [
+        {
+          "description": "Instance enforces security configuration settings",
+          "check_function": "checkSecurityConfigurationSettings",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.5.3",
+      "name": "Track, review, approve/disapprove, and audit changes to information systems.",
+      "description": "Ensure changes to information systems are tracked, reviewed, and audited.",
+      "criteria": [
+        {
+          "description": "Instance tracks, reviews, and audits changes",
+          "check_function": "checkChangeManagement",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.5.4",
+      "name": "Analyze the security impact of changes prior to implementation.",
+      "description": "Ensure security impact of changes is analyzed prior to implementation.",
+      "criteria": [
+        {
+          "description": "Instance analyzes security impact of changes",
+          "check_function": "checkSecurityImpactAnalysis",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.5.5",
+      "name": "Define, document, approve, and enforce physical and logical access restrictions associated with changes to information systems.",
+      "description": "Ensure access restrictions associated with changes are enforced.",
+      "criteria": [
+        {
+          "description": "Instance enforces access restrictions for changes",
+          "check_function": "checkAccessRestrictionsForChanges",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.5.6",
+      "name": "Employ the principle of least functionality by configuring the information system to provide only essential capabilities.",
+      "description": "Ensure information system provides only essential capabilities.",
+      "criteria": [
+        {
+          "description": "Instance is configured to provide only essential capabilities",
+          "check_function": "checkLeastFunctionality",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.5.7",
+      "name": "Restrict, disable, or prevent the use of nonessential programs, functions, ports, protocols, and services.",
+      "description": "Ensure nonessential programs, functions, ports, protocols, and services are restricted, disabled, or prevented.",
+      "criteria": [
+        {
+          "description": "Instance restricts, disables, or prevents nonessential programs and services",
+          "check_function": "checkNonessentialPrograms",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.5.8",
+      "name": "Apply deny-by-exception (blacklist) policy to prevent the use of unauthorized software or deny-all, permit-by-exception (whitelist) policy to allow the execution of authorized software.",
+      "description": "Ensure deny-by-exception or permit-by-exception policies are applied.",
+      "criteria": [
+        {
+          "description": "Instance applies deny-by-exception or permit-by-exception policies",
+          "check_function": "checkSoftwarePolicies",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.5.9",
+      "name": "Control and monitor user-installed software.",
+      "description": "Ensure user-installed software is controlled and monitored.",
+      "criteria": [
+        {
+          "description": "Instance controls and monitors user-installed software",
+          "check_function": "checkUserInstalledSoftware",
+          "value": 5
+        }
+      ]
     }
   ],
   "responses": {
