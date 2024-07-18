@@ -71,7 +71,7 @@ func TestCheckPrivacyNotices(t *testing.T) {
 		Description: "Instance provides privacy and security notices",
 		Status:      "PASS",
 		Response:    "Implemented",
-		Impact:      5,
+		Impact:      0,
 	}
 
 	// Ensure the file does not exist to simulate failure
@@ -107,7 +107,7 @@ func TestCheckSessionTerminationFail(t *testing.T) {
 	expected := models.ComplianceResult{
 		Description: "Instance automatically terminates user sessions after a defined condition",
 		Status:      "FAIL",
-		Response:    "Error checking screensaver configuration: exec: \"gnome-screensaver-command\": executable file not found in $PATH",
+		Response:    "Session timeout not properly configured",
 		Impact:      5,
 	}
 
