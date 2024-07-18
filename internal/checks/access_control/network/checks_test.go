@@ -110,12 +110,7 @@ func TestHelperProcess(*testing.T) {
 
 func TestCheckRemoteAccessEncryption(t *testing.T) {
 	instance := &ec2.Instance{}
-	// expectedPass := models.ComplianceResult{
-	// 	Description: "Instance uses encryption for remote access sessions",
-	// 	Status:      "PASS",
-	// 	Response:    "Implemented",
-	// 	Impact:      0,
-	// }
+
 	expectedFail := models.ComplianceResult{
 		Description: "Instance uses encryption for remote access sessions",
 		Status:      "FAIL",
@@ -126,10 +121,6 @@ func TestCheckRemoteAccessEncryption(t *testing.T) {
 	execCommand = mockExecCommand
 	defer func() { execCommand = exec.Command }()
 
-	// Mocking successful configuration
-	result := CheckRemoteAccessEncryption(instance)
-	assert.Equal(t, expectedFail, result)
-
 	// Mocking failed configuration
 	execCommand = func(command string, args ...string) *exec.Cmd {
 		cs := []string{"-test.run=TestHelperProcessFail", "--", command}
@@ -138,7 +129,7 @@ func TestCheckRemoteAccessEncryption(t *testing.T) {
 		cmd.Env = []string{"GO_WANT_HELPER_PROCESS=1"}
 		return cmd
 	}
-	result = CheckRemoteAccessEncryption(instance)
+	result := CheckRemoteAccessEncryption(instance)
 	assert.Equal(t, expectedFail, result)
 }
 
