@@ -1,6 +1,9 @@
 package network
 
 import (
+	"cloud_compliance_checker/models"
+	"os"
+	"os/exec"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -79,26 +82,79 @@ func TestCheckRemoteAccessMonitoring(t *testing.T) {
 }
 
 // Test for CheckRemoteAccessEncryption function
+// Mocking exec.Command
+var execCommand = exec.Command
+
+func mockExecCommand(command string, args ...string) *exec.Cmd {
+	cs := []string{"-test.run=TestHelperProcess", "--", command}
+	cs = append(cs, args...)
+	cmd := exec.Command(os.Args[0], cs...)
+	cmd.Env = []string{"GO_WANT_HELPER_PROCESS=1"}
+	return cmd
+}
+
+func TestHelperProcess(*testing.T) {
+	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
+		return
+	}
+	args := os.Args
+	switch args[3] {
+	case "sshd":
+		if args[4] == "-T" {
+			// Mock successful SSH configuration output
+			println("ciphers aes128-ctr,aes192-ctr,aes256-ctr")
+		}
+	}
+	os.Exit(0)
+}
+
 func TestCheckRemoteAccessEncryption(t *testing.T) {
 	instance := &ec2.Instance{}
-	success, err := checkSSHEcryptionConfiguration()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
+	expectedPass := models.ComplianceResult{
+		Description: "Instance uses encryption for remote access sessions",
+		Status:      "PASS",
+		Response:    "Implemented",
+		Impact:      0,
+	}
+	expectedFail := models.ComplianceResult{
+		Description: "Instance uses encryption for remote access sessions",
+		Status:      "FAIL",
+		Response:    "SSH not properly configured for encryption",
+		Impact:      5,
 	}
 
-	if success {
-		result := CheckRemoteAccessEncryption(instance)
-		assert.Equal(t, "Instance uses encryption for remote access sessions", result.Description)
-		assert.Equal(t, "PASS", result.Status)
-		assert.Equal(t, "Implemented", result.Response)
-		assert.Equal(t, 0, result.Impact)
-	} else {
-		result := CheckRemoteAccessEncryption(instance)
-		assert.Equal(t, "Instance uses encryption for remote access sessions", result.Description)
-		assert.Equal(t, "FAIL", result.Status)
-		assert.Equal(t, "SSH not properly configured for encryption", result.Response)
-		assert.Equal(t, 5, result.Impact)
+	execCommand = mockExecCommand
+	defer func() { execCommand = exec.Command }()
+
+	// Mocking successful configuration
+	result := CheckRemoteAccessEncryption(instance)
+	assert.Equal(t, expectedPass, result)
+
+	// Mocking failed configuration
+	execCommand = func(command string, args ...string) *exec.Cmd {
+		cs := []string{"-test.run=TestHelperProcessFail", "--", command}
+		cs = append(cs, args...)
+		cmd := exec.Command(os.Args[0], cs...)
+		cmd.Env = []string{"GO_WANT_HELPER_PROCESS=1"}
+		return cmd
 	}
+	result = CheckRemoteAccessEncryption(instance)
+	assert.Equal(t, expectedFail, result)
+}
+
+func TestHelperProcessFail(*testing.T) {
+	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
+		return
+	}
+	args := os.Args
+	switch args[3] {
+	case "sshd":
+		if args[4] == "-T" {
+			// Mock failed SSH configuration output
+			println("ciphers aes128-ctr,aes192-ctr")
+		}
+	}
+	os.Exit(0)
 }
 
 // Test for CheckRemoteAccessRouting function
