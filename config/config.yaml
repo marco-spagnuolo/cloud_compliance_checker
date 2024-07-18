@@ -1,0 +1,85 @@
+aws:
+  region: us-east-1
+  credentials:
+    access_key_id: YOUR_AWS_ACCESS_KEY_ID
+    secret_access_key: YOUR_AWS_SECRET_ACCESS_KEY
+  config_service:
+    role_arn: arn:aws:iam::YOUR_ACCOUNT_ID:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig
+    bucket_name: your-config-bucket
+  s3:
+    bucket_name: your-log-bucket
+  config_rules:
+    - name: approved-amis-by-id
+      description: Checks whether running instances are using specified AMIs. Optionally checks root volumes and any attached volumes.
+      resource_types:
+        - AWS::EC2::Instance
+      source:
+        owner: AWS
+        source_identifier: APPROVED_AMIS_BY_ID
+      input_parameters:
+        amiIds: ami-12345678,ami-23456789
+      maximum_execution_frequency: Six_Hours
+    - name: security-configuration
+      description: Ensure security configurations are applied.
+      resource_types:
+        - AWS::EC2::Instance
+      source:
+        owner: AWS
+        source_identifier: SECURITY_CONFIGURATION
+      maximum_execution_frequency: Six_Hours
+    - name: configuration-changes
+      description: Ensure configuration changes are tracked and managed.
+      resource_types:
+        - AWS::EC2::Instance
+      source:
+        owner: AWS
+        source_identifier: CONFIGURATION_CHANGES
+      maximum_execution_frequency: Six_Hours
+    - name: security-impact-analysis
+      description: Analyze the security impact of changes.
+      resource_types:
+        - AWS::EC2::Instance
+      source:
+        owner: AWS
+        source_identifier: SECURITY_IMPACT_ANALYSIS
+      maximum_execution_frequency: Six_Hours
+    - name: access-restrictions
+      description: Ensure access restrictions are enforced.
+      resource_types:
+        - AWS::EC2::Instance
+      source:
+        owner: AWS
+        source_identifier: ACCESS_RESTRICTIONS
+      maximum_execution_frequency: Six_Hours
+    - name: least-functionality
+      description: Ensure least functionality.
+      resource_types:
+        - AWS::EC2::Instance
+      source:
+        owner: AWS
+        source_identifier: LEAST_FUNCTIONALITY
+      maximum_execution_frequency: Six_Hours
+    - name: nonessential-functions
+      description: Restrict nonessential functions.
+      resource_types:
+        - AWS::EC2::Instance
+      source:
+        owner: AWS
+        source_identifier: NONESSENTIAL_FUNCTIONS
+      maximum_execution_frequency: Six_Hours
+    - name: software-policies
+      description: Ensure software policies compliance.
+      resource_types:
+        - AWS::EC2::Instance
+      source:
+        owner: AWS
+        source_identifier: SOFTWARE_POLICIES
+      maximum_execution_frequency: Six_Hours
+    - name: user-installed-software
+      description: Control and monitor user-installed software.
+      resource_types:
+        - AWS::EC2::Instance
+      source:
+        owner: AWS
+        source_identifier: USER_INSTALLED_SOFTWARE
+      maximum_execution_frequency: Six_Hours

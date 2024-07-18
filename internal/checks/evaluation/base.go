@@ -11,13 +11,16 @@ import (
 	"cloud_compliance_checker/models"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/configservice"
+	"github.com/aws/aws-sdk-go/service/configservice/configserviceiface"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 )
 
 // evaluateCriteria evaluates the criteria for a given instance and returns the compliance result
-func evaluateCriteria(instance *ec2.Instance, criteria models.Criteria, iamClient iamiface.IAMAPI, ec2Client ec2iface.EC2API) models.ComplianceResult {
+func evaluateCriteria(svc configserviceiface.ConfigServiceAPI, instance *ec2.Instance, criteria models.Criteria, iamClient iamiface.IAMAPI, ec2Client ec2iface.EC2API) models.ComplianceResult {
 	switch criteria.CheckFunction {
 	case "CheckSecurityGroup":
 		return securitygroup.CheckSecurityGroup(instance)
@@ -78,21 +81,21 @@ func evaluateCriteria(instance *ec2.Instance, criteria models.Criteria, iamClien
 	case "CheckTimeSynchronization":
 		return audit_and_accountability.NewAuditAndAccountability().CheckTimeSynchronization()
 	case "CheckSecurityConfiguration":
-		return config_management.CheckSecurityConfiguration()
+		return config_management.CheckSecurityConfiguration(svc)
 	case "CheckConfigurationChanges":
-		return config_management.CheckConfigurationChanges()
+		return config_management.CheckConfigurationChanges(svc)
 	case "CheckSecurityImpactAnalysis":
-		return config_management.CheckSecurityImpactAnalysis()
+		return config_management.CheckSecurityImpactAnalysis(svc)
 	case "CheckAccessRestrictions":
-		return config_management.CheckAccessRestrictions()
+		return config_management.CheckAccessRestrictions(svc)
 	case "CheckLeastFunctionality":
-		return config_management.CheckLeastFunctionality()
+		return config_management.CheckLeastFunctionality(svc)
 	case "CheckNonessentialFunctions":
-		return config_management.CheckNonessentialFunctions()
+		return config_management.CheckNonessentialFunctions(svc)
 	case "CheckSoftwarePolicies":
-		return config_management.CheckSoftwarePolicies()
+		return config_management.CheckSoftwarePolicies(svc)
 	case "CheckUserInstalledSoftware":
-		return config_management.CheckUserInstalledSoftware()
+		return config_management.CheckUserInstalledSoftware(svc)
 	default:
 		return models.ComplianceResult{
 			Description: criteria.Description,
@@ -105,10 +108,12 @@ func evaluateCriteria(instance *ec2.Instance, criteria models.Criteria, iamClien
 
 // CheckCompliance runs all compliance checks on the given instance and returns the total score
 func CheckCompliance(instance *ec2.Instance, controls models.NISTControls, iamClient iamiface.IAMAPI, ec2Client ec2iface.EC2API) int {
+	sess := session.Must(session.NewSession())
+	svc := configservice.New(sess)
 	score := 110
 	for _, control := range controls.Controls {
 		for _, criteria := range control.Criteria {
-			result := evaluateCriteria(instance, criteria, iamClient, ec2Client)
+			result := evaluateCriteria(svc, instance, criteria, iamClient, ec2Client)
 			fmt.Printf("Check: %s, Result: %s, Impact: %d\n", criteria.CheckFunction, result.Status, result.Impact) // Debugging line
 			score -= result.Impact
 		}

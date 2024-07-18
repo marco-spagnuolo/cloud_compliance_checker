@@ -7,13 +7,19 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/configservice"
+	"github.com/aws/aws-sdk-go/service/configservice/configserviceiface"
 )
 
-// 3.4.1 - Establish and maintain baseline configurations and inventories of organizational systems (including hardware, software, firmware, and documentation) throughout the respective system development life cycles.
-func CheckConfigCompliance() models.ComplianceResult {
-	sess := session.Must(session.NewSession())
-	svc := configservice.New(sess)
+// ConfigService is a variable that allows us to mock the AWS Config service in tests.
+var ConfigService configserviceiface.ConfigServiceAPI
 
+func init() {
+	sess := session.Must(session.NewSession())
+	ConfigService = configservice.New(sess)
+}
+
+// 3.4.1 - Establish and maintain baseline configurations and inventories of organizational systems (including hardware, software, firmware, and documentation) throughout the respective system development life cycles.
+func CheckConfigCompliance(svc configserviceiface.ConfigServiceAPI) models.ComplianceResult {
 	input := &configservice.DescribeComplianceByConfigRuleInput{}
 
 	result, err := svc.DescribeComplianceByConfigRule(input)
@@ -46,10 +52,7 @@ func CheckConfigCompliance() models.ComplianceResult {
 }
 
 // 3.4.2 - Establish and enforce security configuration settings for information technology products employed in organizational systems.
-func CheckSecurityConfiguration() models.ComplianceResult {
-	sess := session.Must(session.NewSession())
-	svc := configservice.New(sess)
-
+func CheckSecurityConfiguration(svc configserviceiface.ConfigServiceAPI) models.ComplianceResult {
 	input := &configservice.GetComplianceDetailsByConfigRuleInput{
 		ConfigRuleName: aws.String("security-configuration"),
 	}
@@ -84,10 +87,7 @@ func CheckSecurityConfiguration() models.ComplianceResult {
 }
 
 // 3.4.3 - Track, review, approve/disapprove, and audit changes to organizational systems.
-func CheckConfigurationChanges() models.ComplianceResult {
-	sess := session.Must(session.NewSession())
-	svc := configservice.New(sess)
-
+func CheckConfigurationChanges(svc configserviceiface.ConfigServiceAPI) models.ComplianceResult {
 	input := &configservice.GetComplianceDetailsByConfigRuleInput{
 		ConfigRuleName: aws.String("configuration-changes"),
 	}
@@ -122,10 +122,7 @@ func CheckConfigurationChanges() models.ComplianceResult {
 }
 
 // 3.4.4 - Analyze the security impact of changes prior to implementation.
-func CheckSecurityImpactAnalysis() models.ComplianceResult {
-	sess := session.Must(session.NewSession())
-	svc := configservice.New(sess)
-
+func CheckSecurityImpactAnalysis(svc configserviceiface.ConfigServiceAPI) models.ComplianceResult {
 	input := &configservice.GetComplianceDetailsByConfigRuleInput{
 		ConfigRuleName: aws.String("security-impact-analysis"),
 	}
@@ -160,10 +157,7 @@ func CheckSecurityImpactAnalysis() models.ComplianceResult {
 }
 
 // 3.4.5 - Define, document, approve, and enforce physical and logical access restrictions associated with changes to the system.
-func CheckAccessRestrictions() models.ComplianceResult {
-	sess := session.Must(session.NewSession())
-	svc := configservice.New(sess)
-
+func CheckAccessRestrictions(svc configserviceiface.ConfigServiceAPI) models.ComplianceResult {
 	input := &configservice.GetComplianceDetailsByConfigRuleInput{
 		ConfigRuleName: aws.String("access-restrictions"),
 	}
@@ -198,10 +192,7 @@ func CheckAccessRestrictions() models.ComplianceResult {
 }
 
 // 3.4.6 - Employ the principle of least functionality by configuring organizational systems to provide only essential capabilities.
-func CheckLeastFunctionality() models.ComplianceResult {
-	sess := session.Must(session.NewSession())
-	svc := configservice.New(sess)
-
+func CheckLeastFunctionality(svc configserviceiface.ConfigServiceAPI) models.ComplianceResult {
 	input := &configservice.GetComplianceDetailsByConfigRuleInput{
 		ConfigRuleName: aws.String("least-functionality"),
 	}
@@ -236,10 +227,7 @@ func CheckLeastFunctionality() models.ComplianceResult {
 }
 
 // 3.4.7 - Restrict, disable, and prevent the use of nonessential programs, functions, ports, protocols, and services.
-func CheckNonessentialFunctions() models.ComplianceResult {
-	sess := session.Must(session.NewSession())
-	svc := configservice.New(sess)
-
+func CheckNonessentialFunctions(svc configserviceiface.ConfigServiceAPI) models.ComplianceResult {
 	input := &configservice.GetComplianceDetailsByConfigRuleInput{
 		ConfigRuleName: aws.String("nonessential-functions"),
 	}
@@ -274,10 +262,7 @@ func CheckNonessentialFunctions() models.ComplianceResult {
 }
 
 // 3.4.8 - Apply deny-by-exception (blacklisting) policy to prevent the use of unauthorized software or deny-all, permit-by-exception (whitelisting) policy to allow the execution of authorized software.
-func CheckSoftwarePolicies() models.ComplianceResult {
-	sess := session.Must(session.NewSession())
-	svc := configservice.New(sess)
-
+func CheckSoftwarePolicies(svc configserviceiface.ConfigServiceAPI) models.ComplianceResult {
 	input := &configservice.GetComplianceDetailsByConfigRuleInput{
 		ConfigRuleName: aws.String("software-policies"),
 	}
@@ -312,10 +297,7 @@ func CheckSoftwarePolicies() models.ComplianceResult {
 }
 
 // 3.4.9 - Control and monitor user-installed software.
-func CheckUserInstalledSoftware() models.ComplianceResult {
-	sess := session.Must(session.NewSession())
-	svc := configservice.New(sess)
-
+func CheckUserInstalledSoftware(svc configserviceiface.ConfigServiceAPI) models.ComplianceResult {
 	input := &configservice.GetComplianceDetailsByConfigRuleInput{
 		ConfigRuleName: aws.String("user-installed-software"),
 	}
