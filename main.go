@@ -14,6 +14,7 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/cloudtrail"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
 )
@@ -34,14 +35,15 @@ func main() {
 	// Create AWS session
 	sess := session.Must(session.NewSession())
 
-	// Create IAM and EC2 clients
+	// Create IAM, EC2, and CloudTrail clients
 	iamClient := iam.New(sess)
 	ec2Client := ec2.New(sess)
+	cloudTrailClient := cloudtrail.New(sess)
 
 	// Assess assets
 	var results []models.AssessmentResult
 	for _, asset := range assets {
-		result := evaluation.CheckCompliance(asset.Instance, controls, iamClient, ec2Client)
+		result := evaluation.CheckCompliance(asset.Instance, controls, iamClient, ec2Client, cloudTrailClient)
 		results = append(results, models.AssessmentResult{
 			Asset:         asset,
 			Implemented:   result == 110,              // Adjust the logic here based on your requirements

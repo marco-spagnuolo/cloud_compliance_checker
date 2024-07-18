@@ -12,11 +12,11 @@ import (
 	"cloud_compliance_checker/internal/checks/protection"
 	"cloud_compliance_checker/internal/checks/risk_assesment"
 	"cloud_compliance_checker/internal/checks/security_assessment"
-
 	"cloud_compliance_checker/models"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/cloudtrail/cloudtrailiface"
 	"github.com/aws/aws-sdk-go/service/configservice"
 	"github.com/aws/aws-sdk-go/service/configservice/configserviceiface"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -25,7 +25,7 @@ import (
 )
 
 // evaluateCriteria evaluates the criteria for a given instance and returns the compliance result
-func evaluateCriteria(svc configserviceiface.ConfigServiceAPI, instance *ec2.Instance, criteria models.Criteria, iamClient iamiface.IAMAPI, ec2Client ec2iface.EC2API) models.ComplianceResult {
+func evaluateCriteria(svc configserviceiface.ConfigServiceAPI, instance *ec2.Instance, criteria models.Criteria, iamClient iamiface.IAMAPI, ec2Client ec2iface.EC2API, sess *session.Session, cloudTrailClient cloudtrailiface.CloudTrailAPI) models.ComplianceResult {
 	switch criteria.CheckFunction {
 	case "CheckSecurityGroup":
 		return securitygroup.CheckSecurityGroup(instance)
@@ -102,42 +102,41 @@ func evaluateCriteria(svc configserviceiface.ConfigServiceAPI, instance *ec2.Ins
 	case "CheckUserInstalledSoftware":
 		return config_management.CheckUserInstalledSoftware(svc)
 	case "CheckBoundaryProtection":
-		return protection.CheckBoundaryProtection()
+		return protection.CheckBoundaryProtection(sess)
 	case "CheckCryptographicProtection":
-		return protection.CheckCryptographicProtection()
+		return protection.CheckCryptographicProtection(sess)
 	case "CheckInformationTransmissionProtection":
-		return protection.CheckInformationTransmissionProtection()
+		return protection.CheckInformationTransmissionProtection(sess)
 	case "CheckSystemUsers":
-		return id_auth.CheckSystemUsers()
+		return id_auth.CheckSystemUsers(iamClient, cloudTrailClient, ec2Client)
 	case "CheckAuthentication":
-		return id_auth.CheckAuthentication()
+		return id_auth.CheckAuthentication(iamClient)
 	case "CheckMFA":
-		return id_auth.CheckMFA()
+		return id_auth.CheckMFA(iamClient)
 	case "CheckReplayResistantAuthentication":
 		return id_auth.CheckReplayResistantAuthentication()
 	case "CheckIdentifierReusePrevention":
-		return id_auth.CheckIdentifierReusePrevention()
+		return id_auth.CheckIdentifierReusePrevention(iamClient)
 	case "CheckIdentifierDisabling":
-		return id_auth.CheckIdentifierDisabling()
+		return id_auth.CheckIdentifierDisabling(iamClient)
 	case "CheckPasswordComplexity":
-		return id_auth.CheckPasswordComplexity()
+		return id_auth.CheckPasswordComplexity(iamClient)
 	case "CheckPasswordReuseProhibition":
-		return id_auth.CheckPasswordReuseProhibition()
+		return id_auth.CheckPasswordReuseProhibition(iamClient)
 	case "CheckTemporaryPasswordUsage":
-		return id_auth.CheckTemporaryPasswordUsage()
+		return id_auth.CheckTemporaryPasswordUsage(iamClient)
 	case "CheckPasswordEncryption":
-		return id_auth.CheckPasswordEncryption()
+		return id_auth.CheckPasswordEncryption(iamClient)
 	case "CheckObscuredFeedback":
-		return id_auth.CheckObscuredFeedback()
+		return id_auth.CheckObscuredFeedback(iamClient)
 	case "CheckRiskAssessment":
-		return risk_assesment.CheckRiskAssessment(svc)
-	case "CheckVulnerabilityScanning":
-		return risk_assesment.CheckVulnerabilityScanning()
+		return risk_assesment.CheckRiskAssessment(sess)
+	case "CheckVulnerabilityScan":
+		return risk_assesment.CheckVulnerabilityScan(sess)
 	case "CheckSecurityAssessmentProcedures":
-		return security_assessment.CheckSecurityAssessmentProcedures()
+		return security_assessment.CheckSecurityAssessmentProcedures(sess)
 	case "CheckSecurityControlAssessments":
-		return security_assessment.CheckSecurityControlAssessments()
-
+		return security_assessment.CheckSecurityControlAssessments(sess)
 	default:
 		return models.ComplianceResult{
 			Description: criteria.Description,
@@ -149,13 +148,13 @@ func evaluateCriteria(svc configserviceiface.ConfigServiceAPI, instance *ec2.Ins
 }
 
 // CheckCompliance runs all compliance checks on the given instance and returns the total score
-func CheckCompliance(instance *ec2.Instance, controls models.NISTControls, iamClient iamiface.IAMAPI, ec2Client ec2iface.EC2API) int {
+func CheckCompliance(instance *ec2.Instance, controls models.NISTControls, iamClient iamiface.IAMAPI, ec2Client ec2iface.EC2API, cloudTrailClient cloudtrailiface.CloudTrailAPI) int {
 	sess := session.Must(session.NewSession())
 	svc := configservice.New(sess)
 	score := 110
 	for _, control := range controls.Controls {
 		for _, criteria := range control.Criteria {
-			result := evaluateCriteria(svc, instance, criteria, iamClient, ec2Client)
+			result := evaluateCriteria(svc, instance, criteria, iamClient, ec2Client, sess, cloudTrailClient)
 			fmt.Printf("Check: %s, Result: %s, Impact: %d\n", criteria.CheckFunction, result.Status, result.Impact) // Debugging line
 			score -= result.Impact
 		}
