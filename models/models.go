@@ -6,6 +6,7 @@ type Asset struct {
 	Name     string
 	Type     string
 	Cloud    string
+	Details  interface{}
 	Instance *ec2.Instance
 }
 

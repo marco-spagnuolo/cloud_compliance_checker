@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cloud_compliance_checker/assessment"
+	"cloud_compliance_checker/compliance"
 	"cloud_compliance_checker/config"
 	"cloud_compliance_checker/discovery"
 	"cloud_compliance_checker/reports"
@@ -17,7 +17,7 @@ func main() {
 	assets := discovery.DiscoverAssets()
 
 	// Assess assets
-	results := assessment.AssessAssets(assets)
+	results := compliance.AssessAssets(assets)
 
 	// Calculate scores
 	scores := scoring.CalculateScores(results)
