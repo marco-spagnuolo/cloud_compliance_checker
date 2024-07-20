@@ -34,6 +34,7 @@ require (
 )
 
 require (
+	github.com/golang/mock v1.6.0
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/spf13/viper v1.19.0
 )
