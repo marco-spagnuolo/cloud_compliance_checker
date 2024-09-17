@@ -3,7 +3,7 @@ module cloud_compliance_checker
 go 1.21.1
 
 require (
-	github.com/aws/aws-sdk-go v1.54.19
+	github.com/aws/aws-sdk-go v1.55.5
 	github.com/stretchr/testify v1.9.0
 )
 
