@@ -52,7 +52,7 @@ func CheckConfigCompliance(svc configserviceiface.ConfigServiceAPI) models.Compl
 }
 
 // 3.4.2 - Establish and enforce security configuration settings for information technology products employed in organizational systems.
-func CheckSecurityConfiguration(svc configserviceiface.ConfigServiceAPI) models.ComplianceResult {
+func CheckSecurityConfiguration(svc configserviceiface.ConfigServiceAPI, criteria models.Criteria) models.ComplianceResult {
 	input := &configservice.GetComplianceDetailsByConfigRuleInput{
 		ConfigRuleName: aws.String("security-configuration"),
 	}
@@ -63,7 +63,7 @@ func CheckSecurityConfiguration(svc configserviceiface.ConfigServiceAPI) models.
 			Description: "Ensure security configurations are applied",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error retrieving security configuration compliance: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -73,7 +73,7 @@ func CheckSecurityConfiguration(svc configserviceiface.ConfigServiceAPI) models.
 				Description: "Ensure security configurations are applied",
 				Status:      "FAIL",
 				Response:    "Non-compliant security configurations found",
-				Impact:      5,
+				Impact:      criteria.Value,
 			}
 		}
 	}
@@ -87,7 +87,7 @@ func CheckSecurityConfiguration(svc configserviceiface.ConfigServiceAPI) models.
 }
 
 // 3.4.3 - Track, review, approve/disapprove, and audit changes to organizational systems.
-func CheckConfigurationChanges(svc configserviceiface.ConfigServiceAPI) models.ComplianceResult {
+func CheckConfigurationChanges(svc configserviceiface.ConfigServiceAPI, criteria models.Criteria) models.ComplianceResult {
 	input := &configservice.GetComplianceDetailsByConfigRuleInput{
 		ConfigRuleName: aws.String("configuration-changes"),
 	}
@@ -98,7 +98,7 @@ func CheckConfigurationChanges(svc configserviceiface.ConfigServiceAPI) models.C
 			Description: "Ensure configuration changes are tracked and managed",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error retrieving configuration change compliance: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -108,7 +108,7 @@ func CheckConfigurationChanges(svc configserviceiface.ConfigServiceAPI) models.C
 				Description: "Ensure configuration changes are tracked and managed",
 				Status:      "FAIL",
 				Response:    "Non-compliant configuration changes found",
-				Impact:      5,
+				Impact:      criteria.Value,
 			}
 		}
 	}
@@ -122,7 +122,7 @@ func CheckConfigurationChanges(svc configserviceiface.ConfigServiceAPI) models.C
 }
 
 // 3.4.4 - Analyze the security impact of changes prior to implementation.
-func CheckSecurityImpactAnalysis(svc configserviceiface.ConfigServiceAPI) models.ComplianceResult {
+func CheckSecurityImpactAnalysis(svc configserviceiface.ConfigServiceAPI, criteria models.Criteria) models.ComplianceResult {
 	input := &configservice.GetComplianceDetailsByConfigRuleInput{
 		ConfigRuleName: aws.String("security-impact-analysis"),
 	}
@@ -133,7 +133,7 @@ func CheckSecurityImpactAnalysis(svc configserviceiface.ConfigServiceAPI) models
 			Description: "Analyze the security impact of changes",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error retrieving security impact analysis compliance: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -143,7 +143,7 @@ func CheckSecurityImpactAnalysis(svc configserviceiface.ConfigServiceAPI) models
 				Description: "Analyze the security impact of changes",
 				Status:      "FAIL",
 				Response:    "Non-compliant security impact analyses found",
-				Impact:      5,
+				Impact:      criteria.Value,
 			}
 		}
 	}
@@ -157,7 +157,7 @@ func CheckSecurityImpactAnalysis(svc configserviceiface.ConfigServiceAPI) models
 }
 
 // 3.4.5 - Define, document, approve, and enforce physical and logical access restrictions associated with changes to the system.
-func CheckAccessRestrictions(svc configserviceiface.ConfigServiceAPI) models.ComplianceResult {
+func CheckAccessRestrictions(svc configserviceiface.ConfigServiceAPI, criteria models.Criteria) models.ComplianceResult {
 	input := &configservice.GetComplianceDetailsByConfigRuleInput{
 		ConfigRuleName: aws.String("access-restrictions"),
 	}
@@ -168,7 +168,7 @@ func CheckAccessRestrictions(svc configserviceiface.ConfigServiceAPI) models.Com
 			Description: "Ensure access restrictions are enforced",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error retrieving access restriction compliance: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -178,7 +178,7 @@ func CheckAccessRestrictions(svc configserviceiface.ConfigServiceAPI) models.Com
 				Description: "Ensure access restrictions are enforced",
 				Status:      "FAIL",
 				Response:    "Non-compliant access restrictions found",
-				Impact:      5,
+				Impact:      criteria.Value,
 			}
 		}
 	}
@@ -192,7 +192,7 @@ func CheckAccessRestrictions(svc configserviceiface.ConfigServiceAPI) models.Com
 }
 
 // 3.4.6 - Employ the principle of least functionality by configuring organizational systems to provide only essential capabilities.
-func CheckLeastFunctionality(svc configserviceiface.ConfigServiceAPI) models.ComplianceResult {
+func CheckLeastFunctionality(svc configserviceiface.ConfigServiceAPI, criteria models.Criteria) models.ComplianceResult {
 	input := &configservice.GetComplianceDetailsByConfigRuleInput{
 		ConfigRuleName: aws.String("least-functionality"),
 	}
@@ -203,7 +203,7 @@ func CheckLeastFunctionality(svc configserviceiface.ConfigServiceAPI) models.Com
 			Description: "Ensure least functionality",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error retrieving least functionality compliance: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -213,7 +213,7 @@ func CheckLeastFunctionality(svc configserviceiface.ConfigServiceAPI) models.Com
 				Description: "Ensure least functionality",
 				Status:      "FAIL",
 				Response:    "Non-compliant least functionality found",
-				Impact:      5,
+				Impact:      criteria.Value,
 			}
 		}
 	}
@@ -227,7 +227,7 @@ func CheckLeastFunctionality(svc configserviceiface.ConfigServiceAPI) models.Com
 }
 
 // 3.4.7 - Restrict, disable, and prevent the use of nonessential programs, functions, ports, protocols, and services.
-func CheckNonessentialFunctions(svc configserviceiface.ConfigServiceAPI) models.ComplianceResult {
+func CheckNonessentialFunctions(svc configserviceiface.ConfigServiceAPI, criteria models.Criteria) models.ComplianceResult {
 	input := &configservice.GetComplianceDetailsByConfigRuleInput{
 		ConfigRuleName: aws.String("nonessential-functions"),
 	}
@@ -238,7 +238,7 @@ func CheckNonessentialFunctions(svc configserviceiface.ConfigServiceAPI) models.
 			Description: "Restrict nonessential functions",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error retrieving nonessential functions compliance: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -248,7 +248,7 @@ func CheckNonessentialFunctions(svc configserviceiface.ConfigServiceAPI) models.
 				Description: "Restrict nonessential functions",
 				Status:      "FAIL",
 				Response:    "Non-compliant nonessential functions found",
-				Impact:      5,
+				Impact:      criteria.Value,
 			}
 		}
 	}
@@ -262,7 +262,7 @@ func CheckNonessentialFunctions(svc configserviceiface.ConfigServiceAPI) models.
 }
 
 // 3.4.8 - Apply deny-by-exception (blacklisting) policy to prevent the use of unauthorized software or deny-all, permit-by-exception (whitelisting) policy to allow the execution of authorized software.
-func CheckSoftwarePolicies(svc configserviceiface.ConfigServiceAPI) models.ComplianceResult {
+func CheckSoftwarePolicies(svc configserviceiface.ConfigServiceAPI, criteria models.Criteria) models.ComplianceResult {
 	input := &configservice.GetComplianceDetailsByConfigRuleInput{
 		ConfigRuleName: aws.String("software-policies"),
 	}
@@ -273,7 +273,7 @@ func CheckSoftwarePolicies(svc configserviceiface.ConfigServiceAPI) models.Compl
 			Description: "Ensure software policies compliance",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error retrieving software policies compliance: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -283,7 +283,7 @@ func CheckSoftwarePolicies(svc configserviceiface.ConfigServiceAPI) models.Compl
 				Description: "Ensure software policies compliance",
 				Status:      "FAIL",
 				Response:    "Non-compliant software policies found",
-				Impact:      5,
+				Impact:      criteria.Value,
 			}
 		}
 	}
@@ -297,7 +297,7 @@ func CheckSoftwarePolicies(svc configserviceiface.ConfigServiceAPI) models.Compl
 }
 
 // 3.4.9 - Control and monitor user-installed software.
-func CheckUserInstalledSoftware(svc configserviceiface.ConfigServiceAPI) models.ComplianceResult {
+func CheckUserInstalledSoftware(svc configserviceiface.ConfigServiceAPI, criteria models.Criteria) models.ComplianceResult {
 	input := &configservice.GetComplianceDetailsByConfigRuleInput{
 		ConfigRuleName: aws.String("user-installed-software"),
 	}
@@ -308,7 +308,7 @@ func CheckUserInstalledSoftware(svc configserviceiface.ConfigServiceAPI) models.
 			Description: "Control and monitor user-installed software",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error retrieving user-installed software compliance: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -318,7 +318,7 @@ func CheckUserInstalledSoftware(svc configserviceiface.ConfigServiceAPI) models.
 				Description: "Control and monitor user-installed software",
 				Status:      "FAIL",
 				Response:    "Non-compliant user-installed software found",
-				Impact:      5,
+				Impact:      criteria.Value,
 			}
 		}
 	}

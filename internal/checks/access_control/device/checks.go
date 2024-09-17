@@ -8,14 +8,14 @@ import (
 )
 
 // CheckMobileDeviceConnection checks if the instance controls connection of mobile devices.
-func CheckMobileDeviceConnection(instance *ec2.Instance) models.ComplianceResult {
+func CheckMobileDeviceConnection(instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	success, err := verifyMobileDeviceConnection()
 	if err != nil {
 		return models.ComplianceResult{
 			Description: "Instance controls connection of mobile devices",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error verifying mobile device connection: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -31,7 +31,7 @@ func CheckMobileDeviceConnection(instance *ec2.Instance) models.ComplianceResult
 		Description: "Instance controls connection of mobile devices",
 		Status:      "FAIL",
 		Response:    "Mobile device connection not properly controlled",
-		Impact:      5,
+		Impact:      criteria.Value,
 	}
 }
 
@@ -41,14 +41,14 @@ func verifyMobileDeviceConnection() (bool, error) {
 }
 
 // CheckMobileDeviceEncryption checks if the instance encrypts CUI on mobile devices.
-func CheckMobileDeviceEncryption(instance *ec2.Instance) models.ComplianceResult {
+func CheckMobileDeviceEncryption(instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	success, err := verifyMobileDeviceEncryption()
 	if err != nil {
 		return models.ComplianceResult{
 			Description: "Instance encrypts CUI on mobile devices",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error verifying mobile device encryption: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -64,7 +64,7 @@ func CheckMobileDeviceEncryption(instance *ec2.Instance) models.ComplianceResult
 		Description: "Instance encrypts CUI on mobile devices",
 		Status:      "FAIL",
 		Response:    "Mobile device encryption not properly implemented",
-		Impact:      5,
+		Impact:      criteria.Value,
 	}
 }
 
@@ -74,14 +74,14 @@ func verifyMobileDeviceEncryption() (bool, error) {
 }
 
 // CheckExternalSystemConnections checks if the instance controls connections to external systems.
-func CheckExternalSystemConnections(instance *ec2.Instance) models.ComplianceResult {
+func CheckExternalSystemConnections(instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	success, err := verifyExternalSystemConnections()
 	if err != nil {
 		return models.ComplianceResult{
 			Description: "Instance controls connections to external systems",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error verifying external system connections: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -97,7 +97,7 @@ func CheckExternalSystemConnections(instance *ec2.Instance) models.ComplianceRes
 		Description: "Instance controls connections to external systems",
 		Status:      "FAIL",
 		Response:    "External system connections not properly controlled",
-		Impact:      5,
+		Impact:      criteria.Value,
 	}
 }
 
@@ -107,14 +107,14 @@ func verifyExternalSystemConnections() (bool, error) {
 }
 
 // CheckPortableStorageUse checks if the instance limits the use of portable storage devices on external systems.
-func CheckPortableStorageUse(instance *ec2.Instance) models.ComplianceResult {
+func CheckPortableStorageUse(instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	success, err := verifyPortableStorageUse()
 	if err != nil {
 		return models.ComplianceResult{
 			Description: "Instance limits use of portable storage devices on external systems",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error verifying portable storage use: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -130,7 +130,7 @@ func CheckPortableStorageUse(instance *ec2.Instance) models.ComplianceResult {
 		Description: "Instance limits use of portable storage devices on external systems",
 		Status:      "FAIL",
 		Response:    "Portable storage use not properly limited",
-		Impact:      5,
+		Impact:      criteria.Value,
 	}
 }
 
@@ -140,14 +140,14 @@ func verifyPortableStorageUse() (bool, error) {
 }
 
 // CheckPublicCUIControl checks if the instance controls CUI on publicly accessible systems.
-func CheckPublicCUIControl(instance *ec2.Instance) models.ComplianceResult {
+func CheckPublicCUIControl(instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	success, err := verifyPublicCUIControl()
 	if err != nil {
 		return models.ComplianceResult{
 			Description: "Instance controls CUI on publicly accessible systems",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error verifying public CUI control: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -163,7 +163,7 @@ func CheckPublicCUIControl(instance *ec2.Instance) models.ComplianceResult {
 		Description: "Instance controls CUI on publicly accessible systems",
 		Status:      "FAIL",
 		Response:    "Public CUI control not properly implemented",
-		Impact:      5,
+		Impact:      criteria.Value,
 	}
 }
 

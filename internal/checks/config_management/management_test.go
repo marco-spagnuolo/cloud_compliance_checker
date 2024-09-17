@@ -70,7 +70,7 @@ func TestCheckSecurityConfiguration(t *testing.T) {
 		err: nil,
 	}
 
-	result := CheckSecurityConfiguration(mockSvc)
+	result := CheckSecurityConfiguration(mockSvc, models.Criteria{})
 	expected := models.ComplianceResult{
 		Description: "Ensure security configurations are applied",
 		Status:      "PASS",
@@ -95,7 +95,7 @@ func TestCheckConfigurationChanges(t *testing.T) {
 		err: nil,
 	}
 
-	result := CheckConfigurationChanges(mockSvc)
+	result := CheckConfigurationChanges(mockSvc, models.Criteria{})
 	expected := models.ComplianceResult{
 		Description: "Ensure configuration changes are tracked and managed",
 		Status:      "PASS",
@@ -120,7 +120,7 @@ func TestCheckSecurityImpactAnalysis(t *testing.T) {
 		err: nil,
 	}
 
-	result := CheckSecurityImpactAnalysis(mockSvc)
+	result := CheckSecurityImpactAnalysis(mockSvc, models.Criteria{})
 	expected := models.ComplianceResult{
 		Description: "Analyze the security impact of changes",
 		Status:      "PASS",
@@ -145,7 +145,7 @@ func TestCheckAccessRestrictions(t *testing.T) {
 		err: nil,
 	}
 
-	result := CheckAccessRestrictions(mockSvc)
+	result := CheckAccessRestrictions(mockSvc, models.Criteria{})
 	expected := models.ComplianceResult{
 		Description: "Ensure access restrictions are enforced",
 		Status:      "PASS",
@@ -170,7 +170,7 @@ func TestCheckLeastFunctionality(t *testing.T) {
 		err: nil,
 	}
 
-	result := CheckLeastFunctionality(mockSvc)
+	result := CheckLeastFunctionality(mockSvc, models.Criteria{})
 	expected := models.ComplianceResult{
 		Description: "Ensure least functionality",
 		Status:      "PASS",
@@ -195,7 +195,7 @@ func TestCheckNonessentialFunctions(t *testing.T) {
 		err: nil,
 	}
 
-	result := CheckNonessentialFunctions(mockSvc)
+	result := CheckNonessentialFunctions(mockSvc, models.Criteria{})
 	expected := models.ComplianceResult{
 		Description: "Restrict nonessential functions",
 		Status:      "PASS",
@@ -220,7 +220,7 @@ func TestCheckSoftwarePolicies(t *testing.T) {
 		err: nil,
 	}
 
-	result := CheckSoftwarePolicies(mockSvc)
+	result := CheckSoftwarePolicies(mockSvc, models.Criteria{})
 	expected := models.ComplianceResult{
 		Description: "Ensure software policies compliance",
 		Status:      "PASS",
@@ -245,7 +245,7 @@ func TestCheckUserInstalledSoftware(t *testing.T) {
 		err: nil,
 	}
 
-	result := CheckUserInstalledSoftware(mockSvc)
+	result := CheckUserInstalledSoftware(mockSvc, models.Criteria{})
 	expected := models.ComplianceResult{
 		Description: "Control and monitor user-installed software",
 		Status:      "PASS",

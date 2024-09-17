@@ -10,7 +10,7 @@ import (
 )
 
 // Check for control 3.13.1 - Ensure network boundaries are protected
-func CheckBoundaryProtection(sess *session.Session) models.ComplianceResult {
+func CheckBoundaryProtection(sess *session.Session, criteria models.Criteria) models.ComplianceResult {
 	ec2Svc := ec2.New(sess)
 
 	input := &ec2.DescribeSecurityGroupsInput{}
@@ -20,7 +20,7 @@ func CheckBoundaryProtection(sess *session.Session) models.ComplianceResult {
 			Description: "Ensure network boundaries are protected",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error describing security groups: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -32,7 +32,7 @@ func CheckBoundaryProtection(sess *session.Session) models.ComplianceResult {
 						Description: "Ensure network boundaries are protected",
 						Status:      "FAIL",
 						Response:    "Found security group with open access (0.0.0.0/0)",
-						Impact:      5,
+						Impact:      criteria.Value,
 					}
 				}
 			}
@@ -48,7 +48,7 @@ func CheckBoundaryProtection(sess *session.Session) models.ComplianceResult {
 }
 
 // Check for control 3.13.2 - Ensure communication channels are encrypted
-func CheckCryptographicProtection(sess *session.Session) models.ComplianceResult {
+func CheckCryptographicProtection(sess *session.Session, criteria models.Criteria) models.ComplianceResult {
 	kmsSvc := kms.New(sess)
 
 	input := &kms.ListKeysInput{}
@@ -58,7 +58,7 @@ func CheckCryptographicProtection(sess *session.Session) models.ComplianceResult
 			Description: "Ensure communication channels are encrypted",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error listing KMS keys: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -67,7 +67,7 @@ func CheckCryptographicProtection(sess *session.Session) models.ComplianceResult
 			Description: "Ensure communication channels are encrypted",
 			Status:      "FAIL",
 			Response:    "No KMS keys found for encryption",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -80,7 +80,7 @@ func CheckCryptographicProtection(sess *session.Session) models.ComplianceResult
 }
 
 // Check for control 3.13.3 - Ensure information is protected during transmission
-func CheckInformationTransmissionProtection(sess *session.Session) models.ComplianceResult {
+func CheckInformationTransmissionProtection(sess *session.Session, criteria models.Criteria) models.ComplianceResult {
 	ec2Svc := ec2.New(sess)
 
 	input := &ec2.DescribeVpcEndpointsInput{}
@@ -90,7 +90,7 @@ func CheckInformationTransmissionProtection(sess *session.Session) models.Compli
 			Description: "Ensure information is protected during transmission",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error describing VPC endpoints: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -109,7 +109,7 @@ func CheckInformationTransmissionProtection(sess *session.Session) models.Compli
 		Description: "Ensure information is protected during transmission",
 		Status:      "FAIL",
 		Response:    "No VPC endpoints found for secure information transmission",
-		Impact:      5,
+		Impact:      criteria.Value,
 	}
 }
 
@@ -234,7 +234,7 @@ func CheckCommunicationsAuthenticity(sess *session.Session) models.ComplianceRes
 	}
 }
 
-// Check for control 3.13.15 - Protect the confidentiality of CUI at rest
+// Check for control 3.13.1criteria.Value - Protect the confidentiality of CUI at rest
 func CheckCUIAtRestProtection(sess *session.Session) models.ComplianceResult {
 	// Protect the confidentiality of CUI at rest
 	return models.ComplianceResult{

@@ -1,6 +1,7 @@
 package device
 
 import (
+	"cloud_compliance_checker/models"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -9,7 +10,7 @@ import (
 
 func TestCheckMobileDeviceConnection(t *testing.T) {
 	instance := &ec2.Instance{}
-	result := CheckMobileDeviceConnection(instance)
+	result := CheckMobileDeviceConnection(instance, models.Criteria{})
 	assert.Equal(t, "Instance controls connection of mobile devices", result.Description)
 	assert.Equal(t, "PASS", result.Status)
 	assert.Equal(t, "Implemented", result.Response)
@@ -18,7 +19,7 @@ func TestCheckMobileDeviceConnection(t *testing.T) {
 
 func TestCheckMobileDeviceEncryption(t *testing.T) {
 	instance := &ec2.Instance{}
-	result := CheckMobileDeviceEncryption(instance)
+	result := CheckMobileDeviceEncryption(instance, models.Criteria{})
 	assert.Equal(t, "Instance encrypts CUI on mobile devices", result.Description)
 	assert.Equal(t, "PASS", result.Status)
 	assert.Equal(t, "Implemented", result.Response)
@@ -27,7 +28,7 @@ func TestCheckMobileDeviceEncryption(t *testing.T) {
 
 func TestCheckExternalSystemConnections(t *testing.T) {
 	instance := &ec2.Instance{}
-	result := CheckExternalSystemConnections(instance)
+	result := CheckExternalSystemConnections(instance, models.Criteria{})
 	assert.Equal(t, "Instance controls connections to external systems", result.Description)
 	assert.Equal(t, "PASS", result.Status)
 	assert.Equal(t, "Implemented", result.Response)
@@ -36,7 +37,7 @@ func TestCheckExternalSystemConnections(t *testing.T) {
 
 func TestCheckPortableStorageUse(t *testing.T) {
 	instance := &ec2.Instance{}
-	result := CheckPortableStorageUse(instance)
+	result := CheckPortableStorageUse(instance, models.Criteria{})
 	assert.Equal(t, "Instance limits use of portable storage devices on external systems", result.Description)
 	assert.Equal(t, "PASS", result.Status)
 	assert.Equal(t, "Implemented", result.Response)
@@ -45,7 +46,7 @@ func TestCheckPortableStorageUse(t *testing.T) {
 
 func TestCheckPublicCUIControl(t *testing.T) {
 	instance := &ec2.Instance{}
-	result := CheckPublicCUIControl(instance)
+	result := CheckPublicCUIControl(instance, models.Criteria{})
 	assert.Equal(t, "Instance controls CUI on publicly accessible systems", result.Description)
 	assert.Equal(t, "PASS", result.Status)
 	assert.Equal(t, "Implemented", result.Response)

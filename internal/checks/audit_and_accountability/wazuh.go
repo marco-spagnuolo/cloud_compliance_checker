@@ -111,14 +111,14 @@ func defaultCheckSystemClockSyncWithNTP(ntpServer string) (bool, error) {
 }
 
 // 3.3.1 - Create and retain system audit logs and records to the extent needed to enable the monitoring, analysis, investigation, and reporting of unlawful or unauthorized system activity.
-func (a *AuditAndAccountability) CheckAuditLogs() models.ComplianceResult {
+func (a *AuditAndAccountability) CheckAuditLogs(criteria models.Criteria) models.ComplianceResult {
 	logs, err := a.FetchWazuhLogs()
 	if err != nil {
 		return models.ComplianceResult{
 			Description: "Fetch Wazuh audit logs",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error fetching logs: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -135,19 +135,19 @@ func (a *AuditAndAccountability) CheckAuditLogs() models.ComplianceResult {
 		Description: "Audit logs are being generated",
 		Status:      "FAIL",
 		Response:    "No audit logs found",
-		Impact:      5,
+		Impact:      criteria.Value,
 	}
 }
 
 // 3.3.2 - Ensure that the actions of individual system users can be uniquely traced to those users so they can be held accountable for their actions.
-func (a *AuditAndAccountability) CheckUserTraceability() models.ComplianceResult {
+func (a *AuditAndAccountability) CheckUserTraceability(criteria models.Criteria) models.ComplianceResult {
 	logs, err := a.FetchWazuhLogs()
 	if err != nil {
 		return models.ComplianceResult{
 			Description: "Ensure user actions are traceable",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error fetching logs: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -157,7 +157,7 @@ func (a *AuditAndAccountability) CheckUserTraceability() models.ComplianceResult
 				Description: "Ensure user actions are traceable",
 				Status:      "FAIL",
 				Response:    "User actions are not uniquely traceable",
-				Impact:      5,
+				Impact:      criteria.Value,
 			}
 		}
 	}
@@ -171,14 +171,14 @@ func (a *AuditAndAccountability) CheckUserTraceability() models.ComplianceResult
 }
 
 // 3.3.3 - Review and update logged events.
-func (a *AuditAndAccountability) CheckLoggedEventsReview() models.ComplianceResult {
+func (a *AuditAndAccountability) CheckLoggedEventsReview(criteria models.Criteria) models.ComplianceResult {
 	logs, err := a.FetchWazuhLogs()
 	if err != nil {
 		return models.ComplianceResult{
 			Description: "Review and update logged events",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error fetching logs: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -195,19 +195,19 @@ func (a *AuditAndAccountability) CheckLoggedEventsReview() models.ComplianceResu
 		Description: "Review and update logged events",
 		Status:      "FAIL",
 		Response:    "No logged events found",
-		Impact:      5,
+		Impact:      criteria.Value,
 	}
 }
 
 // 3.3.4 - Alert in the event of an audit logging process failure.
-func (a *AuditAndAccountability) CheckAuditLoggingFailure() models.ComplianceResult {
+func (a *AuditAndAccountability) CheckAuditLoggingFailure(criteria models.Criteria) models.ComplianceResult {
 	err := a.checkLoggingProcess()
 	if err != nil {
 		return models.ComplianceResult{
 			Description: "Alert on audit logging process failure",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Logging process failure: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -237,14 +237,14 @@ func (a *AuditAndAccountability) checkLoggingProcess() error {
 }
 
 // 3.3.5 - Correlate audit record review, analysis, and reporting processes for investigation and response to indications of unlawful, unauthorized, suspicious, or unusual activity.
-func (a *AuditAndAccountability) CheckAuditCorrelation() models.ComplianceResult {
+func (a *AuditAndAccountability) CheckAuditCorrelation(criteria models.Criteria) models.ComplianceResult {
 	logs, err := a.FetchWazuhLogs()
 	if err != nil {
 		return models.ComplianceResult{
 			Description: "Correlate audit records",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error fetching logs: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -262,19 +262,19 @@ func (a *AuditAndAccountability) CheckAuditCorrelation() models.ComplianceResult
 		Description: "Correlate audit records",
 		Status:      "FAIL",
 		Response:    "No logs available for correlation",
-		Impact:      5,
+		Impact:      criteria.Value,
 	}
 }
 
 // 3.3.6 - Provide audit reduction and report generation to support on-demand analysis and reporting.
-func (a *AuditAndAccountability) CheckAuditReduction() models.ComplianceResult {
+func (a *AuditAndAccountability) CheckAuditReduction(criteria models.Criteria) models.ComplianceResult {
 	logs, err := a.FetchWazuhLogs()
 	if err != nil {
 		return models.ComplianceResult{
 			Description: "Provide audit reduction and report generation",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error fetching logs: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -291,12 +291,12 @@ func (a *AuditAndAccountability) CheckAuditReduction() models.ComplianceResult {
 		Description: "Provide audit reduction and report generation",
 		Status:      "FAIL",
 		Response:    "No logs available for reduction and report generation",
-		Impact:      5,
+		Impact:      criteria.Value,
 	}
 }
 
 // 3.3.7 - Provide a system capability that compares and synchronizes internal system clocks with an authoritative source to generate time stamps for audit records.
-func (a *AuditAndAccountability) CheckTimeSynchronization() models.ComplianceResult {
+func (a *AuditAndAccountability) CheckTimeSynchronization(criteria models.Criteria) models.ComplianceResult {
 	// Implement logic to check time synchronization with NTP
 	timeSynced, err := a.CheckSystemClockSyncWithNTP("pool.ntp.org")
 	if err != nil {
@@ -304,7 +304,7 @@ func (a *AuditAndAccountability) CheckTimeSynchronization() models.ComplianceRes
 			Description: "Synchronize system clocks",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error checking time synchronization: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -321,6 +321,6 @@ func (a *AuditAndAccountability) CheckTimeSynchronization() models.ComplianceRes
 		Description: "Synchronize system clocks",
 		Status:      "FAIL",
 		Response:    "System clocks are not synchronized",
-		Impact:      5,
+		Impact:      criteria.Value,
 	}
 }

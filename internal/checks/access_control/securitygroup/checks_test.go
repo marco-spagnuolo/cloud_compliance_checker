@@ -61,7 +61,7 @@ func TestCheckSecurityGroup(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := CheckSecurityGroup(tt.instance)
+			result := CheckSecurityGroup(tt.instance, models.Criteria{})
 			assert.Equal(t, tt.expected, result)
 		})
 	}

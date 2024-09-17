@@ -35,14 +35,17 @@ type Score struct {
 
 // Criteria represents a compliance check criteria
 type Criteria struct {
-	CheckFunction string
 	Description   string
+	CheckFunction string
+	Value         int
 }
 
 // Control represents a NIST control with multiple criteria
 type Control struct {
-	ID       string
-	Criteria []Criteria
+	ID          string
+	Name        string
+	Description string
+	Criteria    Criteria
 }
 
 // NISTControls represents a collection of NIST controls

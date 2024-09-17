@@ -1,6 +1,7 @@
 package risk_assesment
 
 import (
+	"cloud_compliance_checker/models"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -61,7 +62,7 @@ func TestCheckRiskAssessment(t *testing.T) {
 	mockConfig := &mockConfigService{}
 	mockSecurityHub := &mockSecurityHub{}
 
-	result := checkRiskAssessmentWithServices(mockConfig, mockSecurityHub)
+	result := checkRiskAssessmentWithServices(mockConfig, mockSecurityHub, models.Criteria{})
 	if result.Status != "PASS" {
 		t.Errorf("Expected PASS, but got %s", result.Status)
 	}
@@ -70,7 +71,7 @@ func TestCheckRiskAssessment(t *testing.T) {
 func TestCheckVulnerabilityScan(t *testing.T) {
 	mockInspector := &mockInspector{}
 
-	result := checkVulnerabilityScanWithService(mockInspector)
+	result := checkVulnerabilityScanWithService(mockInspector, models.Criteria{})
 	if result.Status != "PASS" {
 		t.Errorf("Expected PASS, but got %s", result.Status)
 	}
@@ -79,7 +80,7 @@ func TestCheckVulnerabilityScan(t *testing.T) {
 func TestCheckVulnerabilityRemediation(t *testing.T) {
 	mockInspector := &mockInspector{}
 
-	result := checkVulnerabilityRemediationWithService(mockInspector)
+	result := checkVulnerabilityRemediationWithService(mockInspector, models.Criteria{})
 	if result.Status != "PASS" {
 		t.Errorf("Expected PASS, but got %s", result.Status)
 	}

@@ -6,8 +6,6 @@ import (
 	"cloud_compliance_checker/discovery"
 	"cloud_compliance_checker/internal/checks/evaluation"
 	"cloud_compliance_checker/models"
-	"cloud_compliance_checker/reports"
-	"cloud_compliance_checker/scoring"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -18,6 +16,23 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
 )
+
+func loadControls(filePath string) (models.NISTControls, error) {
+	var controls models.NISTControls
+	file, err := os.Open(filePath)
+	if err != nil {
+		return controls, err
+	}
+	data := bufio.NewReader(file)
+
+	decoder := json.NewDecoder(data)
+	err = decoder.Decode(&controls)
+	if err != nil {
+		return controls, err
+	}
+
+	return controls, nil
+}
 
 func main() {
 	// Load configuration
@@ -40,41 +55,13 @@ func main() {
 	ec2Client := ec2.New(sess)
 	cloudTrailClient := cloudtrail.New(sess)
 
-	// Assess assets
-	var results []models.AssessmentResult
-	for _, asset := range assets {
-		result := evaluation.CheckCompliance(asset.Instance, controls, iamClient, ec2Client, cloudTrailClient)
-		results = append(results, models.AssessmentResult{
-			Asset:         asset,
-			Implemented:   result == 110,              // Adjust the logic here based on your requirements
-			Planned:       result > 0 && result < 110, // Adjust the logic here based on your requirements
-			NotApplicable: result == 0,                // Adjust the logic here based on your requirements
-		})
+	// Evaluate assets
+	results := evaluation.EvaluateAssets(assets, controls, iamClient, ec2Client, sess, cloudTrailClient)
+
+	// Print results
+	for _, result := range results {
+		fmt.Printf("Asset: %s\n", result.Asset.Name)
+		fmt.Printf("Compliance Score: %d\n", result.Score)
+		fmt.Println()
 	}
-
-	// Calculate scores
-	scores := scoring.CalculateScores(results)
-
-	// Generate report
-	report := reports.GenerateReport(scores)
-
-	// Output report
-	fmt.Println(report)
-}
-
-func loadControls(filePath string) (models.NISTControls, error) {
-	var controls models.NISTControls
-	file, err := os.Open(filePath)
-	if err != nil {
-		return controls, err
-	}
-	data := bufio.NewReader(file)
-
-	decoder := json.NewDecoder(data)
-	err = decoder.Decode(&controls)
-	if err != nil {
-		return controls, err
-	}
-
-	return controls, nil
 }

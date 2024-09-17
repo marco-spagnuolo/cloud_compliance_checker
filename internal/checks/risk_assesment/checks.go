@@ -14,13 +14,13 @@ import (
 )
 
 // Check for control 3.11.1 - Periodically assess the risk to organizational operations
-func CheckRiskAssessment(sess *session.Session) models.ComplianceResult {
+func CheckRiskAssessment(sess *session.Session, criteria models.Criteria) models.ComplianceResult {
 	configSvc := configservice.New(sess)
 	securityHubSvc := securityhub.New(sess)
-	return checkRiskAssessmentWithServices(configSvc, securityHubSvc)
+	return checkRiskAssessmentWithServices(configSvc, securityHubSvc, criteria)
 }
 
-func checkRiskAssessmentWithServices(configSvc configserviceiface.ConfigServiceAPI, securityHubSvc securityhubiface.SecurityHubAPI) models.ComplianceResult {
+func checkRiskAssessmentWithServices(configSvc configserviceiface.ConfigServiceAPI, securityHubSvc securityhubiface.SecurityHubAPI, criteria models.Criteria) models.ComplianceResult {
 	// Check AWS Config compliance
 	configInput := &configservice.DescribeComplianceByConfigRuleInput{}
 	configResult, err := configSvc.DescribeComplianceByConfigRule(configInput)
@@ -29,7 +29,7 @@ func checkRiskAssessmentWithServices(configSvc configserviceiface.ConfigServiceA
 			Description: "Periodically assess the risk to organizational operations",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error retrieving AWS Config compliance summary: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -41,7 +41,7 @@ func checkRiskAssessmentWithServices(configSvc configserviceiface.ConfigServiceA
 			Description: "Periodically assess the risk to organizational operations",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error retrieving Security Hub findings: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -50,7 +50,7 @@ func checkRiskAssessmentWithServices(configSvc configserviceiface.ConfigServiceA
 			Description: "Periodically assess the risk to organizational operations",
 			Status:      "FAIL",
 			Response:    "No compliance summaries or findings found",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -63,12 +63,12 @@ func checkRiskAssessmentWithServices(configSvc configserviceiface.ConfigServiceA
 }
 
 // Check for control 3.11.2 - Scan for vulnerabilities in the information system
-func CheckVulnerabilityScan(sess *session.Session) models.ComplianceResult {
+func CheckVulnerabilityScan(sess *session.Session, criteria models.Criteria) models.ComplianceResult {
 	inspectorSvc := inspector.New(sess)
-	return checkVulnerabilityScanWithService(inspectorSvc)
+	return checkVulnerabilityScanWithService(inspectorSvc, criteria)
 }
 
-func checkVulnerabilityScanWithService(inspectorSvc inspectoriface.InspectorAPI) models.ComplianceResult {
+func checkVulnerabilityScanWithService(inspectorSvc inspectoriface.InspectorAPI, criteria models.Criteria) models.ComplianceResult {
 	input := &inspector.ListFindingsInput{}
 	result, err := inspectorSvc.ListFindings(input)
 	if err != nil {
@@ -76,7 +76,7 @@ func checkVulnerabilityScanWithService(inspectorSvc inspectoriface.InspectorAPI)
 			Description: "Scan for vulnerabilities in the information system",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error listing Inspector findings: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -98,12 +98,12 @@ func checkVulnerabilityScanWithService(inspectorSvc inspectoriface.InspectorAPI)
 }
 
 // Check for control 3.11.3 - Remediate vulnerabilities in accordance with risk assessments
-func CheckVulnerabilityRemediation(sess *session.Session) models.ComplianceResult {
+func CheckVulnerabilityRemediation(sess *session.Session, criteria models.Criteria) models.ComplianceResult {
 	inspectorSvc := inspector.New(sess)
-	return checkVulnerabilityRemediationWithService(inspectorSvc)
+	return checkVulnerabilityRemediationWithService(inspectorSvc, criteria)
 }
 
-func checkVulnerabilityRemediationWithService(inspectorSvc inspectoriface.InspectorAPI) models.ComplianceResult {
+func checkVulnerabilityRemediationWithService(inspectorSvc inspectoriface.InspectorAPI, criteria models.Criteria) models.ComplianceResult {
 	input := &inspector.ListFindingsInput{}
 	result, err := inspectorSvc.ListFindings(input)
 	if err != nil {
@@ -111,7 +111,7 @@ func checkVulnerabilityRemediationWithService(inspectorSvc inspectoriface.Inspec
 			Description: "Remediate vulnerabilities in accordance with risk assessments",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error listing Inspector findings: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 

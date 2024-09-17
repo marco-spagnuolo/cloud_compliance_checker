@@ -10,14 +10,14 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-func CheckLogonAttempts(instance *ec2.Instance) models.ComplianceResult {
+func CheckLogonAttempts(instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	success, err := checkPamConfiguration()
 	if err != nil {
 		return models.ComplianceResult{
 			Description: "Instance limits unsuccessful logon attempts",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error checking PAM configuration: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -33,7 +33,7 @@ func CheckLogonAttempts(instance *ec2.Instance) models.ComplianceResult {
 			Description: "Instance limits unsuccessful logon attempts",
 			Status:      "FAIL",
 			Response:    "PAM configuration does not limit logon attempts",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 }
@@ -55,7 +55,7 @@ func checkPamConfiguration() (bool, error) {
 	return false, nil
 }
 
-func CheckPrivacyNotices(instance *ec2.Instance) models.ComplianceResult {
+func CheckPrivacyNotices(instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	filePath := "/etc/issue"
 	exists, err := fileExists(filePath)
 	if err != nil {
@@ -63,7 +63,7 @@ func CheckPrivacyNotices(instance *ec2.Instance) models.ComplianceResult {
 			Description: "Instance provides privacy and security notices",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error checking privacy notice file: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -79,7 +79,7 @@ func CheckPrivacyNotices(instance *ec2.Instance) models.ComplianceResult {
 			Description: "Instance provides privacy and security notices",
 			Status:      "FAIL",
 			Response:    "Privacy notice file not found",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 }
@@ -95,7 +95,8 @@ func fileExists(filePath string) (bool, error) {
 	return false, err
 }
 
-func CheckSessionLock(instance *ec2.Instance) models.ComplianceResult {
+// **
+func CheckSessionLock(instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	// Verifica le configurazioni dello screensaver per il blocco della sessione
 	success, err := checkScreenSaverConfiguration()
 	if err != nil {
@@ -103,7 +104,7 @@ func CheckSessionLock(instance *ec2.Instance) models.ComplianceResult {
 			Description: "Instance uses session lock with pattern-hiding displays",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error checking screensaver configuration: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -119,7 +120,7 @@ func CheckSessionLock(instance *ec2.Instance) models.ComplianceResult {
 			Description: "Instance uses session lock with pattern-hiding displays",
 			Status:      "FAIL",
 			Response:    "Session lock not properly configured",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 }
@@ -153,7 +154,7 @@ func checkScreenSaverConfiguration() (bool, error) {
 	return false, nil
 }
 
-func CheckSessionTermination(instance *ec2.Instance) models.ComplianceResult {
+func CheckSessionTermination(instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	// Verifica le configurazioni del timeout della sessione
 	success, err := checkSessionTimeoutConfiguration()
 	if err != nil {
@@ -161,7 +162,7 @@ func CheckSessionTermination(instance *ec2.Instance) models.ComplianceResult {
 			Description: "Instance automatically terminates user sessions after a defined condition",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error checking session timeout configuration: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -177,7 +178,7 @@ func CheckSessionTermination(instance *ec2.Instance) models.ComplianceResult {
 			Description: "Instance automatically terminates user sessions after a defined condition",
 			Status:      "FAIL",
 			Response:    "Session timeout not properly configured",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 }

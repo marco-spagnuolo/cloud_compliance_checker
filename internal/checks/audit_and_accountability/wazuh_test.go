@@ -91,7 +91,7 @@ func TestCheckAuditLogs(t *testing.T) {
 		Impact:      0,
 	}
 
-	result := audit.CheckAuditLogs()
+	result := audit.CheckAuditLogs(models.Criteria{})
 	assert.Equal(t, expected, result)
 }
 
@@ -106,7 +106,7 @@ func TestCheckUserTraceability(t *testing.T) {
 		Impact:      0,
 	}
 
-	result := audit.CheckUserTraceability()
+	result := audit.CheckUserTraceability(models.Criteria{})
 	assert.Equal(t, expected, result)
 }
 
@@ -121,7 +121,7 @@ func TestCheckLoggedEventsReview(t *testing.T) {
 		Impact:      0,
 	}
 
-	result := audit.CheckLoggedEventsReview()
+	result := audit.CheckLoggedEventsReview(models.Criteria{})
 	assert.Equal(t, expected, result)
 }
 
@@ -136,7 +136,7 @@ func TestCheckAuditLoggingFailure(t *testing.T) {
 		Impact:      0,
 	}
 
-	result := audit.CheckAuditLoggingFailure()
+	result := audit.CheckAuditLoggingFailure(models.Criteria{})
 	assert.Equal(t, expected, result)
 }
 
@@ -151,7 +151,7 @@ func TestCheckAuditCorrelation(t *testing.T) {
 		Impact:      0,
 	}
 
-	result := audit.CheckAuditCorrelation()
+	result := audit.CheckAuditCorrelation(models.Criteria{})
 	assert.Equal(t, expected, result)
 }
 
@@ -166,7 +166,7 @@ func TestCheckAuditReduction(t *testing.T) {
 		Impact:      0,
 	}
 
-	result := audit.CheckAuditReduction()
+	result := audit.CheckAuditReduction(models.Criteria{})
 	assert.Equal(t, expected, result)
 }
 
@@ -181,6 +181,6 @@ func TestCheckTimeSynchronization(t *testing.T) {
 		Impact:      0,
 	}
 
-	result := audit.CheckTimeSynchronization()
+	result := audit.CheckTimeSynchronization(models.Criteria{})
 	assert.Equal(t, expected, result)
 }

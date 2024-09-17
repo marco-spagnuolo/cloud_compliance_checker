@@ -1,6 +1,7 @@
 package id_auth
 
 import (
+	"cloud_compliance_checker/models"
 	"testing"
 	"time"
 
@@ -95,7 +96,7 @@ func TestCheckSystemUsers(t *testing.T) {
 		},
 	}
 
-	result := CheckSystemUsers(mockIAM, mockCloudTrail, mockEC2)
+	result := CheckSystemUsers(mockIAM, mockCloudTrail, mockEC2, models.Criteria{})
 	if result.Status != "PASS" {
 		t.Errorf("Expected PASS, but got %s", result.Status)
 	}
@@ -110,7 +111,7 @@ func TestCheckAuthentication(t *testing.T) {
 		},
 	}
 
-	result := CheckAuthentication(mockIAM)
+	result := CheckAuthentication(mockIAM, models.Criteria{})
 	if result.Status != "PASS" {
 		t.Errorf("Expected PASS, but got %s", result.Status)
 	}
@@ -125,7 +126,9 @@ func TestCheckMFA(t *testing.T) {
 		},
 	}
 
-	result := CheckMFA(mockIAM)
+	result := CheckMFA(mockIAM, models.Criteria{
+		Value: 5,
+	})
 	if result.Status != "PASS" {
 		t.Errorf("Expected PASS, but got %s", result.Status)
 	}
@@ -138,7 +141,7 @@ func TestCheckIdentifierReusePrevention(t *testing.T) {
 		},
 	}
 
-	result := CheckIdentifierReusePrevention(mockIAM)
+	result := CheckIdentifierReusePrevention(mockIAM, models.Criteria{})
 	if result.Status != "PASS" {
 		t.Errorf("Expected PASS, but got %s", result.Status)
 	}
@@ -151,7 +154,7 @@ func TestCheckIdentifierDisabling(t *testing.T) {
 		},
 	}
 
-	result := CheckIdentifierDisabling(mockIAM)
+	result := CheckIdentifierDisabling(mockIAM, models.Criteria{})
 	if result.Status != "PASS" {
 		t.Errorf("Expected PASS, but got %s", result.Status)
 	}
@@ -164,7 +167,7 @@ func TestCheckPasswordComplexity(t *testing.T) {
 		},
 	}
 
-	result := CheckPasswordComplexity(mockIAM)
+	result := CheckPasswordComplexity(mockIAM, models.Criteria{})
 	if result.Status != "PASS" {
 		t.Errorf("Expected PASS, but got %s", result.Status)
 	}
@@ -177,7 +180,7 @@ func TestCheckPasswordReuseProhibition(t *testing.T) {
 		},
 	}
 
-	result := CheckPasswordReuseProhibition(mockIAM)
+	result := CheckPasswordReuseProhibition(mockIAM, models.Criteria{})
 	if result.Status != "PASS" {
 		t.Errorf("Expected PASS, but got %s", result.Status)
 	}
@@ -193,7 +196,7 @@ func TestCheckTemporaryPasswordUsage(t *testing.T) {
 		},
 	}
 
-	result := CheckTemporaryPasswordUsage(mockIAM)
+	result := CheckTemporaryPasswordUsage(mockIAM, models.Criteria{})
 	if result.Status != "PASS" {
 		t.Errorf("Expected PASS, but got %s", result.Status)
 	}
@@ -204,7 +207,7 @@ func TestCheckPasswordEncryption(t *testing.T) {
 		PasswordPolicy: &iam.PasswordPolicy{},
 	}
 
-	result := CheckPasswordEncryption(mockIAM)
+	result := CheckPasswordEncryption(mockIAM, models.Criteria{})
 	if result.Status != "PASS" {
 		t.Errorf("Expected PASS, but got %s", result.Status)
 	}
@@ -243,7 +246,7 @@ func (m *mockIAM) ListMFADevices(input *iam.ListMFADevicesInput) (*iam.ListMFADe
 func TestCheckObscuredFeedback(t *testing.T) {
 	mockSvc := &mockIAM{}
 
-	result := CheckObscuredFeedback(mockSvc)
+	result := CheckObscuredFeedback(mockSvc, models.Criteria{})
 	if result.Status != "PASS" {
 		t.Errorf("Expected PASS, but got %s", result.Status)
 	}

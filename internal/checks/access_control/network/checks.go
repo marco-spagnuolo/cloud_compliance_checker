@@ -11,7 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 )
 
-func CheckFlowLogs(svc ec2iface.EC2API, instance *ec2.Instance) models.ComplianceResult {
+func CheckFlowLogs(svc ec2iface.EC2API, instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	vpcID := instance.VpcId
 
 	input := &ec2.DescribeFlowLogsInput{
@@ -31,7 +31,7 @@ func CheckFlowLogs(svc ec2iface.EC2API, instance *ec2.Instance) models.Complianc
 			Description: "Instance has flow logs enabled",
 			Status:      "FAIL",
 			Response:    "Error describing flow logs",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -47,19 +47,19 @@ func CheckFlowLogs(svc ec2iface.EC2API, instance *ec2.Instance) models.Complianc
 			Description: "Instance has flow logs enabled",
 			Status:      "FAIL",
 			Response:    "Flow logs not enabled",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 }
 
-func CheckRemoteAccessMonitoring(instance *ec2.Instance) models.ComplianceResult {
+func CheckRemoteAccessMonitoring(instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	success, err := checkAuditdConfiguration()
 	if err != nil {
 		return models.ComplianceResult{
 			Description: "Instance monitors and controls remote access sessions",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error checking auditd configuration: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -75,7 +75,7 @@ func CheckRemoteAccessMonitoring(instance *ec2.Instance) models.ComplianceResult
 			Description: "Instance monitors and controls remote access sessions",
 			Status:      "FAIL",
 			Response:    "auditd not properly configured for remote access monitoring",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 }
@@ -97,14 +97,14 @@ func checkAuditdConfiguration() (bool, error) {
 	return false, nil
 }
 
-func CheckRemoteAccessEncryption(instance *ec2.Instance) models.ComplianceResult {
+func CheckRemoteAccessEncryption(instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	success, err := checkSSHEcryptionConfiguration()
 	if err != nil {
 		return models.ComplianceResult{
 			Description: "Instance uses encryption for remote access sessions",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error checking SSH configuration: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -120,7 +120,7 @@ func CheckRemoteAccessEncryption(instance *ec2.Instance) models.ComplianceResult
 			Description: "Instance uses encryption for remote access sessions",
 			Status:      "FAIL",
 			Response:    "SSH not properly configured for encryption",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 }
@@ -142,7 +142,7 @@ func checkSSHEcryptionConfiguration() (bool, error) {
 	return true, nil
 }
 
-func CheckRemoteAccessRouting(ec2Client ec2iface.EC2API, instance *ec2.Instance) models.ComplianceResult {
+func CheckRemoteAccessRouting(ec2Client ec2iface.EC2API, instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	securityGroups := instance.SecurityGroups
 
 	for _, sg := range securityGroups {
@@ -156,7 +156,7 @@ func CheckRemoteAccessRouting(ec2Client ec2iface.EC2API, instance *ec2.Instance)
 				Description: "Instance routes remote access via managed access control points",
 				Status:      "FAIL",
 				Response:    fmt.Sprintf("Error describing security group: %v", err),
-				Impact:      5,
+				Impact:      criteria.Value,
 			}
 		}
 
@@ -178,7 +178,7 @@ func CheckRemoteAccessRouting(ec2Client ec2iface.EC2API, instance *ec2.Instance)
 		Description: "Instance routes remote access via managed access control points",
 		Status:      "FAIL",
 		Response:    "No valid bastion host routing found in security groups",
-		Impact:      5,
+		Impact:      criteria.Value,
 	}
 }
 
@@ -195,14 +195,14 @@ func isValidBastionHostPermission(permission *ec2.IpPermission) bool {
 	return false
 }
 
-func CheckWirelessAccessAuthorization(instance *ec2.Instance) models.ComplianceResult {
+func CheckWirelessAccessAuthorization(instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	authorized, err := verifyWirelessAccessAuthorization()
 	if err != nil {
 		return models.ComplianceResult{
 			Description: "Instance authorizes wireless access before connections",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error verifying wireless access authorization: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -218,7 +218,7 @@ func CheckWirelessAccessAuthorization(instance *ec2.Instance) models.ComplianceR
 			Description: "Instance authorizes wireless access before connections",
 			Status:      "FAIL",
 			Response:    "Wireless access not properly authorized",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 }
@@ -228,14 +228,14 @@ func verifyWirelessAccessAuthorization() (bool, error) {
 	return authorized, nil
 }
 
-func CheckWirelessAccessProtection(instance *ec2.Instance) models.ComplianceResult {
+func CheckWirelessAccessProtection(instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	protected, err := verifyWirelessAccessProtection()
 	if err != nil {
 		return models.ComplianceResult{
 			Description: "Instance uses authentication and encryption for wireless access",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error verifying wireless access protection: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -251,7 +251,7 @@ func CheckWirelessAccessProtection(instance *ec2.Instance) models.ComplianceResu
 			Description: "Instance uses authentication and encryption for wireless access",
 			Status:      "FAIL",
 			Response:    "Wireless access not properly protected",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-func CheckSecurityGroup(instance *ec2.Instance) models.ComplianceResult {
+func CheckSecurityGroup(instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	requiredGroupName := "required-security-group"
 	for _, sg := range instance.SecurityGroups {
 		if *sg.GroupName == requiredGroupName {
@@ -22,6 +22,6 @@ func CheckSecurityGroup(instance *ec2.Instance) models.ComplianceResult {
 		Description: "Instance has a specific security group",
 		Status:      "FAIL",
 		Response:    "Planned to be implemented",
-		Impact:      5,
+		Impact:      criteria.Value,
 	}
 }

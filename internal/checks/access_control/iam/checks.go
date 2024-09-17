@@ -11,7 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 )
 
-func CheckIAMRoles(instance *ec2.Instance) models.ComplianceResult {
+func CheckIAMRoles(instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	if instance.IamInstanceProfile != nil {
 		return models.ComplianceResult{
 			Description: "Instance has IAM roles attached",
@@ -23,18 +23,18 @@ func CheckIAMRoles(instance *ec2.Instance) models.ComplianceResult {
 	return models.ComplianceResult{
 		Description: "Instance has IAM roles attached",
 		Status:      "FAIL",
-		Response:    "Planned to be implemented",
-		Impact:      5,
+		Response:    "Instance does not have IAM roles attached",
+		Impact:      criteria.Value,
 	}
 }
 
-func CheckSeparateDuties(iamClient iamiface.IAMAPI, instance *ec2.Instance) models.ComplianceResult {
+func CheckSeparateDuties(iamClient iamiface.IAMAPI, instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	if instance.IamInstanceProfile == nil {
 		return models.ComplianceResult{
 			Description: "Instance has roles with separate duties",
 			Status:      "FAIL",
 			Response:    "No IAM instance profile attached",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -45,7 +45,7 @@ func CheckSeparateDuties(iamClient iamiface.IAMAPI, instance *ec2.Instance) mode
 			Description: "Instance has roles with separate duties",
 			Status:      "FAIL",
 			Response:    "Error extracting instance profile name",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -58,7 +58,7 @@ func CheckSeparateDuties(iamClient iamiface.IAMAPI, instance *ec2.Instance) mode
 			Description: "Instance has roles with separate duties",
 			Status:      "FAIL",
 			Response:    "Error describing instance profile",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -67,7 +67,7 @@ func CheckSeparateDuties(iamClient iamiface.IAMAPI, instance *ec2.Instance) mode
 			Description: "Instance has roles with separate duties",
 			Status:      "FAIL",
 			Response:    "No roles associated with instance profile",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -85,7 +85,7 @@ func CheckSeparateDuties(iamClient iamiface.IAMAPI, instance *ec2.Instance) mode
 			Description: "Instance has roles with separate duties",
 			Status:      "FAIL",
 			Response:    "Roles do not have separate duties",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 }
@@ -94,13 +94,13 @@ func checkRolesForSeparateDuties(roles []*iam.Role) bool {
 	return len(roles) > 1
 }
 
-func CheckLeastPrivilege(iamClient iamiface.IAMAPI, instance *ec2.Instance) models.ComplianceResult {
+func CheckLeastPrivilege(iamClient iamiface.IAMAPI, instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	if instance.IamInstanceProfile == nil {
 		return models.ComplianceResult{
 			Description: "Instance uses least privilege for IAM roles",
 			Status:      "FAIL",
 			Response:    "No IAM instance profile attached",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -114,7 +114,7 @@ func CheckLeastPrivilege(iamClient iamiface.IAMAPI, instance *ec2.Instance) mode
 			Description: "Instance uses least privilege for IAM roles",
 			Status:      "FAIL",
 			Response:    "Error extracting instance profile name",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -128,7 +128,7 @@ func CheckLeastPrivilege(iamClient iamiface.IAMAPI, instance *ec2.Instance) mode
 			Description: "Instance uses least privilege for IAM roles",
 			Status:      "FAIL",
 			Response:    "Error describing instance profile",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -138,7 +138,7 @@ func CheckLeastPrivilege(iamClient iamiface.IAMAPI, instance *ec2.Instance) mode
 			Description: "Instance uses least privilege for IAM roles",
 			Status:      "FAIL",
 			Response:    "No roles associated with instance profile",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -157,7 +157,7 @@ func CheckLeastPrivilege(iamClient iamiface.IAMAPI, instance *ec2.Instance) mode
 			Description: "Instance uses least privilege for IAM roles",
 			Status:      "FAIL",
 			Response:    "Roles do not follow the least privilege principle",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 }
@@ -195,13 +195,13 @@ func analyzePolicyForLeastPrivilege(policyDocument *string) bool {
 	return !strings.Contains(*policyDocument, "*")
 }
 
-func CheckNonPrivilegedAccounts(iamClient iamiface.IAMAPI, instance *ec2.Instance) models.ComplianceResult {
+func CheckNonPrivilegedAccounts(iamClient iamiface.IAMAPI, instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	if instance.IamInstanceProfile == nil {
 		return models.ComplianceResult{
 			Description: "Instance uses non-privileged roles for nonsecurity functions",
 			Status:      "FAIL",
 			Response:    "No IAM instance profile attached",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -215,11 +215,11 @@ func CheckNonPrivilegedAccounts(iamClient iamiface.IAMAPI, instance *ec2.Instanc
 			Description: "Instance uses non-privileged roles for nonsecurity functions",
 			Status:      "FAIL",
 			Response:    "Error extracting instance profile name",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
-	// Descrivi il profilo IAM
+	// Desrive the IAM profile
 	input := &iam.GetInstanceProfileInput{
 		InstanceProfileName: aws.String(profileName),
 	}
@@ -229,17 +229,17 @@ func CheckNonPrivilegedAccounts(iamClient iamiface.IAMAPI, instance *ec2.Instanc
 			Description: "Instance uses non-privileged roles for nonsecurity functions",
 			Status:      "FAIL",
 			Response:    "Error describing instance profile",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
-	// Verifica i ruoli associati al profilo IAM
+	// Check IAM roles associated with the IAM profile
 	if len(result.InstanceProfile.Roles) == 0 {
 		return models.ComplianceResult{
 			Description: "Instance uses non-privileged roles for nonsecurity functions",
 			Status:      "FAIL",
 			Response:    "No roles associated with instance profile",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -258,7 +258,7 @@ func CheckNonPrivilegedAccounts(iamClient iamiface.IAMAPI, instance *ec2.Instanc
 			Description: "Instance uses non-privileged roles for nonsecurity functions",
 			Status:      "FAIL",
 			Response:    "Roles have elevated privileges",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 }
@@ -316,13 +316,13 @@ func analyzePolicyForNonPrivileged(policyDocument *string) bool {
 	return !strings.Contains(*policyDocument, "*")
 }
 
-func CheckPreventPrivilegedFunctions(iamClient iamiface.IAMAPI, instance *ec2.Instance) models.ComplianceResult {
+func CheckPreventPrivilegedFunctions(iamClient iamiface.IAMAPI, instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	if instance.IamInstanceProfile == nil {
 		return models.ComplianceResult{
 			Description: "Instance prevents non-privileged users from executing privileged functions",
 			Status:      "FAIL",
 			Response:    "No IAM instance profile attached",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -350,7 +350,7 @@ func CheckPreventPrivilegedFunctions(iamClient iamiface.IAMAPI, instance *ec2.In
 			Description: "Instance prevents non-privileged users from executing privileged functions",
 			Status:      "FAIL",
 			Response:    "Error describing instance profile",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -360,7 +360,7 @@ func CheckPreventPrivilegedFunctions(iamClient iamiface.IAMAPI, instance *ec2.In
 			Description: "Instance prevents non-privileged users from executing privileged functions",
 			Status:      "FAIL",
 			Response:    "No roles associated with instance profile",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -379,7 +379,7 @@ func CheckPreventPrivilegedFunctions(iamClient iamiface.IAMAPI, instance *ec2.In
 			Description: "Instance prevents non-privileged users from executing privileged functions",
 			Status:      "FAIL",
 			Response:    "Roles have privileged permissions",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 }
@@ -438,13 +438,13 @@ func analyzePolicyForPrivilegedFunctions(policyDocument *string) bool {
 
 }
 
-func CheckRemoteExecutionAuthorization(iamClient iamiface.IAMAPI, instance *ec2.Instance) models.ComplianceResult {
+func CheckRemoteExecutionAuthorization(iamClient iamiface.IAMAPI, instance *ec2.Instance, criteria models.Criteria) models.ComplianceResult {
 	if instance.IamInstanceProfile == nil {
 		return models.ComplianceResult{
 			Description: "Instance authorizes remote execution of privileged commands",
 			Status:      "FAIL",
 			Response:    "No IAM instance profile attached",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -458,7 +458,7 @@ func CheckRemoteExecutionAuthorization(iamClient iamiface.IAMAPI, instance *ec2.
 			Description: "Instance authorizes remote execution of privileged commands",
 			Status:      "FAIL",
 			Response:    "Error extracting instance profile name",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -472,7 +472,7 @@ func CheckRemoteExecutionAuthorization(iamClient iamiface.IAMAPI, instance *ec2.
 			Description: "Instance authorizes remote execution of privileged commands",
 			Status:      "FAIL",
 			Response:    fmt.Sprintf("Error describing instance profile: %v", err),
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -482,7 +482,7 @@ func CheckRemoteExecutionAuthorization(iamClient iamiface.IAMAPI, instance *ec2.
 			Description: "Instance authorizes remote execution of privileged commands",
 			Status:      "FAIL",
 			Response:    "No roles associated with instance profile",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 
@@ -501,7 +501,7 @@ func CheckRemoteExecutionAuthorization(iamClient iamiface.IAMAPI, instance *ec2.
 			Description: "Instance authorizes remote execution of privileged commands",
 			Status:      "FAIL",
 			Response:    "Roles do not have appropriate authorization for remote execution",
-			Impact:      5,
+			Impact:      criteria.Value,
 		}
 	}
 }

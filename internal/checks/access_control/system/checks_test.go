@@ -56,7 +56,7 @@ func TestCheckLogonAttempts(t *testing.T) {
 	execCommand = mockExecCommand
 	defer func() { execCommand = exec.Command }()
 
-	result := CheckLogonAttempts(instance)
+	result := CheckLogonAttempts(instance, models.Criteria{})
 	assert.Equal(t, expected, result)
 }
 
@@ -77,7 +77,7 @@ func TestCheckPrivacyNotices(t *testing.T) {
 	// Ensure the file does not exist to simulate failure
 	os.Remove(filePath)
 
-	result := CheckPrivacyNotices(instance)
+	result := CheckPrivacyNotices(instance, models.Criteria{})
 	assert.Equal(t, expected, result)
 }
 
@@ -94,7 +94,7 @@ func TestCheckSessionLockFail(t *testing.T) {
 		Impact:      5,
 	}
 
-	result := CheckSessionLock(instance)
+	result := CheckSessionLock(instance, models.Criteria{})
 	assert.Equal(t, expected, result)
 }
 
@@ -111,7 +111,7 @@ func TestCheckSessionTerminationFail(t *testing.T) {
 		Impact:      5,
 	}
 
-	result := CheckSessionTermination(instance)
+	result := CheckSessionTermination(instance, models.Criteria{})
 	assert.Equal(t, expected, result)
 }
 

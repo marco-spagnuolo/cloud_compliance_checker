@@ -1,6 +1,7 @@
 package iam
 
 import (
+	"cloud_compliance_checker/models"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -44,7 +45,7 @@ func (m *mockIAMClient) GetPolicyVersion(input *iam.GetPolicyVersionInput) (*iam
 
 func TestCheckIAMRoles(t *testing.T) {
 	instance := &ec2.Instance{IamInstanceProfile: &ec2.IamInstanceProfile{Arn: aws.String("arn:aws:iam::123456789012:instance-profile/ExampleInstanceProfile")}}
-	result := CheckIAMRoles(instance)
+	result := CheckIAMRoles(instance, models.Criteria{})
 	assert.Equal(t, "Instance has IAM roles attached", result.Description)
 	assert.Equal(t, "PASS", result.Status)
 	assert.Equal(t, "Implemented", result.Response)
@@ -59,7 +60,7 @@ func TestCheckSeparateDuties(t *testing.T) {
 	output := &iam.GetInstanceProfileOutput{InstanceProfile: &iam.InstanceProfile{Roles: []*iam.Role{{RoleName: aws.String("Role1")}, {RoleName: aws.String("Role2")}}}}
 	mockIAM.On("GetInstanceProfile", input).Return(output, nil)
 
-	result := CheckSeparateDuties(mockIAM, instance)
+	result := CheckSeparateDuties(mockIAM, instance, models.Criteria{})
 	assert.Equal(t, "Instance has roles with separate duties", result.Description)
 	assert.Equal(t, "PASS", result.Status)
 	assert.Equal(t, "Implemented", result.Response)
@@ -78,7 +79,7 @@ func TestCheckLeastPrivilege(t *testing.T) {
 	rolePolicyOutput := &iam.GetRolePolicyOutput{PolicyDocument: aws.String("{}")}
 	mockIAM.On("GetRolePolicy", rolePolicyInput).Return(rolePolicyOutput, nil)
 
-	result := CheckLeastPrivilege(mockIAM, instance)
+	result := CheckLeastPrivilege(mockIAM, instance, models.Criteria{})
 	assert.Equal(t, "Instance uses least privilege for IAM roles", result.Description)
 	assert.Equal(t, "PASS", result.Status)
 	assert.Equal(t, "Implemented", result.Response)
@@ -105,7 +106,7 @@ func TestCheckNonPrivilegedAccounts(t *testing.T) {
 	policyVersionOutput := &iam.GetPolicyVersionOutput{PolicyVersion: &iam.PolicyVersion{Document: aws.String("{}")}}
 	mockIAM.On("GetPolicyVersion", policyVersionInput).Return(policyVersionOutput, nil)
 
-	result := CheckNonPrivilegedAccounts(mockIAM, instance)
+	result := CheckNonPrivilegedAccounts(mockIAM, instance, models.Criteria{})
 	assert.Equal(t, "Instance uses non-privileged roles for nonsecurity functions", result.Description)
 	assert.Equal(t, "PASS", result.Status)
 	assert.Equal(t, "Implemented", result.Response)
@@ -132,7 +133,7 @@ func TestCheckPreventPrivilegedFunctions(t *testing.T) {
 	policyVersionOutput := &iam.GetPolicyVersionOutput{PolicyVersion: &iam.PolicyVersion{Document: aws.String("{}")}}
 	mockIAM.On("GetPolicyVersion", policyVersionInput).Return(policyVersionOutput, nil)
 
-	result := CheckPreventPrivilegedFunctions(mockIAM, instance)
+	result := CheckPreventPrivilegedFunctions(mockIAM, instance, models.Criteria{})
 	assert.Equal(t, "Instance prevents non-privileged users from executing privileged functions", result.Description)
 	assert.Equal(t, "PASS", result.Status)
 	assert.Equal(t, "Implemented", result.Response)
@@ -159,7 +160,7 @@ func TestCheckRemoteExecutionAuthorization(t *testing.T) {
 	policyVersionOutput := &iam.GetPolicyVersionOutput{PolicyVersion: &iam.PolicyVersion{Document: aws.String("{\"Statement\": [{\"Effect\": \"Allow\", \"Action\": \"ssm:SendCommand\", \"Resource\": \"*\"}]}")}}
 	mockIAM.On("GetPolicyVersion", policyVersionInput).Return(policyVersionOutput, nil)
 
-	result := CheckRemoteExecutionAuthorization(mockIAM, instance)
+	result := CheckRemoteExecutionAuthorization(mockIAM, instance, models.Criteria{})
 	assert.Equal(t, "Instance authorizes remote execution of privileged commands", result.Description)
 	assert.Equal(t, "PASS", result.Status)
 	assert.Equal(t, "Implemented", result.Response)

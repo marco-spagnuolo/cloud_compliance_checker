@@ -50,7 +50,7 @@ func TestCheckFlowLogs(t *testing.T) {
 
 	mockSvc.On("DescribeFlowLogs", input).Return(output, nil)
 
-	result := CheckFlowLogs(mockSvc, instance)
+	result := CheckFlowLogs(mockSvc, instance, models.Criteria{})
 
 	assert.Equal(t, "Instance has flow logs enabled", result.Description)
 	assert.Equal(t, "PASS", result.Status)
@@ -71,13 +71,15 @@ func TestCheckRemoteAccessMonitoring(t *testing.T) {
 	}
 
 	if success {
-		result := CheckRemoteAccessMonitoring(instance)
+		result := CheckRemoteAccessMonitoring(instance, models.Criteria{
+			Value: 5,
+		})
 		assert.Equal(t, "Instance monitors and controls remote access sessions", result.Description)
 		assert.Equal(t, "FAIL", result.Status)
 		assert.Equal(t, "auditd not properly configured for remote access monitoring", result.Response)
 		assert.Equal(t, 5, result.Impact)
 	} else {
-		result := CheckRemoteAccessMonitoring(instance)
+		result := CheckRemoteAccessMonitoring(instance, models.Criteria{})
 		assert.Equal(t, "Instance monitors and controls remote access sessions", result.Description)
 		assert.Equal(t, "FAIL", result.Status)
 		assert.Equal(t, "auditd not properly configured for remote access monitoring", result.Response)
@@ -133,7 +135,7 @@ func TestCheckRemoteAccessEncryption(t *testing.T) {
 		cmd.Env = []string{"GO_WANT_HELPER_PROCESS=1"}
 		return cmd
 	}
-	result := CheckRemoteAccessEncryption(instance)
+	result := CheckRemoteAccessEncryption(instance, models.Criteria{})
 	assert.Equal(t, expectedFail, result)
 }
 
@@ -184,7 +186,7 @@ func TestCheckRemoteAccessRouting(t *testing.T) {
 
 	mockSvc.On("DescribeSecurityGroups", input).Return(output, nil)
 
-	result := CheckRemoteAccessRouting(mockSvc, instance)
+	result := CheckRemoteAccessRouting(mockSvc, instance, models.Criteria{})
 
 	assert.Equal(t, "Instance routes remote access via managed access control points", result.Description)
 	assert.Equal(t, "PASS", result.Status)
@@ -195,7 +197,7 @@ func TestCheckRemoteAccessRouting(t *testing.T) {
 // Test for CheckWirelessAccessAuthorization function
 func TestCheckWirelessAccessAuthorization(t *testing.T) {
 	instance := &ec2.Instance{}
-	result := CheckWirelessAccessAuthorization(instance)
+	result := CheckWirelessAccessAuthorization(instance, models.Criteria{})
 
 	assert.Equal(t, "Instance authorizes wireless access before connections", result.Description)
 	assert.Equal(t, "PASS", result.Status)
@@ -206,7 +208,7 @@ func TestCheckWirelessAccessAuthorization(t *testing.T) {
 // Test for CheckWirelessAccessProtection function
 func TestCheckWirelessAccessProtection(t *testing.T) {
 	instance := &ec2.Instance{}
-	result := CheckWirelessAccessProtection(instance)
+	result := CheckWirelessAccessProtection(instance, models.Criteria{})
 
 	assert.Equal(t, "Instance uses authentication and encryption for wireless access", result.Description)
 	assert.Equal(t, "PASS", result.Status)
