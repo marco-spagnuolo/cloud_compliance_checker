@@ -7,6 +7,7 @@ import (
 	"cloud_compliance_checker/internal/checks/evaluation"
 	"cloud_compliance_checker/models"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -35,8 +36,25 @@ func loadControls(filePath string) (models.NISTControls, error) {
 }
 
 func main() {
+	// --help flag
+	flag.Usage = func() {
+		fmt.Println("Usage: go run main.go --config <path to config .yaml file>")
+		flag.PrintDefaults()
+	}
+
 	// Load configuration
-	config.LoadConfig()
+	configFile := flag.String("config", "", "path to the config file")
+	flag.Parse()
+
+	if *configFile == "" {
+		log.Fatalf("Please provide a config file using the --config flag")
+	}
+
+	// Carica il file di configurazione
+	config.LoadConfig(*configFile)
+
+	// Continua con l'esecuzione del programma...
+	log.Println("Configurazione caricata con successo:", config.AppConfig)
 
 	// Load controls from JSON file
 	controls, err := loadControls("config/control.json")

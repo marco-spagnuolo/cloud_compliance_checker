@@ -2,7 +2,8 @@ package utils
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
+	"os"
 )
 
 type Control struct {
@@ -25,7 +26,13 @@ type NISTControls struct {
 
 func LoadControls(filename string) (NISTControls, error) {
 	var controls NISTControls
-	data, err := ioutil.ReadFile(filename)
+	file, err := os.Open(filename)
+	if err != nil {
+		return controls, err
+	}
+	defer file.Close()
+
+	data, err := io.ReadAll(file)
 	if err != nil {
 		return controls, err
 	}

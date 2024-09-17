@@ -29,7 +29,7 @@ func EvaluateAssets(assets []models.Asset, controls models.NISTControls,
 	iamClient iamiface.IAMAPI, ec2Client ec2iface.EC2API, sess *session.Session, cloudTrailClient cloudtrailiface.CloudTrailAPI) []models.Score {
 	var results []models.Score
 	for _, asset := range assets {
-		score := CheckInstance(asset.Instance, controls, iamClient, ec2Client, cloudTrailClient)
+		score := CheckInstance(asset.Instance, controls, iamClient, ec2Client, sess, cloudTrailClient)
 		results = append(results, models.Score{
 			Asset: asset,
 			Score: score,
@@ -40,8 +40,7 @@ func EvaluateAssets(assets []models.Asset, controls models.NISTControls,
 
 // CheckInstance runs all compliance checks on the given instance(SINGLE INSTANCE) and returns the total score
 func CheckInstance(instance *ec2.Instance, controls models.NISTControls, iamClient iamiface.IAMAPI,
-	ec2Client ec2iface.EC2API, cloudTrailClient cloudtrailiface.CloudTrailAPI) int {
-	sess := session.Must(session.NewSession())
+	ec2Client ec2iface.EC2API, sess *session.Session, cloudTrailClient cloudtrailiface.CloudTrailAPI) int {
 	svc := configservice.New(sess)
 	score := 110
 	for _, control := range controls.Controls {

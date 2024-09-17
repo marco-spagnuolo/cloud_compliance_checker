@@ -39,10 +39,8 @@ type GeneralConfig struct {
 
 var AppConfig Config
 
-func LoadConfig() {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
+func LoadConfig(configFile string) {
+	viper.SetConfigFile(configFile)
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file, %s", err)
