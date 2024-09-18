@@ -4,7 +4,6 @@ import (
 	"cloud_compliance_checker/internal/checks/access_control/device"
 	"cloud_compliance_checker/internal/checks/access_control/iam"
 	"cloud_compliance_checker/internal/checks/access_control/network"
-	"cloud_compliance_checker/internal/checks/access_control/securitygroup"
 	"cloud_compliance_checker/internal/checks/access_control/system"
 	"cloud_compliance_checker/internal/checks/audit_and_accountability"
 	"cloud_compliance_checker/internal/checks/config_management"
@@ -59,7 +58,7 @@ func evaluateCriteria(svc configserviceiface.ConfigServiceAPI, instance *ec2.Ins
 	cloudTrailClient cloudtrailiface.CloudTrailAPI) models.ComplianceResult {
 	switch criteria.CheckFunction {
 	case "CheckSecurityGroup":
-		return securitygroup.CheckSecurityGroup(instance, criteria)
+		return models.ComplianceResult{} //tofix
 	case "CheckIAMRoles":
 		return iam.CheckIAMRoles(instance, criteria)
 	case "CheckSeparateDuties":
