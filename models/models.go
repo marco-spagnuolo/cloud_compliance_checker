@@ -1,14 +1,11 @@
 package models
 
-import "github.com/aws/aws-sdk-go/service/ec2"
-
 // Asset represents a cloud asset
 type Asset struct {
-	Name     string
-	Type     string
-	Cloud    string
-	Details  interface{}
-	Instance *ec2.Instance
+	Name    string
+	Type    string
+	Cloud   string
+	Details interface{}
 }
 
 // ComplianceResult represents the result of a compliance check
@@ -35,17 +32,18 @@ type Score struct {
 
 // Criteria represents a compliance check criteria
 type Criteria struct {
-	Description   string
-	CheckFunction string
-	Value         int
+	Description   string `json:"description"`
+	CheckFunction string `json:"check_function"`
+	Value         int    `json:"value"`
 }
 
 // Control represents a NIST control with multiple criteria
+// Control represents a NIST control with multiple criteria
 type Control struct {
-	ID          string
-	Name        string
-	Description string
-	Criteria    Criteria
+	ID          string     `json:"id"`
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	Criteria    []Criteria `json:"criteria"` // Modifica qui per supportare un array di Criteria
 }
 
 // NISTControls represents a collection of NIST controls

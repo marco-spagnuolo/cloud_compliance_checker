@@ -1,4 +1,4 @@
-package securitygroup
+package policy
 
 import (
 	"context"
