@@ -2,36 +2,36 @@
   "controls": [
     {
       "id": "3.1.1",
-      "name": "Limit system access to authorized users, processes acting on behalf of authorized users, and devices (including other systems)",
-      "description": "Ensure access control policies are established and procedures are implemented.",
+      "name": "Account Management",
+      "description": "Instance has a specific security group: Ensure access control policies are established and implemented.",
       "criteria": [
         {
           "description": "Instance has a specific security group",
-          "check_function": "CheckSecurityGroup",
+          "check_function": "CheckUsersPolicies",
           "value": 5
         }
       ]
     },
     {
       "id": "3.1.2",
-      "name": "Limit system access to the types of transactions and functions that authorized users are permitted to execute",
+      "name": "Access Enforcement",
       "description": "Ensure only authorized transactions and functions are allowed.",
       "criteria": [
         {
-          "description": "Instance has IAM roles attached",
-          "check_function": "CheckIAMRoles",
+          "description": "Ensure only authorized transactions and functions are allowed",
+          "check_function": "CheckAcceptedPolicies",
           "value": 5
         }
       ]
     },
     {
       "id": "3.1.3",
-      "name": "Control the flow of CUI in accordance with approved authorizations.",
+      "name": "Information flow Enforcement ",
       "description": "Ensure CUI flow is controlled.",
       "criteria": [
         {
-          "description": "Instance has flow logs enabled",
-          "check_function": "CheckFlowLogs",
+          "description": "Control the flow of CUI in accordance with approved authorizations.",
+          "check_function": "CheckCUIFlow",
           "value": 5
         }
       ]

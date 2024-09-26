@@ -38,12 +38,11 @@ type Criteria struct {
 }
 
 // Control represents a NIST control with multiple criteria
-// Control represents a NIST control with multiple criteria
 type Control struct {
 	ID          string     `json:"id"`
 	Name        string     `json:"name"`
 	Description string     `json:"description"`
-	Criteria    []Criteria `json:"criteria"` // Modifica qui per supportare un array di Criteria
+	Criteria    []Criteria `json:"criteria"`
 }
 
 // NISTControls represents a collection of NIST controls
