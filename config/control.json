@@ -50,12 +50,24 @@
     }, 
     {
       "id": "3.1.5",
-      "name": "Employ the principle of least privilege, including for specific security functions and privileged accounts.",
-      "description": "Ensure least privilege access is enforced.",
+      "name": "Least Privilege.",
+      "description": "Employ the principle of least privilege, including for specific security functions and privileged accounts.",
       "criteria": [
         {
           "description": "Instance uses least privilege for IAM roles",
           "check_function": "CheckLeastPrivilege",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.6",
+      "name": "Least Privilege — Privileged Accounts.",
+      "description": "Ensure that privileged accounts are used only for their intended purposes.",
+      "criteria": [
+        {
+          "description": "Instance uses least privilege for privileged accounts",
+          "check_function": "CheckPrivilegedAccounts",
           "value": 5
         }
       ]

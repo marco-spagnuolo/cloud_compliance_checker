@@ -28,6 +28,7 @@ type User struct {
 	Name              string   `mapstructure:"name"`
 	Policies          []string `mapstructure:"policies"`
 	SecurityFunctions []string `mapstructure:"security_functions"`
+	IsPrivileged      bool     `mapstructure:"is_privileged"`
 }
 
 // SecurityGroup rappresents a security group in the configuration

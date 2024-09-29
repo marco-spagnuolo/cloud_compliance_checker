@@ -33,7 +33,6 @@ func NewIAMCheck(cfg aws.Config) *IAMCheck {
 	}
 }
 
-// RunCheckPolicies esegue il controllo per il requisito NIST 3.1.1
 func (c *IAMCheck) RunCheckPolicies() error {
 	// Elenca gli utenti IAM su AWS
 	listUsersOutput, err := c.IAMClient.ListUsers(context.TODO(), &iam.ListUsersInput{})
@@ -62,7 +61,13 @@ func (c *IAMCheck) RunCheckPolicies() error {
 		// Cerca l'utente nel file di configurazione
 		configUser, ok := usersFromConfig[*awsUser.UserName]
 		if !ok {
-			return fmt.Errorf("l'utente %s non è presente nel file di configurazione", *awsUser.UserName)
+			fmt.Printf("ERRORE: L'utente %s non è presente nel file di configurazione\n", *awsUser.UserName)
+			continue // Se l'utente non è presente nel file di configurazione, continua con il prossimo utente
+		}
+
+		// Verifica se l'utente ha policy configurate
+		if len(configUser.Policies) == 0 {
+			fmt.Printf("ERRORE: Nessuna policy configurata per l'utente %s nel file YAML\n", configUser.Name)
 		}
 
 		// Verifica la conformità delle policy
@@ -71,7 +76,21 @@ func (c *IAMCheck) RunCheckPolicies() error {
 
 			// Confronta la policy assegnata su AWS con quelle definite nel file YAML
 			if !utils.ContainsString(configUser.Policies, *awsPolicy.PolicyName) {
-				return fmt.Errorf("policy %s non conforme per l'utente %s: non è presente nel file di configurazione", *awsPolicy.PolicyName, *awsUser.UserName)
+				fmt.Printf("ERRORE: La policy %s per l'utente %s non è conforme (non trovata nel file di configurazione)\n", *awsPolicy.PolicyName, *awsUser.UserName)
+			}
+		}
+
+		// Verifica se ci sono policy nel file di configurazione che non sono presenti su AWS
+		for _, configPolicy := range configUser.Policies {
+			found := false
+			for _, awsPolicy := range attachedPoliciesOutput.AttachedPolicies {
+				if configPolicy == *awsPolicy.PolicyName {
+					found = true
+					break
+				}
+			}
+			if !found {
+				fmt.Printf("ERRORE: La policy %s definita per l'utente %s nel file YAML non è assegnata su AWS\n", configPolicy, configUser.Name)
 			}
 		}
 	}
@@ -275,6 +294,42 @@ func (c *IAMCheck) RunPrivilegeCheck() error {
 
 	}
 
+	return nil
+}
+
+func (c *IAMCheck) RunPrivilegeAccountCheck() error {
+	usersFromConfig, err := loadUsersFromConfig()
+	if err != nil {
+		return utils.LogAndReturnError("Impossibile caricare gli utenti dal file di configurazione", err)
+	}
+
+	for _, user := range usersFromConfig {
+		fmt.Printf("Verifica dei privilegi per l'utente: %s\n", user.Name)
+
+		// Se l'utente non è privilegiato ma ha funzioni di sicurezza
+		if !user.IsPrivileged && len(user.SecurityFunctions) > 0 {
+			for _, sf := range user.SecurityFunctions {
+				fmt.Printf("ERRORE: L'utente %s non è privilegiato ma ha accesso alla funzione di sicurezza: %s\n", user.Name, sf)
+			}
+			return fmt.Errorf("utente %s non privilegiato con accesso a funzioni di sicurezza", user.Name)
+		}
+
+		// Se l'utente è privilegiato ma non ha funzioni di sicurezza
+		if user.IsPrivileged && len(user.SecurityFunctions) == 0 {
+			fmt.Printf("ERRORE: L'utente privilegiato %s non ha funzioni di sicurezza assegnate\n", user.Name)
+			return fmt.Errorf("utente privilegiato %s senza funzioni di sicurezza", user.Name)
+		}
+
+		// Verifica che le policy corrispondano alle funzioni di sicurezza
+		for _, sf := range user.SecurityFunctions {
+			if !utils.ContainsString(user.Policies, sf) {
+				fmt.Printf("ERRORE: La policy %s per l'utente %s non corrisponde alla funzione di sicurezza %s\n", user.Policies, user.Name, sf)
+				return fmt.Errorf("funzioni di sicurezza non conformi per l'utente %s", user.Name)
+			}
+		}
+	}
+
+	fmt.Println("Verifica dei privilegi completata con successo")
 	return nil
 }
 
