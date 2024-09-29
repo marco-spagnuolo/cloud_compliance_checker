@@ -16,7 +16,7 @@ type AWSConfig struct {
 	AccessKey        string          `mapstructure:"access_key"`
 	SecretKey        string          `mapstructure:"secret_key"`
 	Region           string          `mapstructure:"region"`
-	User             User            `yaml:"users"`
+	User             []User          `mapstructure:"users"`
 	AcceptedPolicies []string        `mapstructure:"accepted_policies"`
 	SecurityGroups   []SecurityGroup `mapstructure:"security_groups"`
 	S3Buckets        []S3Bucket      `mapstructure:"s3_buckets"`
@@ -25,8 +25,9 @@ type AWSConfig struct {
 
 // User rappresents a user in the configuration
 type User struct {
-	Name     string   `yaml:"name"`
-	Policies []string `yaml:"policies"`
+	Name              string   `mapstructure:"name"`
+	Policies          []string `mapstructure:"policies"`
+	SecurityFunctions []string `mapstructure:"security_functions"`
 }
 
 // SecurityGroup rappresents a security group in the configuration

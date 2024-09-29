@@ -237,6 +237,47 @@ func (c *IAMCheck) RunCheckSeparateDuties() error {
 	return nil
 }
 
+// Funzione per eseguire il controllo sui privilegi 3.1.5
+func (c *IAMCheck) RunPrivilegeCheck() error {
+	// Carica gli utenti e le loro policy dalla configurazione
+	usersFromConfig, err := loadUsersFromConfig()
+	if err != nil {
+		return utils.LogAndReturnError("impossibile caricare gli utenti dal file di configurazione", err)
+	}
+
+	// Verifica i privilegi e le funzioni di sicurezza per ogni utente
+	for _, user := range usersFromConfig {
+		fmt.Printf("Verifica dei privilegi per l'utente: %s\n", user.Name)
+
+		// Verifica che ogni funzione di sicurezza corrisponda a una policy assegnata
+		for _, sf := range user.SecurityFunctions {
+			fmt.Printf("Verifica della funzione di sicurezza %s per l'utente %s\n", sf, user.Name)
+
+			// Variabile per determinare se è stata trovata una policy corrispondente
+			found := false
+
+			// Controlla se c'è una policy che copre la funzione di sicurezza
+			for _, policy := range user.Policies {
+				fmt.Printf("Verifica della policy %s per la funzione di sicurezza %s\n", policy, sf)
+
+				if policy == sf {
+					found = true
+					break
+				}
+			}
+
+			// Se non è stata trovata alcuna policy corrispondente alla funzione di sicurezza, segnala l'errore
+			if !found {
+				fmt.Printf("ERRORE: La funzione di sicurezza %s per l'utente %s non è coperta da alcuna policy\n", sf, user.Name)
+				return fmt.Errorf("funzioni di sicurezza non conformi per l'utente %s", user.Name)
+			}
+		}
+
+	}
+
+	return nil
+}
+
 // loadUsersFromConfig carica gli utenti e le relative policy dal file YAML
 func loadUsersFromConfig() (map[string]config.User, error) {
 	var usersConfig []config.User

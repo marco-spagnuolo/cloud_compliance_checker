@@ -1,7 +1,7 @@
 package evaluation
 
 import (
-	"cloud_compliance_checker/internal/checks/access_control/policy"
+	policy "cloud_compliance_checker/internal/checks/access_control/iampolicy"
 	"cloud_compliance_checker/models"
 	"fmt"
 
@@ -121,6 +121,23 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 		}
 	case "CheckSeparateDuties":
 		err := check.RunCheckSeparateDuties()
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+		}
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
+			Impact:      0,
+		}
+	case "CheckLeastPrivilege":
+		err := check.RunPrivilegeCheck()
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,
