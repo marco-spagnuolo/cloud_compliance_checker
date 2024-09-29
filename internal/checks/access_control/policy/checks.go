@@ -4,6 +4,7 @@ import (
 	"cloud_compliance_checker/config"
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -12,14 +13,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-// IAMCheck è una struttura che implementa il controllo della conformità alle policy IAM e altri controlli AWS
+// IAMCheck is a structure that implements compliance checks for IAM policies and other AWS controls
 type IAMCheck struct {
 	EC2Client *ec2.Client
 	S3Client  *s3.Client
 	IAMClient *iam.Client
 }
 
-// NewIAMCheck inizializza una nuova istanza di IAMCheck
+// NewIAMCheck initializes a new instance of IAMCheck
 func NewIAMCheck(cfg aws.Config) *IAMCheck {
 	return &IAMCheck{
 		EC2Client: ec2.NewFromConfig(cfg),
@@ -28,43 +29,83 @@ func NewIAMCheck(cfg aws.Config) *IAMCheck {
 	}
 }
 
-// User rappresenta un utente con le sue policy dal file di configurazione YAML
+// User represents an AWS user with associated policies
 type User struct {
 	Name     string
 	Policies []string
 }
 
-// loadUsersFromConfig carica gli utenti e le relative policy dal file YAML
-func loadUsersFromConfig() (map[string]User, error) {
-	viper.SetConfigFile("cred.yaml")
-	err := viper.ReadInConfig()
+// Run esegue il controllo per il requisito NIST 3.1.1
+func (c *IAMCheck) RunCheckPolicies() error {
+	// Elenca gli utenti IAM su AWS
+	listUsersOutput, err := c.IAMClient.ListUsers(context.TODO(), &iam.ListUsersInput{})
 	if err != nil {
-		return nil, fmt.Errorf("errore nella lettura del file di configurazione: %v", err)
+		return fmt.Errorf("impossibile elencare gli utenti IAM: %v", err)
 	}
 
-	// Leggi gli utenti dal file YAML
-	var usersConfig []User
-	err = viper.UnmarshalKey("aws.users", &usersConfig)
+	// Carica la configurazione utenti e policy dal file YAML
+	usersFromConfig, err := loadUsersFromConfig()
 	if err != nil {
-		return nil, fmt.Errorf("errore nella decodifica degli utenti dal file di configurazione: %v", err)
+		return fmt.Errorf("impossibile caricare gli utenti dal file di configurazione: %v", err)
 	}
 
-	usersMap := make(map[string]User)
-	for _, user := range usersConfig {
-		usersMap[user.Name] = user
-	}
+	// Itera sugli utenti AWS e verifica le policy assegnate
+	for _, awsUser := range listUsersOutput.Users {
+		fmt.Printf("=======> Verifica dell'utente AWS: %s\n", *awsUser.UserName)
 
-	return usersMap, nil
-}
+		// Elenca le policy assegnate all'utente su AWS
+		attachedPoliciesOutput, err := c.IAMClient.ListAttachedUserPolicies(context.TODO(), &iam.ListAttachedUserPoliciesInput{
+			UserName: awsUser.UserName,
+		})
+		if err != nil {
+			return fmt.Errorf("impossibile elencare le policy assegnate all'utente %s: %v", *awsUser.UserName, err)
+		}
 
-// isPolicyInUserConfig verifica se una policy è assegnata a un utente nel file di configurazione
-func isPolicyInUserConfig(userPolicies []string, policyName string) bool {
-	for _, policy := range userPolicies {
-		if policy == policyName {
-			return true
+		// Cerca l'utente nel file di configurazione
+		configUser, ok := usersFromConfig[*awsUser.UserName]
+		if !ok {
+			return fmt.Errorf("l'utente %s non è presente nel file di configurazione", *awsUser.UserName)
+		}
+
+		// Verifica la conformità delle policy
+		for _, awsPolicy := range attachedPoliciesOutput.AttachedPolicies {
+			fmt.Printf("=======> L'utente %s ha la policy: %s\n", *awsUser.UserName, *awsPolicy.PolicyName)
+
+			// Confronta la policy assegnata su AWS con quelle definite nel file YAML
+			if !isPolicyInUserConfig(configUser.Policies, *awsPolicy.PolicyName) {
+				return fmt.Errorf("policy %s non conforme per l'utente %s: non è presente nel file di configurazione", *awsPolicy.PolicyName, *awsUser.UserName)
+			}
 		}
 	}
-	return false
+
+	return nil
+}
+
+// RunCheckAcceptedPolicies esegue il controllo per il requisito NIST 3.1.2
+func (c *IAMCheck) RunCheckAcceptedPolicies() error {
+	// Ottieni le policy accettate dalla configurazione
+	acceptedPolicies := config.AppConfig.AWS.AcceptedPolicies
+
+	// Elenca tutte le policy gestite su AWS
+	listPoliciesOutput, err := c.IAMClient.ListPolicies(context.TODO(), &iam.ListPoliciesInput{})
+	if err != nil {
+		return fmt.Errorf("impossibile elencare le policy su AWS: %v", err)
+	}
+
+	// Crea una mappa per verificare più facilmente se una policy è presente su AWS
+	policiesOnAWS := make(map[string]bool)
+	for _, policy := range listPoliciesOutput.Policies {
+		policiesOnAWS[*policy.PolicyName] = true
+	}
+
+	// Verifica se le policy accettate nel file di configurazione esistono su AWS
+	for _, acceptedPolicy := range acceptedPolicies {
+		if _, exists := policiesOnAWS[acceptedPolicy]; !exists {
+			return fmt.Errorf("policy accettata %s non trovata su AWS", acceptedPolicy)
+		}
+	}
+
+	return nil
 }
 
 // RunSecurityGroupCheck esegue il controllo di conformità sui gruppi di sicurezza
@@ -200,89 +241,6 @@ func (c *IAMCheck) RunS3BucketCheck() error {
 	return nil
 }
 
-// Funzione di supporto per verificare se un valore è contenuto in una lista
-func contains(list []int, elem int) bool {
-	for _, v := range list {
-		if v == elem {
-			return true
-		}
-	}
-	return false
-}
-
-// Run esegue il controllo per il requisito NIST 3.1.1
-func (c *IAMCheck) RunCheckPolicies() error {
-	// Elenca gli utenti IAM su AWS
-	listUsersOutput, err := c.IAMClient.ListUsers(context.TODO(), &iam.ListUsersInput{})
-	if err != nil {
-		return fmt.Errorf("impossibile elencare gli utenti IAM: %v", err)
-	}
-
-	// Carica la configurazione utenti e policy dal file YAML
-	usersFromConfig, err := loadUsersFromConfig()
-	if err != nil {
-		return fmt.Errorf("impossibile caricare gli utenti dal file di configurazione: %v", err)
-	}
-
-	// Itera sugli utenti AWS e verifica le policy assegnate
-	for _, awsUser := range listUsersOutput.Users {
-		fmt.Printf("=======> Verifica dell'utente AWS: %s\n", *awsUser.UserName)
-
-		// Elenca le policy assegnate all'utente su AWS
-		attachedPoliciesOutput, err := c.IAMClient.ListAttachedUserPolicies(context.TODO(), &iam.ListAttachedUserPoliciesInput{
-			UserName: awsUser.UserName,
-		})
-		if err != nil {
-			return fmt.Errorf("impossibile elencare le policy assegnate all'utente %s: %v", *awsUser.UserName, err)
-		}
-
-		// Cerca l'utente nel file di configurazione
-		configUser, ok := usersFromConfig[*awsUser.UserName]
-		if !ok {
-			return fmt.Errorf("l'utente %s non è presente nel file di configurazione", *awsUser.UserName)
-		}
-
-		// Verifica la conformità delle policy
-		for _, awsPolicy := range attachedPoliciesOutput.AttachedPolicies {
-			fmt.Printf("=======> L'utente %s ha la policy: %s\n", *awsUser.UserName, *awsPolicy.PolicyName)
-
-			// Confronta la policy assegnata su AWS con quelle definite nel file YAML
-			if !isPolicyInUserConfig(configUser.Policies, *awsPolicy.PolicyName) {
-				return fmt.Errorf("policy %s non conforme per l'utente %s: non è presente nel file di configurazione", *awsPolicy.PolicyName, *awsUser.UserName)
-			}
-		}
-	}
-
-	return nil
-}
-
-// RunCheckAcceptedPolicies esegue il controllo per il requisito NIST 3.1.2
-func (c *IAMCheck) RunCheckAcceptedPolicies() error {
-	// Ottieni le policy accettate dalla configurazione
-	acceptedPolicies := config.AppConfig.AWS.AcceptedPolicies
-
-	// Elenca tutte le policy gestite su AWS
-	listPoliciesOutput, err := c.IAMClient.ListPolicies(context.TODO(), &iam.ListPoliciesInput{})
-	if err != nil {
-		return fmt.Errorf("impossibile elencare le policy su AWS: %v", err)
-	}
-
-	// Crea una mappa per verificare più facilmente se una policy è presente su AWS
-	policiesOnAWS := make(map[string]bool)
-	for _, policy := range listPoliciesOutput.Policies {
-		policiesOnAWS[*policy.PolicyName] = true
-	}
-
-	// Verifica se le policy accettate nel file di configurazione esistono su AWS
-	for _, acceptedPolicy := range acceptedPolicies {
-		if _, exists := policiesOnAWS[acceptedPolicy]; !exists {
-			return fmt.Errorf("policy accettata %s non trovata su AWS", acceptedPolicy)
-		}
-	}
-
-	return nil
-}
-
 // RunCheckCUIFlow esegue i controlli di conformità richiesti per NIST SP 800-171 3.1.3
 // Chiamando sia il controllo dei gruppi di sicurezza sia il controllo dei bucket S3
 func (c *IAMCheck) RunCheckCUIFlow() error {
@@ -311,14 +269,18 @@ func (c *IAMCheck) RunCheckSeparateDuties() error {
 	var criticalRoles []config.CriticalRole
 	err := viper.UnmarshalKey("aws.critical_roles", &criticalRoles)
 	if err != nil {
+		log.Printf("ERRORE: impossibile caricare i ruoli critici dal file di configurazione: %v\n", err)
 		return fmt.Errorf("errore nella decodifica dei ruoli critici dal file di configurazione: %v", err)
 	}
+	log.Printf("INFO: Ruoli critici caricati dalla configurazione: %+v\n", criticalRoles)
 
 	// Elenca i ruoli IAM su AWS
 	listRolesOutput, err := c.IAMClient.ListRoles(context.TODO(), &iam.ListRolesInput{})
 	if err != nil {
+		log.Printf("ERRORE: impossibile elencare i ruoli IAM su AWS: %v\n", err)
 		return fmt.Errorf("impossibile elencare i ruoli IAM: %v", err)
 	}
+	log.Printf("INFO: Trovati %d ruoli IAM su AWS.\n", len(listRolesOutput.Roles))
 
 	// Mappa per confrontare i ruoli e le loro funzioni sensibili
 	roleFunctionMap := make(map[string][]string)
@@ -327,42 +289,109 @@ func (c *IAMCheck) RunCheckSeparateDuties() error {
 			RoleName: role.RoleName,
 		})
 		if err != nil {
+			log.Printf("ERRORE: impossibile elencare le policy per il ruolo %s: %v\n", *role.RoleName, err)
 			return fmt.Errorf("impossibile elencare le policy per il ruolo %s: %v", *role.RoleName, err)
 		}
+		log.Printf("INFO: Policy assegnate al ruolo %s: %+v\n", *role.RoleName, listAttachedRolePoliciesOutput.AttachedPolicies)
 
 		var policies []string
 		for _, policy := range listAttachedRolePoliciesOutput.AttachedPolicies {
-			policies = append(policies, *policy.PolicyName)
+			function := mapPolicyToFunction(*policy.PolicyName)
+			if function != "" {
+				policies = append(policies, function)
+			}
 		}
-
 		roleFunctionMap[*role.RoleName] = policies
 	}
 
+	// Verifica dei ruoli critici rispetto alle funzioni sensibili
 	for _, criticalRole := range criticalRoles {
-		fmt.Printf("Verifica del ruolo critico: %s\n", criticalRole.RoleName)
+		log.Printf("INFO: Verifica del ruolo critico: %s\n", criticalRole.RoleName)
 
 		policies, ok := roleFunctionMap[criticalRole.RoleName]
 		if !ok {
+			log.Printf("ERRORE: Ruolo critico %s non trovato su AWS\n", criticalRole.RoleName)
 			return fmt.Errorf("ruolo critico %s non trovato su AWS", criticalRole.RoleName)
 		}
 
+		log.Printf("INFO: Policy assegnate al ruolo critico %s: %+v\n", criticalRole.RoleName, policies)
+		log.Printf("INFO: Funzioni sensibili attese per il ruolo %s: %+v\n", criticalRole.RoleName, criticalRole.SensitiveFunctions)
+
+		// Confronto delle policy assegnate con le funzioni sensibili
 		for _, sensitiveFunction := range criticalRole.SensitiveFunctions {
-			fmt.Printf("Controllando la funzione sensibile %s per il ruolo critico %s...\n", sensitiveFunction, criticalRole.RoleName)
+			log.Printf("INFO: Controllo della funzione sensibile %s per il ruolo critico %s\n", sensitiveFunction, criticalRole.RoleName)
 			if !containsString(policies, sensitiveFunction) {
+				log.Printf("ERRORE: Funzione sensibile %s non assegnata al ruolo critico %s\n", sensitiveFunction, criticalRole.RoleName)
 				return fmt.Errorf("funzione sensibile %s non assegnata al ruolo critico %s", sensitiveFunction, criticalRole.RoleName)
 			} else {
-				fmt.Printf("Funzione sensibile %s conforme per il ruolo critico %s\n", sensitiveFunction, criticalRole.RoleName)
+				log.Printf("INFO: Funzione sensibile %s conforme per il ruolo critico %s\n", sensitiveFunction, criticalRole.RoleName)
 			}
 		}
 	}
 
+	log.Println("INFO: Verifica separazione dei compiti completata con successo.")
 	return nil
 }
 
-// Funzione di supporto per verificare se una stringa è contenuta in una lista
+// Funzione per mappare le policy AWS alle funzioni sensibili
+func mapPolicyToFunction(policyName string) string {
+	switch policyName {
+	case "IAMFullAccess":
+		return "ManageIAM"
+	case "AmazonEC2FullAccess":
+		return "ManageEC2"
+	default:
+		return ""
+	}
+}
+
+// containsString verifica se una stringa è contenuta in una lista di stringhe
 func containsString(list []string, elem string) bool {
 	for _, v := range list {
 		if v == elem {
+			return true
+		}
+	}
+	return false
+}
+
+// Funzione di supporto per verificare se un valore è contenuto in una lista
+func contains(list []int, elem int) bool {
+	for _, v := range list {
+		if v == elem {
+			return true
+		}
+	}
+	return false
+}
+
+// loadUsersFromConfig carica gli utenti e le relative policy dal file YAML
+func loadUsersFromConfig() (map[string]User, error) {
+	viper.SetConfigFile("cred.yaml")
+	err := viper.ReadInConfig()
+	if err != nil {
+		return nil, fmt.Errorf("errore nella lettura del file di configurazione: %v", err)
+	}
+
+	// Leggi gli utenti dal file YAML
+	var usersConfig []User
+	err = viper.UnmarshalKey("aws.users", &usersConfig)
+	if err != nil {
+		return nil, fmt.Errorf("errore nella decodifica degli utenti dal file di configurazione: %v", err)
+	}
+
+	usersMap := make(map[string]User)
+	for _, user := range usersConfig {
+		usersMap[user.Name] = user
+	}
+
+	return usersMap, nil
+}
+
+// isPolicyInUserConfig verifica se una policy è assegnata a un utente nel file di configurazione
+func isPolicyInUserConfig(userPolicies []string, policyName string) bool {
+	for _, policy := range userPolicies {
+		if policy == policyName {
 			return true
 		}
 	}
