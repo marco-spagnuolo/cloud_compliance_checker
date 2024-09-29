@@ -20,25 +20,29 @@ type AWSConfig struct {
 	Region           string          `mapstructure:"region"`
 	User             User            `yaml:"users"`
 	AcceptedPolicies []string        `yaml:"accepted_policies"`
-	SecurityGroups   []SecurityGroup `yaml:"security_groups"`
-	S3Buckets        []S3Bucket      `yaml:"s3_buckets"`
+	SecurityGroups   []SecurityGroup `mapstructure:"security_groups"`
+	S3Buckets        []S3Bucket      `mapstructure:"s3_buckets"`
+	CriticalRole     []CriticalRole  `mapstructure:"critical_roles"`
 }
 type User struct {
 	Name     string   `yaml:"name"`
 	Policies []string `yaml:"policies"`
 }
 
-// SecurityGroup rappresenta un gruppo di sicurezza dal file di configurazione
 type SecurityGroup struct {
-	Name                string `yaml:"name"`
-	AllowedIngressPorts []int  `yaml:"allowed_ingress_ports"`
-	AllowedEgressPorts  []int  `yaml:"allowed_egress_ports"`
+	Name                string `mapstructure:"name"`
+	AllowedIngressPorts []int  `mapstructure:"allowed_ingress_ports"`
+	AllowedEgressPorts  []int  `mapstructure:"allowed_egress_ports"`
 }
 
-// S3Bucket rappresenta un bucket S3 dal file di configurazione
 type S3Bucket struct {
-	Name       string `yaml:"name"`
-	Encryption string `yaml:"encryption"`
+	Name       string `mapstructure:"name"`
+	Encryption string `mapstructure:"encryption"`
+}
+
+type CriticalRole struct {
+	RoleName           string   `mapstructure:"role_name"`
+	SensitiveFunctions []string `mapstructure:"sensitive_functions"`
 }
 
 // AppConfig è la configurazione globale dell'applicazione
@@ -60,6 +64,8 @@ func LoadConfig(configFile string) {
 	if err := viper.Unmarshal(&AppConfig); err != nil {
 		log.Fatalf("Impossibile decodificare la configurazione: %v", err)
 	}
+	// print the configuration
+	fmt.Printf("Configurazione caricata con successo: %+v", AppConfig)
 
 }
 

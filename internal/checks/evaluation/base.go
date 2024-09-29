@@ -64,11 +64,11 @@ func CheckInstance(controls models.NISTControls, cfg aws.Config, cloudTrailClien
 func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 	cfg aws.Config, cloudTrailClient *cloudtrail.Client) models.ComplianceResult {
 	var result models.ComplianceResult
+	check := policy.NewIAMCheck(cfg)
 
 	switch criteria.CheckFunction {
 	case "CheckUsersPolicies":
-		check := policy.NewIAMCheck(cfg)
-		err := check.Run()
+		err := check.RunCheckPolicies()
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,
@@ -85,7 +85,6 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 		}
 
 	case "CheckAcceptedPolicies":
-		check := policy.NewIAMCheck(cfg)
 		err := check.RunCheckAcceptedPolicies()
 		if err != nil {
 			result = models.ComplianceResult{
@@ -104,8 +103,24 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 		}
 
 	case "CheckCUIFlow":
-		check := policy.NewIAMCheck(cfg)
 		err := check.RunCheckCUIFlow()
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+		}
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
+			Impact:      0,
+		}
+	case "CheckSeparateDuties":
+		err := check.RunCheckSeparateDuties()
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,
@@ -131,6 +146,5 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 		}
 	}
 
-	// Log result for better readability
 	return result
 }

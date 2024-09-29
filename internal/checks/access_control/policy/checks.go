@@ -211,7 +211,7 @@ func contains(list []int, elem int) bool {
 }
 
 // Run esegue il controllo per il requisito NIST 3.1.1
-func (c *IAMCheck) Run() error {
+func (c *IAMCheck) RunCheckPolicies() error {
 	// Elenca gli utenti IAM su AWS
 	listUsersOutput, err := c.IAMClient.ListUsers(context.TODO(), &iam.ListUsersInput{})
 	if err != nil {
@@ -303,4 +303,68 @@ func (c *IAMCheck) RunCheckCUIFlow() error {
 	fmt.Println("===== Controllo dei bucket S3 completato =====")
 
 	return nil
+}
+
+// RunCheckSeparateDuties esegue il controllo per il requisito NIST 3.1.4
+func (c *IAMCheck) RunCheckSeparateDuties() error {
+	// Carica i ruoli critici e le funzioni sensibili dal file di configurazione
+	var criticalRoles []config.CriticalRole
+	err := viper.UnmarshalKey("aws.critical_roles", &criticalRoles)
+	if err != nil {
+		return fmt.Errorf("errore nella decodifica dei ruoli critici dal file di configurazione: %v", err)
+	}
+
+	// Elenca i ruoli IAM su AWS
+	listRolesOutput, err := c.IAMClient.ListRoles(context.TODO(), &iam.ListRolesInput{})
+	if err != nil {
+		return fmt.Errorf("impossibile elencare i ruoli IAM: %v", err)
+	}
+
+	// Mappa per confrontare i ruoli e le loro funzioni sensibili
+	roleFunctionMap := make(map[string][]string)
+	for _, role := range listRolesOutput.Roles {
+		listAttachedRolePoliciesOutput, err := c.IAMClient.ListAttachedRolePolicies(context.TODO(), &iam.ListAttachedRolePoliciesInput{
+			RoleName: role.RoleName,
+		})
+		if err != nil {
+			return fmt.Errorf("impossibile elencare le policy per il ruolo %s: %v", *role.RoleName, err)
+		}
+
+		var policies []string
+		for _, policy := range listAttachedRolePoliciesOutput.AttachedPolicies {
+			policies = append(policies, *policy.PolicyName)
+		}
+
+		roleFunctionMap[*role.RoleName] = policies
+	}
+
+	for _, criticalRole := range criticalRoles {
+		fmt.Printf("Verifica del ruolo critico: %s\n", criticalRole.RoleName)
+
+		policies, ok := roleFunctionMap[criticalRole.RoleName]
+		if !ok {
+			return fmt.Errorf("ruolo critico %s non trovato su AWS", criticalRole.RoleName)
+		}
+
+		for _, sensitiveFunction := range criticalRole.SensitiveFunctions {
+			fmt.Printf("Controllando la funzione sensibile %s per il ruolo critico %s...\n", sensitiveFunction, criticalRole.RoleName)
+			if !containsString(policies, sensitiveFunction) {
+				return fmt.Errorf("funzione sensibile %s non assegnata al ruolo critico %s", sensitiveFunction, criticalRole.RoleName)
+			} else {
+				fmt.Printf("Funzione sensibile %s conforme per il ruolo critico %s\n", sensitiveFunction, criticalRole.RoleName)
+			}
+		}
+	}
+
+	return nil
+}
+
+// Funzione di supporto per verificare se una stringa è contenuta in una lista
+func containsString(list []string, elem string) bool {
+	for _, v := range list {
+		if v == elem {
+			return true
+		}
+	}
+	return false
 }
