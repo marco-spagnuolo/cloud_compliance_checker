@@ -49,7 +49,7 @@ func (c *IAMCheck) RunCheckPolicies() error {
 
 	// Itera sugli utenti AWS e verifica le policy assegnate
 	for _, awsUser := range listUsersOutput.Users {
-		fmt.Printf("=======> Verifica dell'utente AWS: %s\n", *awsUser.UserName)
+		log.Printf("=======> Verifica dell'utente AWS: %s\n", *awsUser.UserName)
 
 		// Elenca le policy assegnate all'utente su AWS
 		attachedPoliciesOutput, err := c.IAMClient.ListAttachedUserPolicies(context.TODO(), &iam.ListAttachedUserPoliciesInput{
@@ -62,12 +62,12 @@ func (c *IAMCheck) RunCheckPolicies() error {
 		// Cerca l'utente nel file di configurazione
 		configUser, ok := usersFromConfig[*awsUser.UserName]
 		if !ok {
-			return fmt.Errorf("l'utente %s non è presente nel file di configurazione", *awsUser.UserName)
+			return utils.LogAndReturnError(fmt.Sprintf("utente %s non trovato nel file di configurazione", *awsUser.UserName), nil)
 		}
 
 		// Verifica la conformità delle policy
 		for _, awsPolicy := range attachedPoliciesOutput.AttachedPolicies {
-			fmt.Printf("=======> L'utente %s ha la policy: %s\n", *awsUser.UserName, *awsPolicy.PolicyName)
+			log.Printf("=======> L'utente %s ha la policy: %s\n", *awsUser.UserName, *awsPolicy.PolicyName)
 
 			// Confronta la policy assegnata su AWS con quelle definite nel file YAML
 			if !utils.ContainsString(configUser.Policies, *awsPolicy.PolicyName) {
@@ -81,20 +81,34 @@ func (c *IAMCheck) RunCheckPolicies() error {
 
 // RunCheckAcceptedPolicies esegue il controllo per il requisito NIST 3.1.2
 func (c *IAMCheck) RunCheckAcceptedPolicies() error {
-	acceptedPolicies := config.AppConfig.AWS.AcceptedPolicies
+	// Carica le policy accettate dal file di configurazione
+	acceptedPolicies, err := loadAcceptedPoliciesFromConfig()
+	if err != nil {
+		return fmt.Errorf("impossibile caricare le policy accettate dal file di configurazione: %v", err)
+	}
+
+	// Lista le policy gestite su AWS
 	listPoliciesOutput, err := c.IAMClient.ListPolicies(context.TODO(), &iam.ListPoliciesInput{})
 	if err != nil {
 		return utils.LogAndReturnError("impossibile elencare le policy su AWS", err)
 	}
 
+	log.Printf("INFO: Numero di policy trovate su AWS: %d\n", len(listPoliciesOutput.Policies))
+
+	// Mappa le policy su AWS per confronto veloce
 	policiesOnAWS := utils.MapAWSManagedPolicies(listPoliciesOutput.Policies)
 
+	// Confronta le policy accettate con quelle effettivamente presenti su AWS
 	for _, acceptedPolicy := range acceptedPolicies {
 		if _, exists := policiesOnAWS[acceptedPolicy]; !exists {
+			log.Printf("ERRORE: Policy accettata %s non trovata su AWS", acceptedPolicy)
 			return fmt.Errorf("policy accettata %s non trovata su AWS", acceptedPolicy)
+		} else {
+			log.Printf("INFO: Policy %s è presente su AWS e conforme", acceptedPolicy)
 		}
 	}
 
+	log.Println("INFO: Tutte le policy accettate sono conformi su AWS")
 	return nil
 }
 
@@ -116,7 +130,7 @@ func RunSecurityGroupCheck(securityGroupsFromConfig []config.SecurityGroup, secu
 		configSG, ok := sgMap[*awsSG.GroupName]
 		if !ok {
 			// Se non trovato, segna il gruppo di sicurezza come non conforme
-			fmt.Printf("Gruppo di sicurezza %s non trovato nella configurazione\n", *awsSG.GroupName)
+			log.Printf("Gruppo di sicurezza %s non trovato nella configurazione\n", *awsSG.GroupName)
 			isCompliant = false
 			continue
 		}
@@ -125,7 +139,7 @@ func RunSecurityGroupCheck(securityGroupsFromConfig []config.SecurityGroup, secu
 		if awsSG.IpPermissions != nil {
 			for _, ingress := range awsSG.IpPermissions {
 				if ingress.FromPort != nil && !utils.Contains(configSG.AllowedIngressPorts, int(*ingress.FromPort)) {
-					fmt.Printf("Porta di ingresso %d non consentita per il gruppo %s\n", *ingress.FromPort, *awsSG.GroupName)
+					log.Printf("Porta di ingresso %d non consentita per il gruppo %s\n", *ingress.FromPort, *awsSG.GroupName)
 					isCompliant = false
 				}
 			}
@@ -135,7 +149,7 @@ func RunSecurityGroupCheck(securityGroupsFromConfig []config.SecurityGroup, secu
 		if awsSG.IpPermissionsEgress != nil {
 			for _, egress := range awsSG.IpPermissionsEgress {
 				if egress.FromPort != nil && !utils.Contains(configSG.AllowedEgressPorts, int(*egress.FromPort)) {
-					fmt.Printf("Porta di uscita %d non consentita per il gruppo %s\n", *egress.FromPort, *awsSG.GroupName)
+					log.Printf("Porta di uscita %d non consentita per il gruppo %s\n", *egress.FromPort, *awsSG.GroupName)
 					isCompliant = false
 				}
 			}
@@ -168,7 +182,7 @@ func (c *IAMCheck) RunS3BucketCheck() error {
 
 // RunCheckCUIFlow esegue i controlli di conformità richiesti per NIST SP 800-171 3.1.3
 func (c *IAMCheck) RunCheckCUIFlow() error {
-	fmt.Println("===== Inizio controllo dei gruppi di sicurezza (3.1.3) =====")
+	log.Println("===== Inizio controllo dei gruppi di sicurezza (3.1.3) =====")
 	// Carica i gruppi di sicurezza dalla configurazione
 	securityGroupsFromConfig, err := loadSecurityGroupsFromConfig()
 	if err != nil {
@@ -186,13 +200,13 @@ func (c *IAMCheck) RunCheckCUIFlow() error {
 		return utils.LogAndReturnError("errore durante il controllo dei gruppi di sicurezza", err)
 	}
 
-	fmt.Println("===== Controllo dei gruppi di sicurezza completato =====")
+	log.Println("===== Controllo dei gruppi di sicurezza completato =====")
 
-	fmt.Println("===== Inizio controllo dei bucket S3 (3.1.3) =====")
+	log.Println("===== Inizio controllo dei bucket S3 (3.1.3) =====")
 	if err := c.RunS3BucketCheck(); err != nil {
 		return utils.LogAndReturnError("errore durante il controllo dei bucket S3", err)
 	}
-	fmt.Println("===== Controllo dei bucket S3 completato =====")
+	log.Println("===== Controllo dei bucket S3 completato =====")
 
 	return nil
 }
@@ -260,4 +274,14 @@ func loadCriticalRolesFromConfig() ([]config.CriticalRole, error) {
 		return nil, fmt.Errorf("errore nella decodifica dei ruoli critici dal file di configurazione: %v", err)
 	}
 	return criticalRoles, nil
+}
+
+// loadAcceptedPoliciesFromConfig carica le policy accettate dal file di configurazione
+func loadAcceptedPoliciesFromConfig() ([]string, error) {
+	var acceptedPolicies []string
+	err := viper.UnmarshalKey("aws.accepted_policies", &acceptedPolicies)
+	if err != nil {
+		return nil, fmt.Errorf("errore nella decodifica delle policy accettate dal file di configurazione: %v", err)
+	}
+	return acceptedPolicies, nil
 }

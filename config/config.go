@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/spf13/viper"
@@ -18,7 +17,7 @@ type AWSConfig struct {
 	SecretKey        string          `mapstructure:"secret_key"`
 	Region           string          `mapstructure:"region"`
 	User             User            `yaml:"users"`
-	AcceptedPolicies []string        `yaml:"accepted_policies"`
+	AcceptedPolicies []string        `mapstructure:"accepted_policies"`
 	SecurityGroups   []SecurityGroup `mapstructure:"security_groups"`
 	S3Buckets        []S3Bucket      `mapstructure:"s3_buckets"`
 	CriticalRole     []CriticalRole  `mapstructure:"critical_roles"`
@@ -56,19 +55,15 @@ func LoadConfig(configFile string) {
 	viper.SetConfigFile(configFile)
 	viper.SetConfigType("yaml")
 
-	// Usa le variabili d'ambiente
 	viper.AutomaticEnv()
 
-	// Leggi il file di configurazione
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Errore nella lettura del file di configurazione: %s", err)
 	}
 
-	// Decodifica la configurazione in AppConfig
 	if err := viper.Unmarshal(&AppConfig); err != nil {
 		log.Fatalf("Impossibile decodificare la configurazione: %v", err)
 	}
-	// print the configuration
-	fmt.Printf("Configurazione caricata con successo: %+v", AppConfig)
+	//fmt.Printf("Configurazione caricata con successo: %+v", AppConfig)
 
 }

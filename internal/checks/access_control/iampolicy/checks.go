@@ -81,20 +81,36 @@ func (c *IAMCheck) RunCheckPolicies() error {
 
 // RunCheckAcceptedPolicies esegue il controllo per il requisito NIST 3.1.2
 func (c *IAMCheck) RunCheckAcceptedPolicies() error {
-	acceptedPolicies := config.AppConfig.AWS.AcceptedPolicies
+
+	// Carica le policy accettate dal file di configurazione
+	acceptedPolicies, err := loadAcceptedPoliciesFromConfig()
+	if err != nil {
+		return fmt.Errorf("impossibile caricare le policy accettate dal file di configurazione: %v", err)
+	}
+
+	// Lista le policy gestite su AWS
 	listPoliciesOutput, err := c.IAMClient.ListPolicies(context.TODO(), &iam.ListPoliciesInput{})
 	if err != nil {
-		return utils.LogAndReturnError("impossibile elencare le policy su AWS", err)
+		return fmt.Errorf("impossibile elencare le policy su AWS: %v", err)
+	}
+
+	// Log per verificare le policy effettivamente presenti su AWS
+	fmt.Printf("INFO: Policy trovate su AWS:")
+	for _, policy := range listPoliciesOutput.Policies {
+		fmt.Printf("Policy trovata: %s", *policy.PolicyName)
 	}
 
 	policiesOnAWS := utils.MapAWSManagedPolicies(listPoliciesOutput.Policies)
 
+	// Confronta le policy accettate con quelle effettivamente presenti su AWS
 	for _, acceptedPolicy := range acceptedPolicies {
 		if _, exists := policiesOnAWS[acceptedPolicy]; !exists {
+			fmt.Printf("ERRORE: Policy accettata %s non trovata su AWS", acceptedPolicy)
 			return fmt.Errorf("policy accettata %s non trovata su AWS", acceptedPolicy)
 		}
 	}
 
+	fmt.Println("INFO: Tutte le policy accettate sono conformi su AWS")
 	return nil
 }
 
@@ -260,4 +276,14 @@ func loadCriticalRolesFromConfig() ([]config.CriticalRole, error) {
 		return nil, fmt.Errorf("errore nella decodifica dei ruoli critici dal file di configurazione: %v", err)
 	}
 	return criticalRoles, nil
+}
+
+// loadAcceptedPoliciesFromConfig carica le policy accettate dal file di configurazione
+func loadAcceptedPoliciesFromConfig() ([]string, error) {
+	var acceptedPolicies []string
+	err := viper.UnmarshalKey("aws.accepted_policies", &acceptedPolicies)
+	if err != nil {
+		return nil, fmt.Errorf("errore nella decodifica delle policy accettate dal file di configurazione: %v", err)
+	}
+	return acceptedPolicies, nil
 }
