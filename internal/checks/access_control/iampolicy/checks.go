@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
@@ -21,9 +22,10 @@ import (
 
 // IAMCheck è una struttura che implementa i controlli di conformità per le policy IAM e altri controlli AWS
 type IAMCheck struct {
-	EC2Client *ec2.Client
-	S3Client  *s3.Client
-	IAMClient *iam.Client
+	EC2Client        *ec2.Client
+	S3Client         *s3.Client
+	IAMClient        *iam.Client
+	CloudTrailClient *cloudtrail.Client
 }
 
 // NewIAMCheck inizializza una nuova istanza di IAMCheck
@@ -570,6 +572,64 @@ func (c *IAMCheck) RunInactivitySessionCheck(cfg aws.Config, username string) er
 
 	fmt.Printf("La policy ForceSessionTimeout è stata trovata per l'utente %s\n", username)
 	fmt.Println("Controllo delle policy di sessione IAM completato.")
+
+	return nil
+}
+
+// RunRemoteMonitoringCheck esegue il controllo per verificare se VPC Flow Logs e CloudTrail sono abilitati
+// Requisito 3.1.20 di NIST SP 800-171
+func (c *IAMCheck) RunRemoteMonitoringCheck(cfg aws.Config) error {
+	// Inizializza il client CloudTrail
+	cloudTrailClient := cloudtrail.NewFromConfig(cfg)
+
+	// Log: Inizio del controllo VPC Flow Logs
+	fmt.Println("Verifica se i VPC Flow Logs sono abilitati...")
+
+	describeFlowLogsInput := &ec2.DescribeFlowLogsInput{}
+	flowLogsOutput, err := c.EC2Client.DescribeFlowLogs(context.TODO(), describeFlowLogsInput)
+	if err != nil {
+		errorMessage := fmt.Sprintf("Errore durante il recupero dei VPC Flow Logs: %v", err)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	// Log: Numero di VPC Flow Logs trovati
+	fmt.Printf("Numero di VPC Flow Logs trovati: %d\n", len(flowLogsOutput.FlowLogs))
+
+	// Se nessun VPC Flow Logs è abilitato, restituisci errore
+	if len(flowLogsOutput.FlowLogs) == 0 {
+		errorMessage := "ERRORE: Nessun VPC Flow Logs abilitato: non conforme"
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	fmt.Println("SUCCESSO: I VPC Flow Logs sono abilitati e monitorano il traffico.")
+
+	// Log: Inizio del controllo CloudTrail
+	fmt.Println("Verifica se CloudTrail è abilitato e monitorando le connessioni remote...")
+
+	trailStatusInput := &cloudtrail.GetTrailStatusInput{
+		Name: aws.String("management-events"), // TODO - ask user
+	}
+
+	trailStatusOutput, err := cloudTrailClient.GetTrailStatus(context.TODO(), trailStatusInput)
+	if err != nil {
+		errorMessage := fmt.Sprintf("Errore durante il recupero dello stato di CloudTrail: %v", err)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	// Log: Stato di CloudTrail
+	if !*trailStatusOutput.IsLogging {
+		errorMessage := "ERRORE: CloudTrail non è abilitato: non conforme"
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	fmt.Println("SUCCESSO: CloudTrail è abilitato e sta monitorando le connessioni remote.")
+
+	// Log: Fine del controllo
+	fmt.Println("Controllo delle connessioni esterne completato con successo.")
 
 	return nil
 }

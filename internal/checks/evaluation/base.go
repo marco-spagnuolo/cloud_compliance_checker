@@ -4,8 +4,10 @@ import (
 	"cloud_compliance_checker/config"
 	"cloud_compliance_checker/internal/checks/access_control/iampolicy"
 	policy "cloud_compliance_checker/internal/checks/access_control/iampolicy"
+	"cloud_compliance_checker/internal/checks/audit_and_accountability"
 	"cloud_compliance_checker/models"
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
@@ -219,7 +221,6 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 			return result
 		}
 
-		// Se il controllo ha successo, restituisci il risultato conforme
 		result = models.ComplianceResult{
 			Description: criteria.Description,
 			Status:      "COMPLIANT",
@@ -237,7 +238,6 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 			}
 			return result
 		}
-		// Se il controllo ha successo, restituisci il risultato conforme
 		result = models.ComplianceResult{
 			Description: criteria.Description,
 			Status:      "COMPLIANT",
@@ -255,7 +255,6 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 			}
 			return result
 		}
-		// Se il controllo ha successo, restituisci il risultato conforme
 		result = models.ComplianceResult{
 			Description: criteria.Description,
 			Status:      "COMPLIANT",
@@ -264,7 +263,6 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 		}
 
 	case "CheckRemoteAccessControl":
-		// Verifica le restrizioni di accesso remoto
 		remoteAccessCheck := iampolicy.NewRemoteAccessCheck(cfg)
 		err := remoteAccessCheck.RunRemoteAccessCheck()
 		if err != nil {
@@ -276,7 +274,42 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 			}
 			return result
 		}
-		// Se il controllo ha successo, restituisci il risultato conforme
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
+			Impact:      0,
+		}
+	case "CheckExternalSystemConnections":
+		err := check.RunRemoteMonitoringCheck(cfg)
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+		}
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
+			Impact:      0,
+		}
+
+	case "CheckAuditLogs":
+		aa := audit_and_accountability.NewEventLoggingCheck(cfg, []string{"AWS_EC2"}, time.Now(), 30)
+		err := aa.RunEventLoggingCheck()
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+		}
 		result = models.ComplianceResult{
 			Description: criteria.Description,
 			Status:      "COMPLIANT",
