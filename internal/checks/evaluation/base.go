@@ -1,6 +1,8 @@
 package evaluation
 
 import (
+	"cloud_compliance_checker/config"
+	"cloud_compliance_checker/internal/checks/access_control/iampolicy"
 	policy "cloud_compliance_checker/internal/checks/access_control/iampolicy"
 	"cloud_compliance_checker/models"
 	"fmt"
@@ -11,43 +13,33 @@ import (
 )
 
 // EvaluateAssets evaluates all assets and returns the compliance results
-func EvaluateAssets(assets []models.Asset, controls models.NISTControls,
-	cfg aws.Config, cloudTrailClient *cloudtrail.Client) []models.Score {
-	var results []models.Score
+func EvaluateAssets(controls models.NISTControls,
+	cfg aws.Config, cloudTrailClient *cloudtrail.Client) int {
+	fmt.Println("=========================================")
 
 	// Separator for readability
 	fmt.Println("===== Compliance Evaluation Results =====")
 
-	for _, asset := range assets {
-		fmt.Printf("\nAsset: %s\n", asset.Name)
-		fmt.Println("======================================")
+	score := checkInstance(controls, cfg, cloudTrailClient)
 
-		score := CheckInstance(controls, cfg, cloudTrailClient)
-		results = append(results, models.Score{
-			Asset: asset,
-			Score: score,
-		})
-
-		// Display compliance score for the asset
-		fmt.Printf("Compliance Score for Asset %s: %d\n", asset.Name, score)
-		fmt.Println("--------------------------------------")
-	}
-
-	return results
+	return score
 }
 
 // CheckInstance runs all compliance checks on the given instance (SINGLE INSTANCE) and returns the total score
-func CheckInstance(controls models.NISTControls, cfg aws.Config, cloudTrailClient *cloudtrail.Client) int {
+func checkInstance(controls models.NISTControls, cfg aws.Config, cloudTrailClient *cloudtrail.Client) int {
 	svc := configservice.NewFromConfig(cfg)
 	score := 110
 
 	for _, control := range controls.Controls {
+		fmt.Printf("\n")
 		fmt.Printf("\n*Control: %s - %s\n", control.ID, control.Description)
+		fmt.Printf("\n")
 
 		for _, criteria := range control.Criteria {
 			result := evaluateCriteria(svc, criteria, cfg, cloudTrailClient)
 
 			// Print results for each check in a readable format
+			fmt.Printf("\n")
 			fmt.Printf("  Check: %s\n", criteria.CheckFunction)
 			fmt.Printf("    Description: %s\n", criteria.Description)
 			fmt.Printf("    Result: %s\n", result.Status)
@@ -164,6 +156,127 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 			}
 			return result
 		}
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
+			Impact:      0,
+		}
+	case "CheckPreventPrivilegedFunctions":
+		err := check.RunPrivilegedFunctionCheck()
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+		}
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
+			Impact:      0,
+		}
+	case "CheckLogonAttempts":
+		// Carica gli utenti dal file di configurazione
+		usersFromConfig, err := iampolicy.LoadUsersFromConfig()
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: "Errore nel caricamento degli utenti",
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+		}
+
+		// Cerca specificamente l'utente marco_admin
+		user, ok := usersFromConfig["marco_admin"]
+		if !ok {
+			result = models.ComplianceResult{
+				Description: "Utente marco_admin non trovato nella configurazione",
+				Status:      "NOT COMPLIANT",
+				Response:    "Impossibile eseguire il controllo senza l'utente marco_admin",
+				Impact:      criteria.Value,
+			}
+			return result
+		}
+
+		// Carica la politica di accesso definita nel file di configurazione
+		loginPolicy := config.AppConfig.AWS.LoginPolicy
+
+		// Esegui il controllo del tentativo di accesso per marco_admin
+		err = check.RunLoginAttemptCheck(user.Name, false, loginPolicy) // Simula un tentativo fallito
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+		}
+
+		// Se il controllo ha successo, restituisci il risultato conforme
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
+			Impact:      0,
+		}
+	case "CheckSessionLock":
+		err := check.RunSessionTimeoutCheck(cfg)
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+		}
+		// Se il controllo ha successo, restituisci il risultato conforme
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
+			Impact:      0,
+		}
+	case "CheckSessionTermination":
+		err := check.RunInactivitySessionCheck(cfg, "marco_admin")
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+		}
+		// Se il controllo ha successo, restituisci il risultato conforme
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
+			Impact:      0,
+		}
+
+	case "CheckRemoteAccessControl":
+		// Verifica le restrizioni di accesso remoto
+		remoteAccessCheck := iampolicy.NewRemoteAccessCheck(cfg)
+		err := remoteAccessCheck.RunRemoteAccessCheck()
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+		}
+		// Se il controllo ha successo, restituisci il risultato conforme
 		result = models.ComplianceResult{
 			Description: criteria.Description,
 			Status:      "COMPLIANT",

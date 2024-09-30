@@ -71,7 +71,67 @@
           "value": 5
         }
       ]
-    }
+    },
+    {
+      "id": "3.1.7",
+      "name": "Least Privilege — Privileged Functions",
+      "description": "Prevent non-privileged users from executing privileged functions..",
+      "criteria": [
+        {
+          "description": "Prevent non-privileged users from executing privileged functions.",
+          "check_function": "CheckPreventPrivilegedFunctions",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.8",
+      "name": "Limit unsuccessful logon attempts.",
+      "description": "Ensure unsuccessful logon attempts are limited.",
+      "criteria": [
+        {
+          "description": "Instance limits unsuccessful logon attempts",
+          "check_function": "CheckLogonAttempts",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.10",
+      "name": "Use session lock with pattern-hiding displays to prevent access and viewing of data after a period of inactivity.",
+      "description": "Ensure session lock with pattern-hiding displays is used.",
+      "criteria": [
+        {
+          "description": "Instance uses session lock with pattern-hiding displays",
+          "check_function": "CheckSessionLock",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "3.1.11",
+      "name": "Terminate (automatically) a user session after a defined condition.",
+      "description": "Ensure user sessions are terminated automatically after a defined condition.",
+      "criteria": [
+        {
+          "description": "Instance automatically terminates user sessions after a defined condition",
+          "check_function": "CheckSessionTermination",
+          "value": 5
+        }
+      ]
+    },
+      {
+        "id": "3.1.12",
+        "name": "Monitor and control remote access sessions.",
+        "description": "Ensure remote access sessions are monitored and controlled.",
+        "criteria": [
+          {
+            "description": "Instance monitors and controls remote access sessions",
+            "check_function": "CheckRemoteAccessControl",
+            "value": 5
+          }
+        ]
+      }
   ],
   "responses": {
     "Implemented": 0,

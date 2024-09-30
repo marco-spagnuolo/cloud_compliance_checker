@@ -72,19 +72,20 @@ func main() {
 	}
 
 	// Inizializza i client AWS per CloudTrail
-
 	cloudTrailClient := cloudtrail.NewFromConfig(awsCfg)
 
 	// Scopre gli asset AWS
 	assets := discovery.DiscoverAssets(awsCfg)
 
-	// Valuta gli asset con i controlli di conformità caricati
-	results := evaluation.EvaluateAssets(assets, controls, awsCfg, cloudTrailClient)
+	// Valuta solo gli asset che non sono bucket S3
+	results := evaluation.EvaluateAssets(controls, awsCfg, cloudTrailClient)
 
-	// Stampa i risultati della valutazione di conformità
-	for _, result := range results {
-		fmt.Printf("Asset: %s\n", result.Asset.Name)
-		fmt.Printf("Compliance Score: %d\n", result.Score)
-		fmt.Println()
+	// Stampa i risultati e gli asset
+	fmt.Println("\n===== Compliance Evaluation Results =====")
+	fmt.Printf("Total Score: %d\n", results)
+	fmt.Println("Asset List:")
+	for _, asset := range assets {
+		fmt.Printf("Name: %s, Type: %s, Cloud: %s\n", asset.Name, asset.Type, asset.Cloud)
 	}
+
 }

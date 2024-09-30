@@ -21,6 +21,7 @@ type AWSConfig struct {
 	SecurityGroups   []SecurityGroup `mapstructure:"security_groups"`
 	S3Buckets        []S3Bucket      `mapstructure:"s3_buckets"`
 	CriticalRole     []CriticalRole  `mapstructure:"critical_roles"`
+	LoginPolicy      LoginPolicy     `mapstructure:"login_policy"`
 }
 
 // User rappresents a user in the configuration
@@ -48,6 +49,13 @@ type S3Bucket struct {
 type CriticalRole struct {
 	RoleName           string   `mapstructure:"role_name"`
 	SensitiveFunctions []string `mapstructure:"sensitive_functions"`
+}
+
+// LoginPolicy rappresenta la politica di gestione dei tentativi di accesso falliti
+type LoginPolicy struct {
+	MaxUnsuccessfulAttempts int    `mapstructure:"max_unsuccessful_attempts"`
+	LockoutDurationMinutes  int    `mapstructure:"lockout_duration_minutes"`
+	ActionOnLockout         string `mapstructure:"action_on_lockout"`
 }
 
 // AppConfig is the global configuration
