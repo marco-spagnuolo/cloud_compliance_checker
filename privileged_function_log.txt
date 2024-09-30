@@ -1,2 +1,0 @@
-2024-09-30T04:22:27+02:00 - Utente privilegiato AdminUser ha eseguito la funzione AdministratorAccess
-2024-09-30T04:22:27+02:00 - Utente privilegiato marco_admin ha eseguito la funzione AdministratorAccess
