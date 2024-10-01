@@ -242,11 +242,11 @@
       },
       {
         "id": "3.4.1",
-        "name": "Create and retain system audit logs and records to the extent needed to enable the monitoring, analysis, investigation, and reporting of unlawful or unauthorized system activity.",
-        "description": "Ensure system audit logs and records are created and retained.",
+        "name": "Baseline Configuration.",
+        "description": "Develop and maintain under configuration control, a current baseline configuration of the system.",
         "criteria": [
           {
-            "description": "Instance creates and retains system audit logs",
+            "description": "Develop and maintain under configuration control, a current baseline configuration of the system.",
             "check_function": "CheckBaselineConfigurations",
             "value": 5
           }
