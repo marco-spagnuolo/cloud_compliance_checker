@@ -28,6 +28,7 @@ func NewEventLoggingCheck(cfg aws.Config, definedEventTypes []string, lastReview
 }
 
 // RunEventLoggingCheck esegue il controllo per verificare i tipi di eventi loggati
+// req 3.3.1
 func (c *EventLoggingCheck) RunEventLoggingCheck() error {
 	fmt.Println("Inizio del controllo dei tipi di eventi loggati...")
 
@@ -51,7 +52,7 @@ func (c *EventLoggingCheck) RunEventLoggingCheck() error {
 	if err != nil {
 		errorMessage := fmt.Sprintf("Errore durante il recupero dello stato di CloudTrail: %v", err)
 		fmt.Println(errorMessage)
-		return fmt.Errorf(errorMessage)
+		return fmt.Errorf(errorMessage[:len(errorMessage)-1])
 	}
 
 	// Verifica se CloudTrail sta loggando gli eventi

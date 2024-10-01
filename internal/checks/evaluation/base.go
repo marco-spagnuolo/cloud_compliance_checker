@@ -316,6 +316,61 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 			Response:    "Check passed",
 			Impact:      0,
 		}
+	case "CheckUserTraceability":
+		aa := audit_and_accountability.NewAuditLogCheck(cfg, 0)
+		err := aa.RunAuditLogCheck()
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+		}
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
+			Impact:      0,
+		}
+	case "CheckLoggedEventsRetention":
+		aa := audit_and_accountability.NewAuditLogCheck(cfg, 90) // TODO - ask user
+		err := aa.RunAuditLogCheck()
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+		}
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
+			Impact:      0,
+		}
+
+	case "CheckLoggingFailure":
+		lfc := audit_and_accountability.NewLoggingFailureCheck(cfg, 24*time.Hour, nil, "mittente@example.com", "destinatario@example.com")
+		err := lfc.RunLoggingFailureCheck()
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+		}
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
+			Impact:      0,
+		}
 
 	default:
 		result = models.ComplianceResult{

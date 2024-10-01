@@ -146,7 +146,7 @@
       },
       {
         "id": "3.3.1",
-        "name": "Create and retain system audit logs and records to the extent needed to enable the monitoring, analysis, investigation, and reporting of unlawful or unauthorized system activity.",
+        "name": "Event Logging",
         "description": "Ensure system audit logs and records are created and retained.",
         "criteria": [
           {
@@ -155,7 +155,44 @@
             "value": 5
           }
         ]
+      },
+      {
+        "id": "3.3.2",
+        "name": "Audit Record Content.",
+        "description": "Ensure actions of system users can be traced.",
+        "criteria": [
+          {
+            "description": "Instance traces actions of individual system users",
+            "check_function": "CheckUserTraceability",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "3.3.3",
+        "name": "Audit Record Generation.",
+        "description": "Retain audit records for a time period consistent with the records retention policy.",
+        "criteria": [
+          {
+            "description": "Retain audit records for a time period consistent with the records retention policy.",
+            "check_function": "CheckLoggedEventsRetention",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "3.3.4",
+        "name": "Alert in the event of an audit logging process failure.",
+        "description": "Ensure alerts are generated in the event of an audit logging process failure.",
+        "criteria": [
+          {
+            "description": "Instance alerts in the event of audit logging process failure",
+            "check_function": "CheckAuditLoggingFailure",
+            "value": 5
+          }
+        ]
       }
+      
   ],
   "responses": {
     "Implemented": 0,
