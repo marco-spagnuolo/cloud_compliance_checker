@@ -1,332 +1,156 @@
 package config_management
 
 import (
-	"cloud_compliance_checker/models"
+	"cloud_compliance_checker/config"
+	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/configservice"
-	"github.com/aws/aws-sdk-go/service/configservice/configserviceiface"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-// ConfigService is a variable that allows us to mock the AWS Config service in tests.
-var ConfigService configserviceiface.ConfigServiceAPI
+// SaveBaselineConfig saves the current baseline configuration to a file
+func SaveBaselineConfig(cfg *config.Config, filename string) error {
+	data, err := json.MarshalIndent(cfg, "", "  ")
+	if err != nil {
+		return err
+	}
 
-func init() {
-	sess := session.Must(session.NewSession())
-	ConfigService = configservice.New(sess)
+	err = ioutil.WriteFile(filename, data, 0644)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Baseline configuration saved successfully.")
+	return nil
 }
 
-// 3.4.1 - Establish and maintain baseline configurations and inventories of organizational systems (including hardware, software, firmware, and documentation) throughout the respective system development life cycles.
-func CheckConfigCompliance(svc configserviceiface.ConfigServiceAPI) models.ComplianceResult {
-	input := &configservice.DescribeComplianceByConfigRuleInput{}
+// GetCurrentAWSBaseline retrieves the current AWS resource baseline using the config structure
+func GetCurrentAWSBaseline(awsCfg aws.Config) (*config.AWSConfig, error) {
+	awsConfig := config.AWSConfig{}
 
-	result, err := svc.DescribeComplianceByConfigRule(input)
+	// Get EC2 instance IDs
+	ec2Client := ec2.NewFromConfig(awsCfg)
+	ec2Result, err := ec2Client.DescribeInstances(context.TODO(), &ec2.DescribeInstancesInput{})
 	if err != nil {
-		return models.ComplianceResult{
-			Description: "Check AWS Config compliance",
-			Status:      "FAIL",
-			Response:    fmt.Sprintf("Error describing compliance: %v", err),
-			Impact:      5,
-		}
+		return nil, fmt.Errorf("error retrieving EC2 instances: %v", err)
 	}
 
-	for _, compliance := range result.ComplianceByConfigRules {
-		if *compliance.Compliance.ComplianceType != "COMPLIANT" {
-			return models.ComplianceResult{
-				Description: "Check AWS Config compliance",
-				Status:      "FAIL",
-				Response:    "Non-compliant resources found",
-				Impact:      5,
+	var securityGroups []config.SecurityGroup
+	for _, reservation := range ec2Result.Reservations {
+		for _, instance := range reservation.Instances {
+			securityGroup := config.SecurityGroup{
+				Name: *instance.InstanceId,
+				// Add appropriate mappings for allowed ingress/egress ports if needed
 			}
+			securityGroups = append(securityGroups, securityGroup)
 		}
 	}
+	awsConfig.SecurityGroups = securityGroups
 
-	return models.ComplianceResult{
-		Description: "Check AWS Config compliance",
-		Status:      "PASS",
-		Response:    "All resources are compliant",
-		Impact:      0,
+	// Get S3 bucket names
+	s3Client := s3.NewFromConfig(awsCfg)
+	s3Result, err := s3Client.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving S3 buckets: %v", err)
 	}
+
+	var s3Buckets []config.S3Bucket
+	for _, bucket := range s3Result.Buckets {
+		s3Buckets = append(s3Buckets, config.S3Bucket{Name: *bucket.Name, Encryption: "default"}) // Placeholder for encryption
+	}
+	awsConfig.S3Buckets = s3Buckets
+
+	// Get IAM role names
+	iamClient := iam.NewFromConfig(awsCfg)
+	iamResult, err := iamClient.ListRoles(context.TODO(), &iam.ListRolesInput{})
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving IAM roles: %v", err)
+	}
+
+	var criticalRoles []config.CriticalRole
+	for _, role := range iamResult.Roles {
+		criticalRole := config.CriticalRole{
+			RoleName: *role.RoleName,
+			// Add sensitive functions or other attributes as necessary
+		}
+		criticalRoles = append(criticalRoles, criticalRole)
+	}
+	awsConfig.CriticalRole = criticalRoles
+
+	return &awsConfig, nil
 }
 
-// 3.4.2 - Establish and enforce security configuration settings for information technology products employed in organizational systems.
-func CheckSecurityConfiguration(svc configserviceiface.ConfigServiceAPI, criteria models.Criteria) models.ComplianceResult {
-	input := &configservice.GetComplianceDetailsByConfigRuleInput{
-		ConfigRuleName: aws.String("security-configuration"),
+// CompareBaseline compares the current AWS baseline configuration with the stored YAML baseline configuration
+func CompareBaseline(current *config.AWSConfig, stored *config.AWSConfig) bool {
+	// Compare S3 Buckets
+	if len(current.S3Buckets) != len(stored.S3Buckets) {
+		fmt.Println("S3 bucket count has changed!")
+		return false
 	}
 
-	result, err := svc.GetComplianceDetailsByConfigRule(input)
-	if err != nil {
-		return models.ComplianceResult{
-			Description: "Ensure security configurations are applied",
-			Status:      "FAIL",
-			Response:    fmt.Sprintf("Error retrieving security configuration compliance: %v", err),
-			Impact:      criteria.Value,
+	for i, bucket := range current.S3Buckets {
+		if bucket.Name != stored.S3Buckets[i].Name {
+			fmt.Printf("S3 bucket %s has changed.\n", bucket.Name)
+			return false
 		}
 	}
 
-	for _, evaluationResult := range result.EvaluationResults {
-		if *evaluationResult.ComplianceType != "COMPLIANT" {
-			return models.ComplianceResult{
-				Description: "Ensure security configurations are applied",
-				Status:      "FAIL",
-				Response:    "Non-compliant security configurations found",
-				Impact:      criteria.Value,
-			}
+	// Compare Security Groups
+	if len(current.SecurityGroups) != len(stored.SecurityGroups) {
+		fmt.Println("Security group count has changed!")
+		return false
+	}
+
+	for i, group := range current.SecurityGroups {
+		if group.Name != stored.SecurityGroups[i].Name {
+			fmt.Printf("Security group %s has changed.\n", group.Name)
+			return false
 		}
 	}
 
-	return models.ComplianceResult{
-		Description: "Ensure security configurations are applied",
-		Status:      "PASS",
-		Response:    "All security configurations are compliant",
-		Impact:      0,
+	// Compare IAM Roles
+	if len(current.CriticalRole) != len(stored.CriticalRole) {
+		fmt.Println("IAM role count has changed!")
+		return false
 	}
+
+	for i, role := range current.CriticalRole {
+		if role.RoleName != stored.CriticalRole[i].RoleName {
+			fmt.Printf("IAM role %s has changed.\n", role.RoleName)
+			return false
+		}
+	}
+
+	// Additional comparisons can be added here as needed
+
+	return true
 }
 
-// 3.4.3 - Track, review, approve/disapprove, and audit changes to organizational systems.
-func CheckConfigurationChanges(svc configserviceiface.ConfigServiceAPI, criteria models.Criteria) models.ComplianceResult {
-	input := &configservice.GetComplianceDetailsByConfigRuleInput{
-		ConfigRuleName: aws.String("configuration-changes"),
-	}
+// RunAWSBaselineCheck performs the baseline check and updates the configuration if necessary
+func RunAWSBaselineCheck(awsCfg aws.Config, storedBaseline *config.AWSConfig) error {
+	fmt.Println("Starting AWS asset baseline configuration check...")
 
-	result, err := svc.GetComplianceDetailsByConfigRule(input)
+	// Retrieve current AWS baseline
+	currentBaseline, err := GetCurrentAWSBaseline(awsCfg)
 	if err != nil {
-		return models.ComplianceResult{
-			Description: "Ensure configuration changes are tracked and managed",
-			Status:      "FAIL",
-			Response:    fmt.Sprintf("Error retrieving configuration change compliance: %v", err),
-			Impact:      criteria.Value,
-		}
+		return fmt.Errorf("error retrieving current AWS asset baseline: %v", err)
 	}
 
-	for _, evaluationResult := range result.EvaluationResults {
-		if *evaluationResult.ComplianceType != "COMPLIANT" {
-			return models.ComplianceResult{
-				Description: "Ensure configuration changes are tracked and managed",
-				Status:      "FAIL",
-				Response:    "Non-compliant configuration changes found",
-				Impact:      criteria.Value,
-			}
-		}
+	// Compare current baseline with stored baseline
+	if !CompareBaseline(currentBaseline, storedBaseline) {
+		fmt.Println("AWS asset configuration has changed, updating baseline.")
+		// Update the stored baseline
+		storedBaseline = currentBaseline
+		fmt.Println("Baseline updated.")
+	} else {
+		fmt.Println("AWS asset configuration has not changed.")
 	}
 
-	return models.ComplianceResult{
-		Description: "Ensure configuration changes are tracked and managed",
-		Status:      "PASS",
-		Response:    "All configuration changes are compliant",
-		Impact:      0,
-	}
-}
-
-// 3.4.4 - Analyze the security impact of changes prior to implementation.
-func CheckSecurityImpactAnalysis(svc configserviceiface.ConfigServiceAPI, criteria models.Criteria) models.ComplianceResult {
-	input := &configservice.GetComplianceDetailsByConfigRuleInput{
-		ConfigRuleName: aws.String("security-impact-analysis"),
-	}
-
-	result, err := svc.GetComplianceDetailsByConfigRule(input)
-	if err != nil {
-		return models.ComplianceResult{
-			Description: "Analyze the security impact of changes",
-			Status:      "FAIL",
-			Response:    fmt.Sprintf("Error retrieving security impact analysis compliance: %v", err),
-			Impact:      criteria.Value,
-		}
-	}
-
-	for _, evaluationResult := range result.EvaluationResults {
-		if *evaluationResult.ComplianceType != "COMPLIANT" {
-			return models.ComplianceResult{
-				Description: "Analyze the security impact of changes",
-				Status:      "FAIL",
-				Response:    "Non-compliant security impact analyses found",
-				Impact:      criteria.Value,
-			}
-		}
-	}
-
-	return models.ComplianceResult{
-		Description: "Analyze the security impact of changes",
-		Status:      "PASS",
-		Response:    "All security impact analyses are compliant",
-		Impact:      0,
-	}
-}
-
-// 3.4.5 - Define, document, approve, and enforce physical and logical access restrictions associated with changes to the system.
-func CheckAccessRestrictions(svc configserviceiface.ConfigServiceAPI, criteria models.Criteria) models.ComplianceResult {
-	input := &configservice.GetComplianceDetailsByConfigRuleInput{
-		ConfigRuleName: aws.String("access-restrictions"),
-	}
-
-	result, err := svc.GetComplianceDetailsByConfigRule(input)
-	if err != nil {
-		return models.ComplianceResult{
-			Description: "Ensure access restrictions are enforced",
-			Status:      "FAIL",
-			Response:    fmt.Sprintf("Error retrieving access restriction compliance: %v", err),
-			Impact:      criteria.Value,
-		}
-	}
-
-	for _, evaluationResult := range result.EvaluationResults {
-		if *evaluationResult.ComplianceType != "COMPLIANT" {
-			return models.ComplianceResult{
-				Description: "Ensure access restrictions are enforced",
-				Status:      "FAIL",
-				Response:    "Non-compliant access restrictions found",
-				Impact:      criteria.Value,
-			}
-		}
-	}
-
-	return models.ComplianceResult{
-		Description: "Ensure access restrictions are enforced",
-		Status:      "PASS",
-		Response:    "All access restrictions are compliant",
-		Impact:      0,
-	}
-}
-
-// 3.4.6 - Employ the principle of least functionality by configuring organizational systems to provide only essential capabilities.
-func CheckLeastFunctionality(svc configserviceiface.ConfigServiceAPI, criteria models.Criteria) models.ComplianceResult {
-	input := &configservice.GetComplianceDetailsByConfigRuleInput{
-		ConfigRuleName: aws.String("least-functionality"),
-	}
-
-	result, err := svc.GetComplianceDetailsByConfigRule(input)
-	if err != nil {
-		return models.ComplianceResult{
-			Description: "Ensure least functionality",
-			Status:      "FAIL",
-			Response:    fmt.Sprintf("Error retrieving least functionality compliance: %v", err),
-			Impact:      criteria.Value,
-		}
-	}
-
-	for _, evaluationResult := range result.EvaluationResults {
-		if *evaluationResult.ComplianceType != "COMPLIANT" {
-			return models.ComplianceResult{
-				Description: "Ensure least functionality",
-				Status:      "FAIL",
-				Response:    "Non-compliant least functionality found",
-				Impact:      criteria.Value,
-			}
-		}
-	}
-
-	return models.ComplianceResult{
-		Description: "Ensure least functionality",
-		Status:      "PASS",
-		Response:    "All systems comply with least functionality",
-		Impact:      0,
-	}
-}
-
-// 3.4.7 - Restrict, disable, and prevent the use of nonessential programs, functions, ports, protocols, and services.
-func CheckNonessentialFunctions(svc configserviceiface.ConfigServiceAPI, criteria models.Criteria) models.ComplianceResult {
-	input := &configservice.GetComplianceDetailsByConfigRuleInput{
-		ConfigRuleName: aws.String("nonessential-functions"),
-	}
-
-	result, err := svc.GetComplianceDetailsByConfigRule(input)
-	if err != nil {
-		return models.ComplianceResult{
-			Description: "Restrict nonessential functions",
-			Status:      "FAIL",
-			Response:    fmt.Sprintf("Error retrieving nonessential functions compliance: %v", err),
-			Impact:      criteria.Value,
-		}
-	}
-
-	for _, evaluationResult := range result.EvaluationResults {
-		if *evaluationResult.ComplianceType != "COMPLIANT" {
-			return models.ComplianceResult{
-				Description: "Restrict nonessential functions",
-				Status:      "FAIL",
-				Response:    "Non-compliant nonessential functions found",
-				Impact:      criteria.Value,
-			}
-		}
-	}
-
-	return models.ComplianceResult{
-		Description: "Restrict nonessential functions",
-		Status:      "PASS",
-		Response:    "All systems restrict nonessential functions",
-		Impact:      0,
-	}
-}
-
-// 3.4.8 - Apply deny-by-exception (blacklisting) policy to prevent the use of unauthorized software or deny-all, permit-by-exception (whitelisting) policy to allow the execution of authorized software.
-func CheckSoftwarePolicies(svc configserviceiface.ConfigServiceAPI, criteria models.Criteria) models.ComplianceResult {
-	input := &configservice.GetComplianceDetailsByConfigRuleInput{
-		ConfigRuleName: aws.String("software-policies"),
-	}
-
-	result, err := svc.GetComplianceDetailsByConfigRule(input)
-	if err != nil {
-		return models.ComplianceResult{
-			Description: "Ensure software policies compliance",
-			Status:      "FAIL",
-			Response:    fmt.Sprintf("Error retrieving software policies compliance: %v", err),
-			Impact:      criteria.Value,
-		}
-	}
-
-	for _, evaluationResult := range result.EvaluationResults {
-		if *evaluationResult.ComplianceType != "COMPLIANT" {
-			return models.ComplianceResult{
-				Description: "Ensure software policies compliance",
-				Status:      "FAIL",
-				Response:    "Non-compliant software policies found",
-				Impact:      criteria.Value,
-			}
-		}
-	}
-
-	return models.ComplianceResult{
-		Description: "Ensure software policies compliance",
-		Status:      "PASS",
-		Response:    "All systems comply with software policies",
-		Impact:      0,
-	}
-}
-
-// 3.4.9 - Control and monitor user-installed software.
-func CheckUserInstalledSoftware(svc configserviceiface.ConfigServiceAPI, criteria models.Criteria) models.ComplianceResult {
-	input := &configservice.GetComplianceDetailsByConfigRuleInput{
-		ConfigRuleName: aws.String("user-installed-software"),
-	}
-
-	result, err := svc.GetComplianceDetailsByConfigRule(input)
-	if err != nil {
-		return models.ComplianceResult{
-			Description: "Control and monitor user-installed software",
-			Status:      "FAIL",
-			Response:    fmt.Sprintf("Error retrieving user-installed software compliance: %v", err),
-			Impact:      criteria.Value,
-		}
-	}
-
-	for _, evaluationResult := range result.EvaluationResults {
-		if *evaluationResult.ComplianceType != "COMPLIANT" {
-			return models.ComplianceResult{
-				Description: "Control and monitor user-installed software",
-				Status:      "FAIL",
-				Response:    "Non-compliant user-installed software found",
-				Impact:      criteria.Value,
-			}
-		}
-	}
-
-	return models.ComplianceResult{
-		Description: "Control and monitor user-installed software",
-		Status:      "PASS",
-		Response:    "All systems comply with user-installed software controls",
-		Impact:      0,
-	}
+	fmt.Println("AWS asset baseline configuration check completed successfully.")
+	return nil
 }

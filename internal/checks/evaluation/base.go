@@ -5,6 +5,7 @@ import (
 	"cloud_compliance_checker/internal/checks/access_control/iampolicy"
 	policy "cloud_compliance_checker/internal/checks/access_control/iampolicy"
 	"cloud_compliance_checker/internal/checks/audit_and_accountability"
+	"cloud_compliance_checker/internal/checks/config_management"
 	"cloud_compliance_checker/models"
 	"fmt"
 	"time"
@@ -400,7 +401,7 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 		result = models.ComplianceResult{
 			Description: criteria.Description,
 			Status:      "COMPLIANT",
-			Response:    "Audit record reduction check passed",
+			Response:    "Check passed",
 			Impact:      0,
 		}
 	case "CheckTimeSynchronization":
@@ -411,7 +412,44 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 		result = models.ComplianceResult{
 			Description: criteria.Description,
 			Status:      "COMPLIANT",
-			Response:    "Audit record reduction check passed",
+			Response:    "Check passed",
+			Impact:      0,
+		}
+	case "CheckAuditSecurity":
+		aa := audit_and_accountability.NewAuditProtectionCheck(cfg, "marco_admin")
+		err := aa.RunAuditProtectionCheck()
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+		}
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
+			Impact:      0,
+		}
+
+	case "CheckBaselineConfigurations":
+		err := config_management.RunAWSBaselineCheck(cfg, &config.AppConfig.AWS)
+
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+		}
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
 			Impact:      0,
 		}
 

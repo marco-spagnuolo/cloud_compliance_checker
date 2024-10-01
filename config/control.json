@@ -227,7 +227,32 @@
             "value": 5
           }
         ]
+      },
+      {
+        "id": "3.3.8",
+        "name": "Protection of Audit Information.",
+        "description": "Ensure audit information is protected from unauthorized access.",
+        "criteria": [
+          {
+            "description": "Ensure audit information is protected from unauthorized access",
+            "check_function": "CheckAuditSecurity",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "3.4.1",
+        "name": "Create and retain system audit logs and records to the extent needed to enable the monitoring, analysis, investigation, and reporting of unlawful or unauthorized system activity.",
+        "description": "Ensure system audit logs and records are created and retained.",
+        "criteria": [
+          {
+            "description": "Instance creates and retains system audit logs",
+            "check_function": "CheckAuditLogs",
+            "value": 5
+          }
+        ]
       }
+
       
   ],
   "responses": {
