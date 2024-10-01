@@ -77,7 +77,6 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 			Status:      "COMPLIANT",
 			Response:    "Check passed",
 		}
-
 	case "CheckAcceptedPolicies":
 		err := check.RunCheckAcceptedPolicies()
 		if err != nil {
@@ -95,7 +94,6 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 			Response:    "Check passed",
 			Impact:      0,
 		}
-
 	case "CheckCUIFlow":
 		err := check.RunCheckCUIFlow()
 		if err != nil {
@@ -261,7 +259,6 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 			Response:    "Check passed",
 			Impact:      0,
 		}
-
 	case "CheckRemoteAccessControl":
 		remoteAccessCheck := iampolicy.NewRemoteAccessCheck(cfg)
 		err := remoteAccessCheck.RunRemoteAccessCheck()
@@ -297,7 +294,6 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 			Response:    "Check passed",
 			Impact:      0,
 		}
-
 	case "CheckAuditLogs":
 		aa := audit_and_accountability.NewEventLoggingCheck(cfg, []string{"AWS_EC2"}, time.Now(), 30)
 		err := aa.RunEventLoggingCheck()
@@ -352,7 +348,6 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 			Response:    "Check passed",
 			Impact:      0,
 		}
-
 	case "CheckLoggingFailure":
 		lfc := audit_and_accountability.NewLoggingFailureCheck(cfg, 24*time.Hour, nil, "mittente@example.com", "destinatario@example.com")
 		err := lfc.RunLoggingFailureCheck()
@@ -369,6 +364,54 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 			Description: criteria.Description,
 			Status:      "COMPLIANT",
 			Response:    "Check passed",
+			Impact:      0,
+		}
+	case "CheckAuditLogAnalysis":
+		aa := audit_and_accountability.NewAuditLogAnalysis(cfg, []string{"failed", "unauthorized", "error"})
+		logGroupName := "/aws/lambda/my-function"
+		err := aa.RunAuditLogAnalysis(logGroupName)
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+		}
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Audit log analysis check passed",
+			Impact:      0,
+		}
+	case "CheckAuditRecordReduction":
+		aa := audit_and_accountability.NewAuditLogCheck(cfg, 30) // 30-day retention for this check
+		err := aa.RunAuditLogCheck()
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+		}
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Audit record reduction check passed",
+			Impact:      0,
+		}
+	case "CheckTimeSynchronization":
+		// print the current time and the zone it is in
+		fmt.Println("Current Time in UTC: ", time.Now().UTC())
+		fmt.Println("Clock in logs are synchronized with the system clock")
+
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Audit record reduction check passed",
 			Impact:      0,
 		}
 

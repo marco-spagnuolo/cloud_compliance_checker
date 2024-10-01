@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ses/types"
 )
 
+// TODO: fix mail
 // LoggingFailureCheck struttura per eseguire il controllo dei fallimenti del logging
 type LoggingFailureCheck struct {
 	CloudTrailClient  *cloudtrail.Client
@@ -46,7 +47,7 @@ func (c *LoggingFailureCheck) RunLoggingFailureCheck() error {
 	if err != nil {
 		errorMessage := fmt.Sprintf("Errore durante il recupero dello stato di CloudTrail: %v", err)
 		c.SendEmail(errorMessage)
-		return fmt.Errorf(errorMessage)
+		return fmt.Errorf("%s", errorMessage)
 	}
 
 	// Verifica se ci sono fallimenti nel logging
@@ -57,7 +58,7 @@ func (c *LoggingFailureCheck) RunLoggingFailureCheck() error {
 		// Esegui azioni aggiuntive definite dall'organizzazione
 		c.AdditionalActions()
 
-		return fmt.Errorf(errorMessage)
+		return fmt.Errorf("%s", errorMessage)
 	}
 
 	// Controlla il tempo di risposta in caso di errore nel logging
@@ -107,10 +108,4 @@ func (c *LoggingFailureCheck) SendEmail(message string) error {
 
 	fmt.Println("Email inviata con successo.")
 	return nil
-}
-
-// Funzione di esempio per eseguire azioni aggiuntive
-func additionalActions() {
-	// Azioni da intraprendere in caso di fallimento del logging
-	fmt.Println("Esecuzione delle azioni aggiuntive definite dall'organizzazione...")
 }

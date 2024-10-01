@@ -191,6 +191,42 @@
             "value": 5
           }
         ]
+      },
+      {
+        "id": "3.3.5",
+        "name": "Audit Record Review, Analysis, and Reporting",
+        "description": "Correlate audit record review, analysis, and reporting processes for investigation and response to indications of unlawful, unauthorized, suspicious, or unusual activity.",
+        "criteria": [
+          {
+            "description": "Instance correlates audit records for investigation",
+            "check_function": "CheckAuditLogAnalysis",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "3.3.6",
+        "name": "Audit Record Reduction and Report Generation.",
+        "description": "Ensure audit reduction and report generation is provided.",
+        "criteria": [
+          {
+            "description": "Instance provides audit reduction and report generation",
+            "check_function": "CheckAuditRecordReduction",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "3.3.7",
+        "name": "Provide a system capability that compares and synchronizes internal system clocks with an authoritative source to generate time stamps for audit records.",
+        "description": "Ensure system clocks are synchronized with an authoritative source.",
+        "criteria": [
+          {
+            "description": "Instance synchronizes system clocks with an authoritative source",
+            "check_function": "CheckTimeSynchronization",
+            "value": 5
+          }
+        ]
       }
       
   ],

@@ -52,6 +52,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.31.0
 	github.com/aws/aws-sdk-go-v2/config v1.27.37
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.43.1
+	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.40.3
 	github.com/aws/aws-sdk-go-v2/service/configservice v1.49.1
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.179.0
 	github.com/aws/aws-sdk-go-v2/service/iam v1.35.3

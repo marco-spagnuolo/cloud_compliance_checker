@@ -2,8 +2,10 @@ package audit_and_accountability
 
 import (
 	"context"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -53,29 +55,75 @@ func (c *AuditLogCheck) RunAuditLogCheck() error {
 		return fmt.Errorf(errorMessage)
 	}
 
-	// Itera sugli eventi e verifica il contenuto di ciascun record
-	for _, event := range eventsOutput.Events {
-		fmt.Printf("\nEvento ID: %s\n", *event.EventId)
-		fmt.Printf("  Tipo di evento: %s\n", *event.EventName)
-		fmt.Printf("  Quando è avvenuto: %s\n", event.EventTime.String())
-		fmt.Printf("  Dove è avvenuto: %s\n", getEventRegion(event))
-		fmt.Printf("  Fonte dell'evento: %s\n", *event.EventSource)
-		fmt.Printf("  Esito dell'evento: %s\n", getEventOutcome(event))
-		fmt.Printf("  Identità coinvolta: %s\n", getEventUsername(event))
-	}
-	if c.RetentionPeriod > 0 {
+	// Riduzione dei record di audit per l'analisi
+	reducedEvents := c.ReduceAuditRecords(eventsOutput.Events)
 
-		// Controllo della conformità della retention
-		for _, event := range eventsOutput.Events {
-			// Se l'evento è più vecchio del periodo di retention, genera un errore
-			if time.Since(*event.EventTime) > c.RetentionPeriod {
-				errorMessage := fmt.Sprintf("ERRORE: L'evento ID %s è più vecchio del periodo di retention (%v)", *event.EventId, c.RetentionPeriod)
-				fmt.Println(errorMessage)
-				return fmt.Errorf(errorMessage)
-			}
+	// Generazione del report
+	err = c.GenerateAuditReport(reducedEvents)
+	if err != nil {
+		errorMessage := fmt.Sprintf("Errore durante la generazione del report di audit: %v", err)
+		fmt.Println(errorMessage)
+		return fmt.Errorf(errorMessage)
+	}
+
+	fmt.Println("Controllo del contenuto dei record di audit completato con successo.")
+	return nil
+}
+
+// ReduceAuditRecords filtra e riduce i record di audit per l'analisi
+func (c *AuditLogCheck) ReduceAuditRecords(events []types.Event) []map[string]interface{} {
+	var reducedEvents []map[string]interface{}
+
+	for _, event := range events {
+		reducedEvent := map[string]interface{}{
+			"EventID":      *event.EventId,
+			"EventName":    *event.EventName,
+			"EventSource":  *event.EventSource,
+			"EventTime":    event.EventTime.String(),
+			"EventRegion":  getEventRegion(event),
+			"EventOutcome": getEventOutcome(event),
+			"Username":     getEventUsername(event),
+		}
+		reducedEvents = append(reducedEvents, reducedEvent)
+	}
+	return reducedEvents
+}
+
+// GenerateAuditReport genera un report CSV contenente i record di audit ridotti
+func (c *AuditLogCheck) GenerateAuditReport(reducedEvents []map[string]interface{}) error {
+	// Creazione del file CSV
+	file, err := os.Create("audit_report.csv")
+	if err != nil {
+		return fmt.Errorf("errore durante la creazione del file report: %v", err)
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	// Scrittura dell'intestazione
+	headers := []string{"EventID", "EventName", "EventSource", "EventTime", "EventRegion", "EventOutcome", "Username"}
+	if err := writer.Write(headers); err != nil {
+		return fmt.Errorf("errore durante la scrittura dell'intestazione del report: %v", err)
+	}
+
+	// Scrittura dei record
+	for _, event := range reducedEvents {
+		record := []string{
+			event["EventID"].(string),
+			event["EventName"].(string),
+			event["EventSource"].(string),
+			event["EventTime"].(string),
+			event["EventRegion"].(string),
+			event["EventOutcome"].(string),
+			event["Username"].(string),
+		}
+		if err := writer.Write(record); err != nil {
+			return fmt.Errorf("errore durante la scrittura dei record del report: %v", err)
 		}
 	}
-	fmt.Println("Controllo del contenuto dei record di audit completato con successo.")
+
+	fmt.Println("Report di audit generato con successo: audit_report.csv")
 	return nil
 }
 

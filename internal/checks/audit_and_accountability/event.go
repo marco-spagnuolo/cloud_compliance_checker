@@ -59,7 +59,7 @@ func (c *EventLoggingCheck) RunEventLoggingCheck() error {
 	if !*trailStatusOutput.IsLogging {
 		errorMessage := "ERRORE: CloudTrail non sta loggando eventi."
 		fmt.Println(errorMessage)
-		return fmt.Errorf(errorMessage)
+		return fmt.Errorf(errorMessage[:len(errorMessage)-1])
 	}
 	fmt.Println("SUCCESSO: CloudTrail sta loggando eventi.")
 
