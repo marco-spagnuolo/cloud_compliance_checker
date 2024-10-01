@@ -247,7 +247,7 @@
         "criteria": [
           {
             "description": "Instance creates and retains system audit logs",
-            "check_function": "CheckAuditLogs",
+            "check_function": "CheckBaselineConfigurations",
             "value": 5
           }
         ]
