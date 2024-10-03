@@ -306,12 +306,25 @@
         "description": "Issue systems or system components with the following configurations to individuals traveling to high-risk locations: [Assignment: organization-defined system configurations].                    Apply the following security requirements to the systems or components when the individuals return from travel: [Assignment: organization-defined security requirements].",
         "criteria": [
           {
-            "description": "Identify and document the location of CUI and the system components on which the information is processed and stored.",
+            "description": "Issue systems or system components with the following configurations to individuals traveling to high-risk locations: [Assignment: organization-defined system configurations].                    Apply the following security requirements to the systems or components when the individuals return from travel: [Assignment: organization-defined security requirements].",
             "check_function": "CheckHighRiskTravel",
             "value": 5
           }
         ]
+      }, 
+      {
+        "id": "3.5.1",
+        "name": "User Identification and Authentication.",
+        "description": "Uniquely identify and authenticate system users, and associate that unique identification with processes acting on behalf of those users. Re-authenticate users when [Assignment: organization-defined circumstances or situations requiring re-authentication].",
+        "criteria": [
+          {
+            "description": "Uniquely identify and authenticate system users, and associate that unique identification with processes acting on behalf of those users. Re-authenticate users when [Assignment: organization-defined circumstances or situations requiring re-authentication].",
+            "check_function": "CheckUserIdentification",
+            "value": 5
+          }
+        ]
       }
+
 
       
   ],

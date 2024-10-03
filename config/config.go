@@ -28,11 +28,15 @@ type AWSConfig struct {
 }
 
 // User rappresents a user in the configuration
+
+// User represents a user in the configuration
 type User struct {
 	Name              string   `mapstructure:"name"`
 	Policies          []string `mapstructure:"policies"`
 	SecurityFunctions []string `mapstructure:"security_functions"`
 	IsPrivileged      bool     `mapstructure:"is_privileged"`
+	MFARequired       bool     `mapstructure:"mfa_required"`
+	ReauthConditions  []string `mapstructure:"reauth_conditions"`
 }
 
 // SecurityGroup rappresents a security group in the configuration

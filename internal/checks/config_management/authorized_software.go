@@ -62,8 +62,6 @@ func GetRunningSoftware(cfg aws.Config, instanceID string) ([]string, error) {
 
 // CheckAuthorizedSoftware checks the running software on EC2 instances against the configuration's authorized software list.
 func CheckAuthorizedSoftware(cfg aws.Config, awsConfig *config.AWSConfig) error {
-	var nonCompliantItems []string
-
 	// Retrieve EC2 instances from AWS using GetEC2Instances (this is a function that retrieves running EC2 instances)
 	ec2Instances, err := GetEC2Instances(cfg)
 	if err != nil {
@@ -72,7 +70,6 @@ func CheckAuthorizedSoftware(cfg aws.Config, awsConfig *config.AWSConfig) error 
 
 	// Iterate over each EC2 instance retrieved
 	for instanceID := range ec2Instances {
-
 		// Fetch the running software dynamically using SSM
 		runningSoftware, err := GetRunningSoftware(cfg, instanceID)
 		if err != nil {
@@ -93,27 +90,16 @@ func CheckAuthorizedSoftware(cfg aws.Config, awsConfig *config.AWSConfig) error 
 			continue
 		}
 
-		// Compare running software with the authorized software list
-		fmt.Printf("Authorized software for instance %s:\n", instanceID)
-		for _, software := range ec2Config.AuthorizedSoftware {
-			fmt.Printf("  %s\n", software)
-		}
-
 		// Check compliance by comparing running software to authorized software
 		for _, software := range runningSoftware {
-			if contains(ec2Config.AuthorizedSoftware, software) {
-				fmt.Printf("  %s - Compliant\n", software)
-			} else {
-				nonCompliantItems = append(nonCompliantItems, fmt.Sprintf("Unauthorized software detected on instance %s: %s", instanceID, software))
+			if !contains(ec2Config.AuthorizedSoftware, software) {
+				// Return the error as soon as an unauthorized software is detected
+				return fmt.Errorf("unauthorized software detected on instance %s: %s", instanceID, software)
 			}
 		}
 	}
 
-	// If non-compliant software is found, return a detailed error
-	if len(nonCompliantItems) > 0 {
-		return fmt.Errorf(strings.Join(nonCompliantItems, "\n"))
-	}
-
+	// If no non-compliant software is found, return nil
 	return nil
 }
 
