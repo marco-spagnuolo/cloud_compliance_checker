@@ -131,7 +131,7 @@ func CompareBaseline(current *config.AWSConfig, stored *config.AWSConfig) bool {
 	return true
 }
 
-// RunAWSBaselineCheck performs the baseline check and updates the configuration if necessary
+// RunAWSBaselineCheck performs the baseline check and returns an error if the baseline is outdated.
 func RunAWSBaselineCheck(awsCfg aws.Config, storedBaseline *config.AWSConfig) error {
 	fmt.Println("Starting AWS asset baseline configuration check...")
 
@@ -143,14 +143,12 @@ func RunAWSBaselineCheck(awsCfg aws.Config, storedBaseline *config.AWSConfig) er
 
 	// Compare current baseline with stored baseline
 	if !CompareBaseline(currentBaseline, storedBaseline) {
-		fmt.Println("AWS asset configuration has changed, updating baseline.")
-		// Update the stored baseline
-		storedBaseline = currentBaseline
-		fmt.Println("Baseline updated.")
-	} else {
-		fmt.Println("AWS asset configuration has not changed.")
+		errMessage := "AWS asset configuration has changed, baseline is outdated and needs to be updated."
+		fmt.Println(errMessage)
+		// Return an error indicating the baseline is outdated
+		return fmt.Errorf("%s", errMessage)
 	}
 
-	fmt.Println("AWS asset baseline configuration check completed successfully.")
+	fmt.Println("AWS asset configuration has not changed. Baseline is up-to-date.")
 	return nil
 }

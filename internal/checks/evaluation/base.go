@@ -2,6 +2,7 @@ package evaluation
 
 import (
 	"cloud_compliance_checker/config"
+	"cloud_compliance_checker/discovery"
 	"cloud_compliance_checker/internal/checks/access_control/iampolicy"
 	policy "cloud_compliance_checker/internal/checks/access_control/iampolicy"
 	"cloud_compliance_checker/internal/checks/audit_and_accountability"
@@ -446,6 +447,70 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 			}
 			return result
 		}
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
+			Impact:      0,
+		}
+	case "CheckEssentialCapabilities":
+		err := config_management.RunAWSResourceReview(cfg)
+
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+
+		}
+
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
+			Impact:      0,
+		}
+
+	case "CheckAuthorizedSoftware":
+		err := config_management.RunSoftwareExecutionCheck(cfg)
+
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+
+		}
+
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
+			Impact:      0,
+		}
+
+	case "CheckInformationLocation":
+		assets := discovery.DiscoverAssets(cfg)
+
+		config_management.DocumentDiscoveredAssets(assets)
+		err := config_management.DisplayCUIComponents()
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+
+		}
+
 		result = models.ComplianceResult{
 			Description: criteria.Description,
 			Status:      "COMPLIANT",

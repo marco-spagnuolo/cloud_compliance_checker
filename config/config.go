@@ -13,15 +13,17 @@ type Config struct {
 
 // AWSConfig contains the AWS configuration
 type AWSConfig struct {
-	AccessKey        string          `mapstructure:"access_key"`
-	SecretKey        string          `mapstructure:"secret_key"`
-	Region           string          `mapstructure:"region"`
-	User             []User          `mapstructure:"users"`
-	AcceptedPolicies []string        `mapstructure:"accepted_policies"`
-	SecurityGroups   []SecurityGroup `mapstructure:"security_groups"`
-	S3Buckets        []S3Bucket      `mapstructure:"s3_buckets"`
-	CriticalRole     []CriticalRole  `mapstructure:"critical_roles"`
-	LoginPolicy      LoginPolicy     `mapstructure:"login_policy"`
+	AccessKey              string                 `mapstructure:"access_key"`
+	SecretKey              string                 `mapstructure:"secret_key"`
+	Region                 string                 `mapstructure:"region"`
+	User                   []User                 `mapstructure:"users"`
+	AcceptedPolicies       []string               `mapstructure:"accepted_policies"`
+	SecurityGroups         []SecurityGroup        `mapstructure:"security_groups"`
+	S3Buckets              []S3Bucket             `mapstructure:"s3_buckets"`
+	CriticalRole           []CriticalRole         `mapstructure:"critical_roles"`
+	LoginPolicy            LoginPolicy            `mapstructure:"login_policy"`
+	MissionEssentialConfig MissionEssentialConfig `mapstructure:"mission_essential_capabilities"`
+	EC2Instances           []EC2Config            `mapstructure:"ec2_instances"` // List of EC2 instance configurations
 }
 
 // User rappresents a user in the configuration
@@ -56,6 +58,20 @@ type LoginPolicy struct {
 	MaxUnsuccessfulAttempts int    `mapstructure:"max_unsuccessful_attempts"`
 	LockoutDurationMinutes  int    `mapstructure:"lockout_duration_minutes"`
 	ActionOnLockout         string `mapstructure:"action_on_lockout"`
+}
+
+// MissionEssentialConfig represents mission-essential functions, ports, protocols, and services
+type MissionEssentialConfig struct {
+	Functions []string `mapstructure:"functions"`
+	Ports     []string `mapstructure:"ports"`
+	Protocols []string `mapstructure:"protocols"`
+	Services  []string `mapstructure:"services"`
+}
+
+// EC2Config represents configuration for each EC2 instance, including authorized software.
+type EC2Config struct {
+	InstanceID         string   `mapstructure:"instance_id"`
+	AuthorizedSoftware []string `mapstructure:"authorized_software"` // List of authorized software for this EC2 instance
 }
 
 // AppConfig is the global configuration

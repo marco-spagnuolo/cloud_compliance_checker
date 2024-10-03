@@ -251,6 +251,54 @@
             "value": 5
           }
         ]
+      },
+      {
+        "id": "3.4.2",
+        "name": "Configuration Settings.",
+        "description": "Establish, document, and implement the following configuration settings for the system that reflect the most restrictive mode consistent with operational requirements: [Assignment: organization-defined configuration settings].",
+        "criteria": [
+          {
+            "description": "Establish, document, and implement the following configuration settings for the system that reflect the most restrictive mode consistent with operational requirements: [Assignment: organization-defined configuration settings].",
+            "check_function": "tbi",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "3.4.6",
+        "name": "Least Functionality.",
+        "description": "Configure the system to provide only mission-essential capabilities.",
+        "criteria": [
+          {
+            "description": "Configure the system to provide only mission-essential capabilities.",
+            "check_function": "CheckEssentialCapabilities",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "3.4.8",
+        "name": "Authorized Software — Allow by Exception.",
+        "description": "Identify software programs authorized to execute on the system.",
+        "criteria": [
+          {
+            "description": "Identify software programs authorized to execute on the system..",
+            "check_function": "CheckAuthorizedSoftware",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "3.4.11",
+        "name": ":Information Location.",
+        "description": "Identify and document the location of CUI and the system components on which the information is processed and stored.",
+        "criteria": [
+          {
+            "description": "Identify and document the location of CUI and the system components on which the information is processed and stored.",
+            "check_function": "CheckInformationLocation",
+            "value": 5
+          }
+        ]
       }
 
       
