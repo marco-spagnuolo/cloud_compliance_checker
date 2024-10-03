@@ -323,7 +323,20 @@
             "value": 5
           }
         ]
+      },
+      {
+        "id": "3.5.2",
+        "name": "Device Identification and Authentication.",
+        "description": "Uniquely identify and authenticate [Assignment: organization-defined devices or types of devices] before establishing a system connection..",
+        "criteria": [
+          {
+            "description": "Uniquely identify and authenticate [Assignment: organization-defined devices or types of devices] before establishing a system connection..",
+            "check_function": "CheckDeviceIdentification",
+            "value": 5
+          }
+        ]
       }
+      
 
 
       
