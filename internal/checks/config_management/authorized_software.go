@@ -37,7 +37,7 @@ func GetRunningSoftware(cfg aws.Config, instanceID string) ([]string, error) {
 	commandID := *sendCmdOutput.Command.CommandId
 
 	// Attendi che il comando sia completato e recupera il risultato
-	time.Sleep(5 * time.Second) // Regola come necessario
+	time.Sleep(5 * time.Second)
 
 	// Ottieni l'output del comando
 	getCmdInput := &ssm.GetCommandInvocationInput{
@@ -71,18 +71,12 @@ func CheckAuthorizedSoftware(cfg aws.Config, awsConfig *config.AWSConfig) error 
 	}
 
 	// Iterate over each EC2 instance retrieved
-	for instanceID, description := range ec2Instances {
+	for instanceID := range ec2Instances {
 
 		// Fetch the running software dynamically using SSM
 		runningSoftware, err := GetRunningSoftware(cfg, instanceID)
 		if err != nil {
 			return fmt.Errorf("error retrieving running software for instance %s: %v", instanceID, err)
-		}
-
-		// Display the running software for each instance
-		fmt.Printf("\nCurrently running software on instance %s (%s):\n", instanceID, description)
-		for _, software := range runningSoftware {
-			fmt.Printf("  Running Software: %s\n", software)
 		}
 
 		// Find the corresponding EC2 configuration from the config file (if any authorized software list exists for this instance)
@@ -110,7 +104,6 @@ func CheckAuthorizedSoftware(cfg aws.Config, awsConfig *config.AWSConfig) error 
 			if contains(ec2Config.AuthorizedSoftware, software) {
 				fmt.Printf("  %s - Compliant\n", software)
 			} else {
-				fmt.Printf("  %s - Non-Compliant\n", software)
 				nonCompliantItems = append(nonCompliantItems, fmt.Sprintf("Unauthorized software detected on instance %s: %s", instanceID, software))
 			}
 		}

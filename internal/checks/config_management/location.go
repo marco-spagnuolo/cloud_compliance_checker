@@ -48,7 +48,7 @@ func DisplayCUIComponents() error {
 	if len(cuiComponents) == 0 {
 		errMessage := "No CUI components available to display"
 		fmt.Println(errMessage)
-		return fmt.Errorf(errMessage)
+		return fmt.Errorf("no CUI components available to display")
 	}
 
 	for _, component := range cuiComponents {

@@ -23,7 +23,8 @@ type AWSConfig struct {
 	CriticalRole           []CriticalRole         `mapstructure:"critical_roles"`
 	LoginPolicy            LoginPolicy            `mapstructure:"login_policy"`
 	MissionEssentialConfig MissionEssentialConfig `mapstructure:"mission_essential_capabilities"`
-	EC2Instances           []EC2Config            `mapstructure:"ec2_instances"` // List of EC2 instance configurations
+	EC2Instances           []EC2Config            `mapstructure:"ec2_instances"`
+	HighRiskTravelConfig   HighRiskTravelConfig   `mapstructure:"high_risk_travel"` // New config for high-risk travel
 }
 
 // User rappresents a user in the configuration
@@ -72,6 +73,32 @@ type MissionEssentialConfig struct {
 type EC2Config struct {
 	InstanceID         string   `mapstructure:"instance_id"`
 	AuthorizedSoftware []string `mapstructure:"authorized_software"` // List of authorized software for this EC2 instance
+}
+
+// HighRiskTravelConfig defines the organization-specific configurations for pre-travel and post-travel actions
+type HighRiskTravelConfig struct {
+	PreTravelConfig  PreTravelConfig      `mapstructure:"pre_travel"`
+	PostTravelChecks PostTravelChecks     `mapstructure:"post_travel"`
+	Users            []HighRiskTravelUser `mapstructure:"users"`
+}
+
+// HighRiskTravelUser represents a user associated with high-risk travel
+type HighRiskTravelUser struct {
+	UserID string `mapstructure:"user_id"`
+	Name   string `mapstructure:"name"`
+	Role   string `mapstructure:"role"`
+}
+
+// PostTravelChecks defines the checks that need to be performed when the individual returns from travel
+type PostTravelChecks struct {
+	CloudTrailCheck  bool `mapstructure:"cloudtrail_check"`
+	VerifySecGroups  bool `mapstructure:"verify_sec_groups"`
+	VerifyEncryption bool `mapstructure:"verify_encryption"`
+}
+
+type PreTravelConfig struct {
+	EC2SecurityGroup string `mapstructure:"ec2_security_group"`
+	S3Encryption     string `mapstructure:"s3_encryption"`
 }
 
 // AppConfig is the global configuration

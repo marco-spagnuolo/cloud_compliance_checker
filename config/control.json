@@ -299,6 +299,18 @@
             "value": 5
           }
         ]
+      },
+      {
+        "id": "3.4.12",
+        "name": ":System and Component Configuration for High-Risk Areas.",
+        "description": "Issue systems or system components with the following configurations to individuals traveling to high-risk locations: [Assignment: organization-defined system configurations].                    Apply the following security requirements to the systems or components when the individuals return from travel: [Assignment: organization-defined security requirements].",
+        "criteria": [
+          {
+            "description": "Identify and document the location of CUI and the system components on which the information is processed and stored.",
+            "check_function": "CheckHighRiskTravel",
+            "value": 5
+          }
+        ]
       }
 
       
