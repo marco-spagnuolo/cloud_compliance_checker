@@ -16,6 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 )
 
+// aws iam tag-user --user-name "SelfManagedUser" --tags Key=CreatorRole,Value=SelfManagedRole
 // Convert custom duration format like "365d" into a valid duration string that Go can parse.
 func convertToDuration(durationStr string) (time.Duration, error) {
 	if strings.HasSuffix(durationStr, "d") {

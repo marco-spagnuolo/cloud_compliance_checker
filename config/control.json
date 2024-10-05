@@ -371,6 +371,18 @@
             "value": 5
           }
         ]
+      },
+      {
+        "id": "03.05.07",
+        "name": "Password Management",
+        "description": "Enforce a minimum password complexity and change of characters when new passwords are created.",
+        "criteria": [
+          {
+            "description": "Enforce a minimum password complexity and change of characters when new passwords are created.",
+            "check_function": "CheckPasswordComplexity",
+            "value": 5
+          }
+        ]
       }
       
 

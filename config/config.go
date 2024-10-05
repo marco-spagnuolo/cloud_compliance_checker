@@ -26,6 +26,7 @@ type AWSConfig struct {
 	EC2Instances           []EC2Config            `mapstructure:"ec2_instances"`
 	HighRiskTravelConfig   HighRiskTravelConfig   `mapstructure:"high_risk_travel"`
 	IdentifierManagement   IdentifierManagement   `mapstructure:"identifier_management"`
+	PasswordPolicy         PasswordPolicy         `mapstructure:"password_policy"`
 }
 
 // User represents a user in the configuration
@@ -37,12 +38,6 @@ type User struct {
 	MFARequired       bool     `mapstructure:"mfa_required"`
 	ReauthConditions  []string `mapstructure:"reauth_conditions"`
 	IdentifierStatus  string   `mapstructure:"identifier_status"`
-}
-
-type IdentifierManagement struct {
-	AuthorizedRoles           []string `mapstructure:"authorization_roles"`
-	ReusePreventionPeriod     string   `mapstructure:"reuse_prevention_period"`
-	IdentifierCharacteristics string   `mapstructure:"identifier_characteristics"`
 }
 
 // SecurityGroup rappresents a security group in the configuration
@@ -110,6 +105,20 @@ type PostTravelChecks struct {
 type PreTravelConfig struct {
 	EC2SecurityGroup string `mapstructure:"ec2_security_group"`
 	S3Encryption     string `mapstructure:"s3_encryption"`
+}
+
+type IdentifierManagement struct {
+	AuthorizedRoles           []string `mapstructure:"authorization_roles"`
+	ReusePreventionPeriod     string   `mapstructure:"reuse_prevention_period"`
+	IdentifierCharacteristics string   `mapstructure:"identifier_characteristics"`
+}
+
+type PasswordPolicy struct {
+	MinLength        int  `mapstructure:"min_length"`
+	RequireNumbers   bool `mapstructure:"require_numbers"`
+	RequireSymbols   bool `mapstructure:"require_symbols"`
+	RequireUppercase bool `mapstructure:"require_uppercase"`
+	RequireLowercase bool `mapstructure:"require_lowercase"`
 }
 
 // AppConfig is the global configuration

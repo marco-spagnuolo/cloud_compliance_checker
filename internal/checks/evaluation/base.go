@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
 	"github.com/aws/aws-sdk-go-v2/service/configservice"
-	"github.com/aws/aws-sdk-go-v2/service/iam"
 )
 
 // EvaluateAssets evaluates all assets and returns the compliance results
@@ -588,35 +587,56 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 	// 		return result
 
 	//	}
-	case "CheckRRA":
+	// case "CheckRRA":
+	// 	// Create IAM client
+	// 	iamClient := iam.NewFromConfig(cfg)
+
+	// 	// Enforce MFA for users
+	// 	err := id_auth.EnforceMFAForUsers(iamClient)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+
+	// 	}
+
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+
+	// case "CheckIAM":
+	// 	// Create IAM client
+
+	// 	// Enforce MFA for users
+	// 	err := id_auth.CheckIAM(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	case "CheckPasswordComplexity":
 		// Create IAM client
-		iamClient := iam.NewFromConfig(cfg)
 
 		// Enforce MFA for users
-		err := id_auth.EnforceMFAForUsers(iamClient)
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-
-		}
-
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-
-	case "CheckIAM":
-		// Create IAM client
-
-		// Enforce MFA for users
-		err := id_auth.CheckIAM(cfg)
+		err := id_auth.CheckPasswordPolicyEnforcement(cfg)
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,
