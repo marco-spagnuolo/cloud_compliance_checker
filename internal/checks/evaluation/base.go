@@ -1,20 +1,14 @@
 package evaluation
 
 import (
-	"cloud_compliance_checker/config"
-	"cloud_compliance_checker/discovery"
-	"cloud_compliance_checker/internal/checks/access_control/iampolicy"
-	policy "cloud_compliance_checker/internal/checks/access_control/iampolicy"
-	"cloud_compliance_checker/internal/checks/audit_and_accountability"
-	"cloud_compliance_checker/internal/checks/config_management"
 	"cloud_compliance_checker/internal/checks/id_auth"
 	"cloud_compliance_checker/models"
 	"fmt"
-	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
 	"github.com/aws/aws-sdk-go-v2/service/configservice"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
 )
 
 // EvaluateAssets evaluates all assets and returns the compliance results
@@ -61,11 +55,545 @@ func checkInstance(controls models.NISTControls, cfg aws.Config, cloudTrailClien
 func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 	cfg aws.Config, cloudTrailClient *cloudtrail.Client) models.ComplianceResult {
 	var result models.ComplianceResult
-	check := policy.NewIAMCheck(cfg)
+	//check := policy.NewIAMCheck(cfg)
 
 	switch criteria.CheckFunction {
-	case "CheckUsersPolicies":
-		err := check.RunCheckPolicies()
+	// case "CheckUsersPolicies":
+	// 	err := check.RunCheckPolicies()
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 	}
+	// case "CheckAcceptedPolicies":
+	// 	err := check.RunCheckAcceptedPolicies()
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckCUIFlow":
+	// 	err := check.RunCheckCUIFlow()
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckSeparateDuties":
+	// 	err := check.RunCheckSeparateDuties()
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckLeastPrivilege":
+	// 	err := check.RunPrivilegeCheck()
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckPrivilegedAccounts":
+	// 	err := check.RunPrivilegeAccountCheck()
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckPreventPrivilegedFunctions":
+	// 	err := check.RunPrivilegedFunctionCheck()
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckLogonAttempts":
+	// 	// Carica gli utenti dal file di configurazione
+	// 	usersFromConfig, err := iampolicy.LoadUsersFromConfig()
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: "Errore nel caricamento degli utenti",
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+
+	// 	// Cerca specificamente l'utente marco_admin
+	// 	user, ok := usersFromConfig["marco_admin"]
+	// 	if !ok {
+	// 		result = models.ComplianceResult{
+	// 			Description: "Utente marco_admin non trovato nella configurazione",
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    "Impossibile eseguire il controllo senza l'utente marco_admin",
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+
+	// 	// Carica la politica di accesso definita nel file di configurazione
+	// 	loginPolicy := config.AppConfig.AWS.LoginPolicy
+
+	// 	// Esegui il controllo del tentativo di accesso per marco_admin
+	// 	err = check.RunLoginAttemptCheck(user.Name, false, loginPolicy) // Simula un tentativo fallito
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckSessionLock":
+	// 	err := check.RunSessionTimeoutCheck(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckSessionTermination":
+	// 	err := check.RunInactivitySessionCheck(cfg, "marco_admin")
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckRemoteAccessControl":
+	// 	remoteAccessCheck := iampolicy.NewRemoteAccessCheck(cfg)
+	// 	err := remoteAccessCheck.RunRemoteAccessCheck()
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckExternalSystemConnections":
+	// 	err := check.RunRemoteMonitoringCheck(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckAuditLogs":
+	// 	aa := audit_and_accountability.NewEventLoggingCheck(cfg, []string{"AWS_EC2"}, time.Now(), 30)
+	// 	err := aa.RunEventLoggingCheck()
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckUserTraceability":
+	// 	aa := audit_and_accountability.NewAuditLogCheck(cfg, 0)
+	// 	err := aa.RunAuditLogCheck()
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckLoggedEventsRetention":
+	// 	aa := audit_and_accountability.NewAuditLogCheck(cfg, 90) // TODO - ask user
+	// 	err := aa.RunAuditLogCheck()
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckLoggingFailure":
+	// 	lfc := audit_and_accountability.NewLoggingFailureCheck(cfg, 24*time.Hour, nil, "mittente@example.com", "destinatario@example.com")
+	// 	err := lfc.RunLoggingFailureCheck()
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckAuditLogAnalysis":
+	// 	aa := audit_and_accountability.NewAuditLogAnalysis(cfg, []string{"failed", "unauthorized", "error"})
+	// 	logGroupName := "/aws/lambda/my-function"
+	// 	err := aa.RunAuditLogAnalysis(logGroupName)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Audit log analysis check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckAuditRecordReduction":
+	// 	aa := audit_and_accountability.NewAuditLogCheck(cfg, 30) // 30-day retention for this check
+	// 	err := aa.RunAuditLogCheck()
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckTimeSynchronization":
+	// 	// print the current time and the zone it is in
+	// 	fmt.Println("Current Time in UTC: ", time.Now().UTC())
+	// 	fmt.Println("Clock in logs are synchronized with the system clock")
+
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckAuditSecurity":
+	// 	aa := audit_and_accountability.NewAuditProtectionCheck(cfg, "marco_admin")
+	// 	err := aa.RunAuditProtectionCheck()
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+
+	// case "CheckBaselineConfigurations":
+	// 	err := config_management.RunAWSBaselineCheck(cfg, &config.AppConfig.AWS)
+
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckEssentialCapabilities":
+	// 	err := config_management.RunAWSResourceReview(cfg)
+
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+
+	// 	}
+
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+
+	// case "CheckAuthorizedSoftware":
+	// 	err := config_management.RunSoftwareExecutionCheck(cfg)
+
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+
+	// 	}
+
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+
+	// case "CheckInformationLocation":
+	// 	assets := discovery.DiscoverAssets(cfg)
+
+	// 	config_management.DocumentDiscoveredAssets(assets)
+	// 	err := config_management.DisplayCUIComponents()
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+
+	// 	}
+
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+
+	// case "CheckHighRiskTravel":
+	// 	err := config_management.CheckHighRiskTravelCompliance(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+
+	// 	}
+
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+
+	// case "CheckUserIdentification":
+	// 	err := id_auth.RunComplianceCheck(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+
+	// 	}
+
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckDeviceIdentification":
+	// 	err := id_auth.CheckMac(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+
+	// 	}
+
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+
+	// case "CheckMFA":
+	// 	// Create IAM client
+	// 	iamClient := iam.NewFromConfig(cfg)
+
+	// 	// Enforce MFA for users
+	// 	err := id_auth.EnforceMFAForUsers(iamClient)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+
+	//	}
+	case "CheckRRA":
+		// Create IAM client
+		iamClient := iam.NewFromConfig(cfg)
+
+		// Enforce MFA for users
+		err := id_auth.EnforceMFAForUsers(iamClient)
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,
@@ -74,361 +602,9 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 				Impact:      criteria.Value,
 			}
 			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-		}
-	case "CheckAcceptedPolicies":
-		err := check.RunCheckAcceptedPolicies()
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckCUIFlow":
-		err := check.RunCheckCUIFlow()
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckSeparateDuties":
-		err := check.RunCheckSeparateDuties()
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckLeastPrivilege":
-		err := check.RunPrivilegeCheck()
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckPrivilegedAccounts":
-		err := check.RunPrivilegeAccountCheck()
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckPreventPrivilegedFunctions":
-		err := check.RunPrivilegedFunctionCheck()
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckLogonAttempts":
-		// Carica gli utenti dal file di configurazione
-		usersFromConfig, err := iampolicy.LoadUsersFromConfig()
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: "Errore nel caricamento degli utenti",
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
+
 		}
 
-		// Cerca specificamente l'utente marco_admin
-		user, ok := usersFromConfig["marco_admin"]
-		if !ok {
-			result = models.ComplianceResult{
-				Description: "Utente marco_admin non trovato nella configurazione",
-				Status:      "NOT COMPLIANT",
-				Response:    "Impossibile eseguire il controllo senza l'utente marco_admin",
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-
-		// Carica la politica di accesso definita nel file di configurazione
-		loginPolicy := config.AppConfig.AWS.LoginPolicy
-
-		// Esegui il controllo del tentativo di accesso per marco_admin
-		err = check.RunLoginAttemptCheck(user.Name, false, loginPolicy) // Simula un tentativo fallito
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckSessionLock":
-		err := check.RunSessionTimeoutCheck(cfg)
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckSessionTermination":
-		err := check.RunInactivitySessionCheck(cfg, "marco_admin")
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckRemoteAccessControl":
-		remoteAccessCheck := iampolicy.NewRemoteAccessCheck(cfg)
-		err := remoteAccessCheck.RunRemoteAccessCheck()
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckExternalSystemConnections":
-		err := check.RunRemoteMonitoringCheck(cfg)
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckAuditLogs":
-		aa := audit_and_accountability.NewEventLoggingCheck(cfg, []string{"AWS_EC2"}, time.Now(), 30)
-		err := aa.RunEventLoggingCheck()
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckUserTraceability":
-		aa := audit_and_accountability.NewAuditLogCheck(cfg, 0)
-		err := aa.RunAuditLogCheck()
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckLoggedEventsRetention":
-		aa := audit_and_accountability.NewAuditLogCheck(cfg, 90) // TODO - ask user
-		err := aa.RunAuditLogCheck()
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckLoggingFailure":
-		lfc := audit_and_accountability.NewLoggingFailureCheck(cfg, 24*time.Hour, nil, "mittente@example.com", "destinatario@example.com")
-		err := lfc.RunLoggingFailureCheck()
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckAuditLogAnalysis":
-		aa := audit_and_accountability.NewAuditLogAnalysis(cfg, []string{"failed", "unauthorized", "error"})
-		logGroupName := "/aws/lambda/my-function"
-		err := aa.RunAuditLogAnalysis(logGroupName)
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Audit log analysis check passed",
-			Impact:      0,
-		}
-	case "CheckAuditRecordReduction":
-		aa := audit_and_accountability.NewAuditLogCheck(cfg, 30) // 30-day retention for this check
-		err := aa.RunAuditLogCheck()
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckTimeSynchronization":
-		// print the current time and the zone it is in
-		fmt.Println("Current Time in UTC: ", time.Now().UTC())
-		fmt.Println("Clock in logs are synchronized with the system clock")
-
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckAuditSecurity":
-		aa := audit_and_accountability.NewAuditProtectionCheck(cfg, "marco_admin")
-		err := aa.RunAuditProtectionCheck()
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
 		result = models.ComplianceResult{
 			Description: criteria.Description,
 			Status:      "COMPLIANT",
@@ -436,130 +612,11 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 			Impact:      0,
 		}
 
-	case "CheckBaselineConfigurations":
-		err := config_management.RunAWSBaselineCheck(cfg, &config.AppConfig.AWS)
+	case "CheckIAM":
+		// Create IAM client
 
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckEssentialCapabilities":
-		err := config_management.RunAWSResourceReview(cfg)
-
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-
-		}
-
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-
-	case "CheckAuthorizedSoftware":
-		err := config_management.RunSoftwareExecutionCheck(cfg)
-
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-
-		}
-
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-
-	case "CheckInformationLocation":
-		assets := discovery.DiscoverAssets(cfg)
-
-		config_management.DocumentDiscoveredAssets(assets)
-		err := config_management.DisplayCUIComponents()
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-
-		}
-
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-
-	case "CheckHighRiskTravel":
-		err := config_management.CheckHighRiskTravelCompliance(cfg)
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-
-		}
-
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-
-	case "CheckUserIdentification":
-		err := id_auth.RunComplianceCheck(cfg)
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			return result
-
-		}
-
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckDeviceIdentification":
-		err := id_auth.SsmCheck(cfg)
+		// Enforce MFA for users
+		err := id_auth.CheckIAM(cfg)
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,

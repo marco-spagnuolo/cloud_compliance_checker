@@ -1,7 +1,7 @@
 {
   "controls": [
     {
-      "id": "3.1.1",
+      "id": "03.01.01",
       "name": "Account Management",
       "description": "Instance has a specific security group: Ensure access control policies are established and implemented.",
       "criteria": [
@@ -13,7 +13,7 @@
       ]
     },
     {
-      "id": "3.1.2",
+      "id": "03.01.02",
       "name": "Access Enforcement",
       "description": "Ensure only authorized transactions and functions are allowed.",
       "criteria": [
@@ -25,7 +25,7 @@
       ]
     },
     {
-      "id": "3.1.3",
+      "id": "03.01.03",
       "name": "Information flow Enforcement ",
       "description": "Ensure CUI flow is controlled.",
       "criteria": [
@@ -37,7 +37,7 @@
       ]
     },
     {
-      "id": "3.1.4",
+      "id": "03.01.04",
       "name": "Separate the duties of individuals to reduce the risk of malevolent activity without collusion.",
       "description": "Ensure duties are separated.",
       "criteria": [
@@ -49,7 +49,7 @@
       ]
     }, 
     {
-      "id": "3.1.5",
+      "id": "03.01.05",
       "name": "Least Privilege.",
       "description": "Employ the principle of least privilege, including for specific security functions and privileged accounts.",
       "criteria": [
@@ -61,7 +61,7 @@
       ]
     },
     {
-      "id": "3.1.6",
+      "id": "03.01.06",
       "name": "Least Privilege — Privileged Accounts.",
       "description": "Ensure that privileged accounts are used only for their intended purposes.",
       "criteria": [
@@ -73,7 +73,7 @@
       ]
     },
     {
-      "id": "3.1.7",
+      "id": "03.01.07",
       "name": "Least Privilege — Privileged Functions",
       "description": "Prevent non-privileged users from executing privileged functions..",
       "criteria": [
@@ -85,7 +85,7 @@
       ]
     },
     {
-      "id": "3.1.8",
+      "id": "03.01.08",
       "name": "Limit unsuccessful logon attempts.",
       "description": "Ensure unsuccessful logon attempts are limited.",
       "criteria": [
@@ -97,7 +97,7 @@
       ]
     },
     {
-      "id": "3.1.10",
+      "id": "03.01.10",
       "name": "Use session lock with pattern-hiding displays to prevent access and viewing of data after a period of inactivity.",
       "description": "Ensure session lock with pattern-hiding displays is used.",
       "criteria": [
@@ -109,7 +109,7 @@
       ]
     },
     {
-      "id": "3.1.11",
+      "id": "03.01.11",
       "name": "Terminate (automatically) a user session after a defined condition.",
       "description": "Ensure user sessions are terminated automatically after a defined condition.",
       "criteria": [
@@ -121,7 +121,7 @@
       ]
     },
       {
-        "id": "3.1.12",
+        "id": "03.01.12",
         "name": "Monitor and control remote access sessions.",
         "description": "Ensure remote access sessions are monitored and controlled.",
         "criteria": [
@@ -133,7 +133,7 @@
         ]
       },
       {
-        "id": "3.1.20",
+        "id": "03.01.20",
         "name": "Use of External Systems.",
         "description": "Ensure connections to external systems are verified and controlled.",
         "criteria": [
@@ -145,7 +145,7 @@
         ]
       },
       {
-        "id": "3.3.1",
+        "id": "03.03.01",
         "name": "Event Logging",
         "description": "Ensure system audit logs and records are created and retained.",
         "criteria": [
@@ -157,7 +157,7 @@
         ]
       },
       {
-        "id": "3.3.2",
+        "id": "03.03.02",
         "name": "Audit Record Content.",
         "description": "Ensure actions of system users can be traced.",
         "criteria": [
@@ -169,7 +169,7 @@
         ]
       },
       {
-        "id": "3.3.3",
+        "id": "03.03.03",
         "name": "Audit Record Generation.",
         "description": "Retain audit records for a time period consistent with the records retention policy.",
         "criteria": [
@@ -181,7 +181,7 @@
         ]
       },
       {
-        "id": "3.3.4",
+        "id": "03.03.04",
         "name": "Alert in the event of an audit logging process failure.",
         "description": "Ensure alerts are generated in the event of an audit logging process failure.",
         "criteria": [
@@ -193,7 +193,7 @@
         ]
       },
       {
-        "id": "3.3.5",
+        "id": "03.03.05",
         "name": "Audit Record Review, Analysis, and Reporting",
         "description": "Correlate audit record review, analysis, and reporting processes for investigation and response to indications of unlawful, unauthorized, suspicious, or unusual activity.",
         "criteria": [
@@ -205,7 +205,7 @@
         ]
       },
       {
-        "id": "3.3.6",
+        "id": "03.03.06",
         "name": "Audit Record Reduction and Report Generation.",
         "description": "Ensure audit reduction and report generation is provided.",
         "criteria": [
@@ -217,7 +217,7 @@
         ]
       },
       {
-        "id": "3.3.7",
+        "id": "03.03.07",
         "name": "Provide a system capability that compares and synchronizes internal system clocks with an authoritative source to generate time stamps for audit records.",
         "description": "Ensure system clocks are synchronized with an authoritative source.",
         "criteria": [
@@ -229,7 +229,7 @@
         ]
       },
       {
-        "id": "3.3.8",
+        "id": "03.03.08",
         "name": "Protection of Audit Information.",
         "description": "Ensure audit information is protected from unauthorized access.",
         "criteria": [
@@ -241,7 +241,7 @@
         ]
       },
       {
-        "id": "3.4.1",
+        "id": "03.04.01",
         "name": "Baseline Configuration.",
         "description": "Develop and maintain under configuration control, a current baseline configuration of the system.",
         "criteria": [
@@ -253,7 +253,7 @@
         ]
       },
       {
-        "id": "3.4.2",
+        "id": "03.04.02",
         "name": "Configuration Settings.",
         "description": "Establish, document, and implement the following configuration settings for the system that reflect the most restrictive mode consistent with operational requirements: [Assignment: organization-defined configuration settings].",
         "criteria": [
@@ -265,7 +265,7 @@
         ]
       },
       {
-        "id": "3.4.6",
+        "id": "03.04.06",
         "name": "Least Functionality.",
         "description": "Configure the system to provide only mission-essential capabilities.",
         "criteria": [
@@ -277,7 +277,7 @@
         ]
       },
       {
-        "id": "3.4.8",
+        "id": "03.04.08",
         "name": "Authorized Software — Allow by Exception.",
         "description": "Identify software programs authorized to execute on the system.",
         "criteria": [
@@ -289,7 +289,7 @@
         ]
       },
       {
-        "id": "3.4.11",
+        "id": "03.04.11",
         "name": ":Information Location.",
         "description": "Identify and document the location of CUI and the system components on which the information is processed and stored.",
         "criteria": [
@@ -301,7 +301,7 @@
         ]
       },
       {
-        "id": "3.4.12",
+        "id": "03.04.12",
         "name": ":System and Component Configuration for High-Risk Areas.",
         "description": "Issue systems or system components with the following configurations to individuals traveling to high-risk locations: [Assignment: organization-defined system configurations].                    Apply the following security requirements to the systems or components when the individuals return from travel: [Assignment: organization-defined security requirements].",
         "criteria": [
@@ -313,7 +313,7 @@
         ]
       }, 
       {
-        "id": "3.5.1",
+        "id": "03.05.01",
         "name": "User Identification and Authentication.",
         "description": "Uniquely identify and authenticate system users, and associate that unique identification with processes acting on behalf of those users. Re-authenticate users when [Assignment: organization-defined circumstances or situations requiring re-authentication].",
         "criteria": [
@@ -325,13 +325,49 @@
         ]
       },
       {
-        "id": "3.5.2",
+        "id": "03.05.02",
         "name": "Device Identification and Authentication.",
         "description": "Uniquely identify and authenticate [Assignment: organization-defined devices or types of devices] before establishing a system connection..",
         "criteria": [
           {
             "description": "Uniquely identify and authenticate [Assignment: organization-defined devices or types of devices] before establishing a system connection..",
             "check_function": "CheckDeviceIdentification",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "03.05.03",
+        "name": "Multi-Factor Authentication",
+        "description": "Use multi-factor authentication for local and network access to privileged accounts and for network access to non-privileged accounts.",
+        "criteria": [
+          {
+            "description": "Use multi-factor authentication for local and network access to privileged accounts and for network access to non-privileged accounts.",
+            "check_function": "CheckMFA",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "03.05.04",
+        "name": "Replay-Resistant Authentication",
+        "description": "Implement Replay-Resistant Authentication",
+        "criteria": [
+          {
+            "description": "Implement Replay-Resistant Authentication",
+            "check_function": "CheckRRA",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "03.05.05",
+        "name": "Identifier Management",
+        "description": "Receive authorization from organizational personnel or roles to assign an individual, group, role, service, or device identifier",
+        "criteria": [
+          {
+            "description": "Receive authorization from organizational personnel or roles to assign an individual, group, role, service, or device identifier",
+            "check_function": "CheckIAM",
             "value": 5
           }
         ]

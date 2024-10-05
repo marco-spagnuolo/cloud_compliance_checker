@@ -56,11 +56,11 @@ func RunComplianceCheck(cfg aws.Config) error {
 
 	iamClient := NewIAMClient(cfg)
 
-	fmt.Println("Running compliance check on IAM users...") // Stampa di debug per vedere se arriva qui
+	fmt.Println("Running compliance check on IAM users...")
 
 	err := CheckAWSUserCompliance(cfg, iamClient)
 	if err != nil {
-		fmt.Printf("Compliance check failed: %v\n", err) // Se fallisce, dovresti vedere l'errore
+		fmt.Printf("Compliance check failed: %v\n", err)
 		return fmt.Errorf("compliance check failed: %v", err)
 	}
 

@@ -24,10 +24,9 @@ type AWSConfig struct {
 	LoginPolicy            LoginPolicy            `mapstructure:"login_policy"`
 	MissionEssentialConfig MissionEssentialConfig `mapstructure:"mission_essential_capabilities"`
 	EC2Instances           []EC2Config            `mapstructure:"ec2_instances"`
-	HighRiskTravelConfig   HighRiskTravelConfig   `mapstructure:"high_risk_travel"` // New config for high-risk travel
+	HighRiskTravelConfig   HighRiskTravelConfig   `mapstructure:"high_risk_travel"`
+	IdentifierManagement   IdentifierManagement   `mapstructure:"identifier_management"`
 }
-
-// User rappresents a user in the configuration
 
 // User represents a user in the configuration
 type User struct {
@@ -37,6 +36,13 @@ type User struct {
 	IsPrivileged      bool     `mapstructure:"is_privileged"`
 	MFARequired       bool     `mapstructure:"mfa_required"`
 	ReauthConditions  []string `mapstructure:"reauth_conditions"`
+	IdentifierStatus  string   `mapstructure:"identifier_status"`
+}
+
+type IdentifierManagement struct {
+	AuthorizedRoles           []string `mapstructure:"authorization_roles"`
+	ReusePreventionPeriod     string   `mapstructure:"reuse_prevention_period"`
+	IdentifierCharacteristics string   `mapstructure:"identifier_characteristics"`
 }
 
 // SecurityGroup rappresents a security group in the configuration
@@ -76,7 +82,8 @@ type MissionEssentialConfig struct {
 // EC2Config represents configuration for each EC2 instance, including authorized software.
 type EC2Config struct {
 	InstanceID         string   `mapstructure:"instance_id"`
-	AuthorizedSoftware []string `mapstructure:"authorized_software"` // List of authorized software for this EC2 instance
+	AuthorizedSoftware []string `mapstructure:"authorized_software"`
+	MACAddress         string   `mapstructure:"mac_address"`
 }
 
 // HighRiskTravelConfig defines the organization-specific configurations for pre-travel and post-travel actions
