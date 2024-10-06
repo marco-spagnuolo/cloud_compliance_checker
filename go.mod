@@ -42,8 +42,8 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
-	golang.org/x/sys v0.18.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/sys v0.26.0 // indirect
+	golang.org/x/text v0.19.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
@@ -63,4 +63,5 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.54.3
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/spf13/viper v1.19.0
+	golang.org/x/crypto v0.28.0
 )

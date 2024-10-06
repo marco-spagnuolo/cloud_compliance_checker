@@ -27,6 +27,7 @@ type AWSConfig struct {
 	HighRiskTravelConfig   HighRiskTravelConfig   `mapstructure:"high_risk_travel"`
 	IdentifierManagement   IdentifierManagement   `mapstructure:"identifier_management"`
 	PasswordPolicy         PasswordPolicy         `mapstructure:"password_policy"`
+	AttackerInstance       AttackerInstanceConfig `mapstructure:"attacker_instance"` // Nuova sezione
 }
 
 // User represents a user in the configuration
@@ -119,6 +120,17 @@ type PasswordPolicy struct {
 	RequireSymbols   bool `mapstructure:"require_symbols"`
 	RequireUppercase bool `mapstructure:"require_uppercase"`
 	RequireLowercase bool `mapstructure:"require_lowercase"`
+}
+
+// AttackerInstanceConfig contains the attacker instance configuration
+type AttackerInstanceConfig struct {
+	AMI            string `mapstructure:"ami"`
+	InstanceType   string `mapstructure:"instance_type"`
+	KeyName        string `mapstructure:"key_name"`
+	SecurityGroup  string `mapstructure:"security_group"`
+	SSHUser        string `mapstructure:"ssh_user"`
+	PrivateKeyPath string `mapstructure:"private_key_path"`
+	TargetIP       string `mapstructure:"target_ip"`
 }
 
 // AppConfig is the global configuration
