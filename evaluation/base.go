@@ -1,7 +1,7 @@
 package evaluation
 
 import (
-	"cloud_compliance_checker/internal/checks/id_auth"
+	incident_response "cloud_compliance_checker/internal/checks/incident_rensponse"
 	"cloud_compliance_checker/models"
 	"fmt"
 
@@ -632,11 +632,32 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 	// 		Response:    "Check passed",
 	// 		Impact:      0,
 	// 	}
-	case "CheckPasswordComplexity":
-		// Create IAM client
+	// case "CheckPasswordComplexity":
+	// 	// Create IAM client
 
-		// Enforce MFA for users
-		err := id_auth.CheckPasswordPolicyEnforcement(cfg)
+	// 	// Enforce MFA for users
+	// 	err := id_auth.CheckPasswordPolicyEnforcement(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		return result
+
+	// 	}
+
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+
+	case "CheckIncidetResponseHandling":
+
+		err := incident_response.CheckIncidentHandling(cfg)
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,

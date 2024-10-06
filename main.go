@@ -4,7 +4,7 @@ import (
 	"bufio"
 	configure "cloud_compliance_checker/config"
 	"cloud_compliance_checker/discovery"
-	"cloud_compliance_checker/internal/checks/evaluation"
+	"cloud_compliance_checker/evaluation"
 	"cloud_compliance_checker/models"
 	"context"
 	"encoding/json"
