@@ -3,6 +3,7 @@ package incident_response
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/guardduty"
@@ -19,11 +20,19 @@ func DetectIncidents(cfg aws.Config) ([]types.Finding, error) {
 	fmt.Println("Listing GuardDuty detectors...")
 	listDetectorsInput := &guardduty.ListDetectorsInput{}
 	detectors, err := guarddutyClient.ListDetectors(context.TODO(), listDetectorsInput)
-	if err != nil || len(detectors.DetectorIds) == 0 {
-		return nil, fmt.Errorf("no GuardDuty detectors found or error: %v", err)
+	if err != nil {
+		return nil, fmt.Errorf("error listing detectors: %v", err)
 	}
+	if len(detectors.DetectorIds) == 0 {
+		return nil, fmt.Errorf("no GuardDuty detectors found")
+	}
+
 	detectorId := detectors.DetectorIds[0]
 	fmt.Printf("Found GuardDuty detector: %s\n", detectorId)
+
+	// Delay to give GuardDuty time to process findings
+	fmt.Println("Waiting for GuardDuty to detect any findings...")
+	time.Sleep(5 * time.Second)
 
 	// List recent findings (potential incidents)
 	fmt.Println("Listing GuardDuty findings...")
@@ -33,6 +42,10 @@ func DetectIncidents(cfg aws.Config) ([]types.Finding, error) {
 	findings, err := guarddutyClient.ListFindings(context.TODO(), listFindingsInput)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve GuardDuty findings: %v", err)
+	}
+	if len(findings.FindingIds) == 0 {
+		fmt.Println("No findings detected by GuardDuty")
+		return nil, nil
 	}
 
 	var allFindings []types.Finding
@@ -63,7 +76,6 @@ func DetectIncidents(cfg aws.Config) ([]types.Finding, error) {
 
 // Detect incidents after attacks using GuardDuty
 func detectIncidents(cfg aws.Config) error {
-	fmt.Println("Starting detection of incidents using GuardDuty...")
 	findings, err := DetectIncidents(cfg)
 	if err != nil {
 		return fmt.Errorf("error detecting incidents: %v", err)

@@ -2,6 +2,7 @@ package incident_response
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 )
@@ -23,7 +24,7 @@ func CheckIncidentHandling(cfg aws.Config) error {
 
 	// Step 2: Simulate Nmap attack
 	fmt.Println("Starting Nmap attack simulation...")
-	err = simulateNmapAttack(cfg)
+	err = simulateNoisyNmapAttack(cfg)
 	if err != nil {
 		return fmt.Errorf("error during Nmap attack: %v", err)
 	}
@@ -91,5 +92,6 @@ func makeVictimVulnerable(ipAddress string) error {
 		sudo sed -i 's/#LoginGraceTime 2m/LoginGraceTime 10m/' /etc/ssh/sshd_config &&  
 		sudo systemctl restart sshd
 	`
+	log.Printf("Executing command to make victim instance at %s vulnerable...", ipAddress)
 	return executeSSHCommand(ipAddress, enablePasswordAuthCommand)
 }

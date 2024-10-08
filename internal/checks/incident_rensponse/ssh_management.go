@@ -103,3 +103,52 @@ func allowSSHAccess(cfg aws.Config, securityGroupID string) error {
 	fmt.Println("SSH access allowed for security group:", securityGroupID)
 	return nil
 }
+
+func executeSSHCommandWithOutput(ipaddress string, command string) (string, error) {
+	// Load attacker configuration from YAML file
+	attackerConfig := config.AppConfig.AWS.AttackerInstance
+	// Ensure the SSH key file exists in the project
+	keyPath := filepath.Join("internal", "checks", "incident_rensponse", "attackerkey.pem")
+	if _, err := os.Stat(keyPath); os.IsNotExist(err) {
+		return "", fmt.Errorf("SSH key not found at path: %s", keyPath)
+	}
+
+	// Use keyPath as the path to the private key file
+	key, err := os.ReadFile(keyPath)
+	if err != nil {
+		return "", fmt.Errorf("unable to read private key: %v", err)
+	}
+
+	signer, err := ssh.ParsePrivateKey(key)
+	if err != nil {
+		return "", fmt.Errorf("unable to parse private key: %v", err)
+	}
+
+	config := &ssh.ClientConfig{
+		User: attackerConfig.SSHUser,
+		Auth: []ssh.AuthMethod{
+			ssh.PublicKeys(signer),
+		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+
+	client, err := ssh.Dial("tcp", ipaddress+":22", config)
+	if err != nil {
+		return "", fmt.Errorf("failed to connect via SSH: %v", err)
+	}
+	defer client.Close()
+
+	session, err := client.NewSession()
+	if err != nil {
+		return "", fmt.Errorf("failed to create SSH session: %v", err)
+	}
+	defer session.Close()
+
+	output, err := session.CombinedOutput(command)
+	if err != nil {
+		return "", fmt.Errorf("failed to run command: %v, output: %s", err, output)
+	}
+
+	fmt.Printf("Command output: %s\n", output)
+	return string(output), nil
+}
