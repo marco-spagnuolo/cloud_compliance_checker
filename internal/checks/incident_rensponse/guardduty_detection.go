@@ -2,7 +2,9 @@ package incident_response
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -86,5 +88,89 @@ func detectIncidents(cfg aws.Config) error {
 		fmt.Printf("Incident: %s\nDescription: %s\nSeverity: %f\n", *finding.Title, *finding.Description, *finding.Severity)
 	}
 	fmt.Printf("Total findings detected: %d\n", len(findings))
+	return nil
+}
+
+// collectAndSaveGuardDutyFindings raccoglie gli incidenti di GuardDuty e li salva in un file JSON
+func collectAndSaveGuardDutyFindings(cfg aws.Config) error {
+	client := guardduty.NewFromConfig(cfg)
+
+	// Recupera l'elenco dei detector GuardDuty
+	listDetectorsInput := &guardduty.ListDetectorsInput{}
+	detectors, err := client.ListDetectors(context.TODO(), listDetectorsInput)
+	if err != nil {
+		return fmt.Errorf("failed to list GuardDuty detectors: %v", err)
+	}
+
+	if len(detectors.DetectorIds) == 0 {
+		return fmt.Errorf("no GuardDuty detectors found")
+	}
+
+	// Prendi il primo detector per esempio
+	detectorID := detectors.DetectorIds[0]
+	fmt.Printf("Found GuardDuty detector: %s\n", detectorID)
+
+	// Recupera i findings (incidenti)
+	findingsInput := &guardduty.ListFindingsInput{
+		DetectorId: &detectorID,
+	}
+	findings, err := client.ListFindings(context.TODO(), findingsInput)
+	if err != nil {
+		return fmt.Errorf("failed to list GuardDuty findings: %v", err)
+	}
+
+	if len(findings.FindingIds) == 0 {
+		fmt.Println("No findings found in GuardDuty.")
+		return nil
+	}
+
+	// Dettagli degli incidenti
+	findingDetails := []map[string]interface{}{}
+	for _, findingID := range findings.FindingIds {
+		getFindingInput := &guardduty.GetFindingsInput{
+			DetectorId: &detectorID,
+			FindingIds: []string{findingID},
+		}
+		findingOutput, err := client.GetFindings(context.TODO(), getFindingInput)
+		if err != nil {
+			return fmt.Errorf("failed to get details for finding ID %s: %v", findingID, err)
+		}
+		for _, finding := range findingOutput.Findings {
+			findingDetails = append(findingDetails, map[string]interface{}{
+				"ID":          finding.Id,
+				"Type":        finding.Type,
+				"Description": finding.Description,
+				"Severity":    finding.Severity,
+				"Time":        parseTime(aws.ToString(finding.Service.EventFirstSeen)),
+			})
+
+		}
+
+	}
+
+	// Salva i findings in un file JSON
+	fileName := "guardduty_findings.json"
+	file, err := os.Create(fileName)
+	if err != nil {
+		return fmt.Errorf("failed to create JSON file: %v", err)
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "  ")
+	err = encoder.Encode(findingDetails)
+	if err != nil {
+		return fmt.Errorf("failed to encode findings to JSON: %v", err)
+	}
+
+	fmt.Printf("Findings saved to file: %s\n", fileName)
+
+	// Carica il file JSON su S3
+	fmt.Println("Uploading findings to S3...")
+	err = uploadToS3(cfg, "guarduty-bucket--findings", fileName)
+	if err != nil {
+		return fmt.Errorf("failed to upload findings to S3: %v", err)
+	}
+
 	return nil
 }

@@ -1,0 +1,142 @@
+[
+  {
+    "Description": "The API StartInstances was invoked using root credentials from IP address 37.160.166.51.",
+    "ID": "d0c935df1dade9b79290534dc164e0cb",
+    "Severity": 2,
+    "Time": "2024-10-08 10:41:07",
+    "Type": "Policy:IAMUser/RootCredentialUsage"
+  },
+  {
+    "Description": "The API DescribeMetricFilters was invoked using root credentials from IP address 82.59.102.212.",
+    "ID": "8ac935dd2031e873c9c6d96b2d6082d8",
+    "Severity": 2,
+    "Time": "2024-10-08 10:36:05",
+    "Type": "Policy:IAMUser/RootCredentialUsage"
+  },
+  {
+    "Description": "The API DescribeMetricFilters was invoked using root credentials from IP address 82.59.102.212.",
+    "ID": "66c935d84c81b6292ff758393d5ad253",
+    "Severity": 2,
+    "Time": "2024-10-08 10:25:51",
+    "Type": "Policy:IAMUser/RootCredentialUsage"
+  },
+  {
+    "Description": "The API DescribeAutoScalingGroups was invoked using root credentials from IP address 82.59.102.212.",
+    "ID": "74c935a61eff0a648dced1ca50d2abdf",
+    "Severity": 2,
+    "Time": "2024-10-08 08:36:26",
+    "Type": "Policy:IAMUser/RootCredentialUsage"
+  },
+  {
+    "Description": "The API DescribeMetricFilters was invoked using root credentials from IP address 82.59.102.212.",
+    "ID": "36c934c32474039e476a20d882009695",
+    "Severity": 2,
+    "Time": "2024-10-08 00:21:59",
+    "Type": "Policy:IAMUser/RootCredentialUsage"
+  },
+  {
+    "Description": "42.63.21.99 is performing SSH brute force attacks against i-04596bc8fe3797c5f. Brute force attacks are used to gain unauthorized access to your instance by guessing the SSH password.",
+    "ID": "0ac934d800a5f68b2b0268248ecbed2e",
+    "Severity": 2,
+    "Time": "2024-10-08 01:05:55",
+    "Type": "UnauthorizedAccess:EC2/SSHBruteForce"
+  },
+  {
+    "Description": "The API DescribeMetricFilters was invoked using root credentials from IP address 82.59.102.212.",
+    "ID": "2cc934c126660513aaeb57b1e477062f",
+    "Severity": 2,
+    "Time": "2024-10-08 00:16:56",
+    "Type": "Policy:IAMUser/RootCredentialUsage"
+  },
+  {
+    "Description": "The API DescribeMetricFilters was invoked using root credentials from IP address 82.59.102.212.",
+    "ID": "42c934bf250f30ccfe1ebb5164c8a4a7",
+    "Severity": 2,
+    "Time": "2024-10-08 00:11:54",
+    "Type": "Policy:IAMUser/RootCredentialUsage"
+  },
+  {
+    "Description": "The API DescribeMetricFilters was invoked using root credentials from IP address 82.59.102.212.",
+    "ID": "42c934ad21311865be84e07433d9d7fa",
+    "Severity": 2,
+    "Time": "2024-10-07 23:32:31",
+    "Type": "Policy:IAMUser/RootCredentialUsage"
+  },
+  {
+    "Description": "The API DescribeMetricFilters was invoked using root credentials from IP address 82.59.102.212.",
+    "ID": "02c9349f06b8483a71bcd077baea044d",
+    "Severity": 2,
+    "Time": "2024-10-07 23:01:19",
+    "Type": "Policy:IAMUser/RootCredentialUsage"
+  },
+  {
+    "Description": "The API DescribeMetricFilters was invoked using root credentials from IP address 82.59.102.212.",
+    "ID": "5cc9349cb9b7149546f0d106811daf3b",
+    "Severity": 2,
+    "Time": "2024-10-07 22:56:17",
+    "Type": "Policy:IAMUser/RootCredentialUsage"
+  },
+  {
+    "Description": "The API DescribeMetricFilters was invoked using root credentials from IP address 82.59.102.212.",
+    "ID": "8ec934964b0c5bfccccfc68e503bd69e",
+    "Severity": 2,
+    "Time": "2024-10-07 22:42:31",
+    "Type": "Policy:IAMUser/RootCredentialUsage"
+  },
+  {
+    "Description": "The API DescribeMetricFilters was invoked using root credentials from IP address 82.59.102.212.",
+    "ID": "b2c934934de0c3da6817d4cad2847084",
+    "Severity": 2,
+    "Time": "2024-10-07 22:35:53",
+    "Type": "Policy:IAMUser/RootCredentialUsage"
+  },
+  {
+    "Description": "The API ListIndexes was invoked using root credentials from IP address 82.59.102.212.",
+    "ID": "64c9349262fde9abb832cb4e58adbdcf",
+    "Severity": 2,
+    "Time": "2024-10-07 22:34:52",
+    "Type": "Policy:IAMUser/RootCredentialUsage"
+  },
+  {
+    "Description": "The API DescribeLoadBalancers was invoked using root credentials from IP address 82.59.102.212.",
+    "ID": "fac93493443326d1c98940ce6d3cc223",
+    "Severity": 2,
+    "Time": "2024-10-07 22:35:53",
+    "Type": "Policy:IAMUser/RootCredentialUsage"
+  },
+  {
+    "Description": "The API DescribeMetricFilters was invoked using root credentials from IP address 82.59.102.212.",
+    "ID": "72c93491025f44faf966b87badae8f4b",
+    "Severity": 2,
+    "Time": "2024-10-07 22:31:05",
+    "Type": "Policy:IAMUser/RootCredentialUsage"
+  },
+  {
+    "Description": "The API DescribeMetricFilters was invoked using root credentials from IP address 82.59.102.212.",
+    "ID": "d2c92fc22de43a2945fce17dd65d8e43",
+    "Severity": 2,
+    "Time": "2024-10-06 01:43:46",
+    "Type": "Policy:IAMUser/RootCredentialUsage"
+  },
+  {
+    "Description": "106.75.26.188 is performing SSH brute force attacks against i-058bbc7789d605e23. Brute force attacks are used to gain unauthorized access to your instance by guessing the SSH password.",
+    "ID": "a8c931274754f9aaf77eac64224dc361",
+    "Severity": 2,
+    "Time": "2024-10-06 14:43:21",
+    "Type": "UnauthorizedAccess:EC2/SSHBruteForce"
+  },
+  {
+    "Description": "223.166.23.5 is performing SSH brute force attacks against i-0f4d77a1ea3995e9d. Brute force attacks are used to gain unauthorized access to your instance by guessing the SSH password.",
+    "ID": "f0c933b139cfa033d4cd62ffd641d73d",
+    "Severity": 2,
+    "Time": "2024-10-07 14:21:24",
+    "Type": "UnauthorizedAccess:EC2/SSHBruteForce"
+  },
+  {
+    "Description": "i-0f4d77a1ea3995e9d is performing SSH brute force attacks against 52.72.3.107. Brute force attacks are used to gain unauthorized access to your instance by guessing the SSH password.",
+    "ID": "d2c9312748d9d76d19055c111ac7ecef",
+    "Severity": 8,
+    "Time": "2024-10-06 14:42:28",
+    "Type": "UnauthorizedAccess:EC2/SSHBruteForce"
+  }
+]

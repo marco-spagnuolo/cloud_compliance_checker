@@ -655,9 +655,51 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 	// 		Impact:      0,
 	// 	}
 
-	case "CheckIncidetResponseHandling":
+	case "CheckIRHandling":
 
-		err := incident_response.CheckIncidentHandling(cfg)
+		err := incident_response.CheckIncidentHandling(cfg, false)
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+
+		}
+
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
+			Impact:      0,
+		}
+
+	case "CheckIRHandlingAndStore":
+
+		err := incident_response.CheckIncidentHandling(cfg, true)
+		if err != nil {
+			result = models.ComplianceResult{
+				Description: criteria.Description,
+				Status:      "NOT COMPLIANT",
+				Response:    err.Error(),
+				Impact:      criteria.Value,
+			}
+			return result
+
+		}
+
+		result = models.ComplianceResult{
+			Description: criteria.Description,
+			Status:      "COMPLIANT",
+			Response:    "Check passed",
+			Impact:      0,
+		}
+
+	case "CheckIRTesting":
+
+		err := incident_response.IncidentResponseTest(cfg)
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,

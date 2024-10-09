@@ -12,7 +12,45 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
+
+// Funzione per l'upload su S3
+func uploadToS3(cfg aws.Config, bucketName, fileName string) error {
+	// Stampa l'identità del chiamante
+	err := printCallerIdentity(cfg)
+	if err != nil {
+		return fmt.Errorf("failed to print caller identity: %v", err)
+	}
+
+	fmt.Printf("Uploading file %s to bucket %s...\n", fileName, bucketName)
+
+	// Apri il file da caricare
+	file, err := os.Open(fileName)
+	if err != nil {
+		return fmt.Errorf("failed to open file %q, %v", fileName, err)
+	}
+	defer file.Close()
+
+	// Crea il client S3
+	s3Client := s3.NewFromConfig(cfg)
+
+	// Esegui l'upload
+	_, err = s3Client.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(filepath.Base(fileName)),
+		Body:   file,
+	})
+
+	// Gestione degli errori
+	if err != nil {
+		fmt.Printf("Errore durante l'upload: %v\n", err)
+		return fmt.Errorf("failed to upload file to S3, %v", err)
+	}
+
+	fmt.Println("File uploaded to S3 successfully!")
+	return nil
+}
 
 // Function to launch an attacker EC2 instance
 func launchInstanceIfNotExists(cfg aws.Config, role string) (string, string, error) {

@@ -415,7 +415,31 @@
       "criteria": [
         {
           "description": "Implement an incident-handling capability that is consistent with the incident response plan and includes preparation, detection and analysis, containment, eradication, and recovery.",
-          "check_function": "CheckIncidetResponseHandling",
+          "check_function": "CheckIRHandling",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.06.2",
+      "name": "Incident Monitoring, Reporting, and Response Assistance",
+      "description": "Track and document system security incidents. Report suspected incidents to the organizational incident response capability within [Assignment: organization-defined time period]. Report incident information to [Assignment: organization-defined authorities]. Provide an incident response support resource that offers advice and assistance to system users on handling and reporting incidents",
+      "criteria": [
+        {
+          "description": "Track and document system security incidents. Report suspected incidents to the organizational incident response capability within [Assignment: organization-defined time period]. Report incident information to [Assignment: organization-defined authorities]. Provide an incident response support resource that offers advice and assistance to system users on handling and reporting incidents",
+          "check_function": "CheckIRHandlingAndStore",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.06.3",
+      "name": "Incident Response Testing",
+      "description": "Test the effectiveness of the incident response capability [Assignment: organization-defined frequency].",
+      "criteria": [
+        {
+          "description": "Test the effectiveness of the incident response capability [Assignment: organization-defined frequency].",
+          "check_function": "CheckIncidetResponseHandlingAndStore",
           "value": 5
         }
       ]
