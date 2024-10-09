@@ -16,7 +16,7 @@ type AWSConfig struct {
 	AccessKey              string                 `mapstructure:"access_key"`
 	SecretKey              string                 `mapstructure:"secret_key"`
 	Region                 string                 `mapstructure:"region"`
-	User                   []User                 `mapstructure:"users"`
+	User                   []User                 `mapstructure:"user"`
 	AcceptedPolicies       []string               `mapstructure:"accepted_policies"`
 	SecurityGroups         []SecurityGroup        `mapstructure:"security_groups"`
 	S3Buckets              []S3Bucket             `mapstructure:"s3_buckets"`
@@ -27,7 +27,8 @@ type AWSConfig struct {
 	HighRiskTravelConfig   HighRiskTravelConfig   `mapstructure:"high_risk_travel"`
 	IdentifierManagement   IdentifierManagement   `mapstructure:"identifier_management"`
 	PasswordPolicy         PasswordPolicy         `mapstructure:"password_policy"`
-	AttackerInstance       AttackerInstanceConfig `mapstructure:"attacker_instance"` // Nuova sezione
+	AttackerInstance       AttackerInstanceConfig `mapstructure:"attacker_instance"`
+	SnsTopicArn            string                 `mapstructure:"sns_topic_arn"`
 }
 
 // User represents a user in the configuration

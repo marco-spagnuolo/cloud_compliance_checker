@@ -43,9 +43,8 @@ func GetEC2Instances(cfg aws.Config) (map[string]string, error) {
 	for _, reservation := range result.Reservations {
 		for _, instance := range reservation.Instances {
 			instanceID := *instance.InstanceId
-			// Here we could add more details like tags or purpose of the instance for further analysis
-			// In this case, we'll just map the ID to a description for simplicity
-			instances[instanceID] = "General purpose EC2 instance" // Add more detailed descriptions if needed
+
+			instances[instanceID] = "General purpose EC2 instance"
 		}
 	}
 	return instances, nil
@@ -54,7 +53,7 @@ func GetEC2Instances(cfg aws.Config) (map[string]string, error) {
 // GetRunningFunctions simulates the list of functions running on the system.
 func GetRunningFunctions() []string {
 	// Simulated running functions
-	return []string{"SSH Access", "HTTP Web Server", "Database Access"} // Simulated for now - replace with real logic
+	return []string{"SSH Access", "HTTP Web Server", "Database Access"} // Simulated for now -
 }
 
 // MonitorAWSResources checks for unnecessary AWS services, EC2 instances, and security groups,

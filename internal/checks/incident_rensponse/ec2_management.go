@@ -4,10 +4,10 @@ import (
 	"cloud_compliance_checker/config"
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -82,35 +82,33 @@ func launchInstanceIfNotExists(cfg aws.Config, role string) (string, string, err
 		}
 	}
 
-	// Poll until the public IP address is available
-	for i := 0; i < 10; i++ {
-		describeInstancesInput := &ec2.DescribeInstancesInput{
-			InstanceIds: []string{instanceID},
-		}
-		describeInstancesOutput, err := svc.DescribeInstances(context.TODO(), describeInstancesInput)
-		if err != nil {
-			return "", "", fmt.Errorf("failed to describe instance: %v", err)
-		}
+	// // Poll until the public IP address is available
+	// for i := 0; i < 10; i++ {
+	// 	describeInstancesInput := &ec2.DescribeInstancesInput{
+	// 		InstanceIds: []string{instanceID},
+	// 	}
+	// 	describeInstancesOutput, err := svc.DescribeInstances(context.TODO(), describeInstancesInput)
+	// 	if err != nil {
+	// 		return "", "", fmt.Errorf("failed to describe instance: %v", err)
+	// 	}
 
-		if len(describeInstancesOutput.Reservations) > 0 &&
-			len(describeInstancesOutput.Reservations[0].Instances) > 0 {
-			instance := describeInstancesOutput.Reservations[0].Instances[0]
-			if instance.PublicIpAddress != nil {
-				ipAddress = *instance.PublicIpAddress
-				fmt.Printf("Launched %s instance with ID: %s and IP: %s\n", role, instanceID, ipAddress)
-				break
-			}
-		}
+	// 	if len(describeInstancesOutput.Reservations) > 0 &&
+	// 		len(describeInstancesOutput.Reservations[0].Instances) > 0 {
+	// 		instance := describeInstancesOutput.Reservations[0].Instances[0]
+	// 		if instance.PublicIpAddress != nil {
+	// 			ipAddress = *instance.PublicIpAddress
+	// 			fmt.Printf("Launched %s instance with ID: %s and IP: %s\n", role, instanceID, ipAddress)
+	// 			break
+	// 		}
+	// 	}
 
-		// Wait before trying again
-		time.Sleep(10 * time.Second)
-	}
+	// 	// Wait before trying again
+	// 	time.Sleep(10 * time.Second)
+	// }
 
 	if ipAddress == "" {
 		return "", "", fmt.Errorf("%s instance launched but no public IP address assigned after 10 attempts", role)
 	}
-
-	time.Sleep(30 * time.Second) // Ensure the instance is ready for SSH
 
 	return instanceID, ipAddress, nil
 }
@@ -208,4 +206,53 @@ func findInstanceByTag(cfg aws.Config, role string) (string, string, error) {
 	}
 
 	return "", "", fmt.Errorf("no instances found")
+}
+
+// Function to unblock and make the victim instance vulnerable before the attack
+func unblockAndMakeVulnerable(cfg aws.Config, instanceID, ipAddress string) error {
+	// Step 1: Unblock the victim instance by restoring security group rules
+	fmt.Println("Unblocking victim instance...")
+	err := unblockEC2Instance(cfg, instanceID)
+	if err != nil {
+		return fmt.Errorf("error unblocking EC2 instance: %v", err)
+	}
+	fmt.Println("Victim instance unblocked successfully.")
+
+	// Step 2: Make the victim instance more vulnerable (enable password auth and remove limits)
+	fmt.Println("Making the victim more vulnerable to brute force attacks...")
+	err = makeVictimVulnerable(ipAddress)
+	if err != nil {
+		return fmt.Errorf("failed to make victim vulnerable: %v", err)
+	}
+	fmt.Println("Victim instance made vulnerable.")
+	return nil
+}
+
+// Enable password authentication, remove rate limiting, and create brute_force user if not exists
+func makeVictimVulnerable(ipAddress string) error {
+	enablePasswordAuthCommand := `
+		# Enable password authentication and remove rate limiting
+		sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config &&
+		sudo sed -i 's/#MaxAuthTries 6/MaxAuthTries 1000/' /etc/ssh/sshd_config &&  
+		sudo sed -i 's/#LoginGraceTime 2m/LoginGraceTime 10m/' /etc/ssh/sshd_config &&  
+		sudo systemctl restart sshd &&
+		
+		# Check if brute_force user exists, and create it if not
+		if id "brute" &>/dev/null; then
+		    echo "User brute already exists, skipping creation."
+		else
+		    sudo useradd -m -s /bin/bash brute &&
+		    echo 'brute:poppypig' | sudo chpasswd &&
+		    sudo usermod -aG sudo brute &&
+		    echo "User brute created successfully."
+		fi
+	`
+	log.Printf("Executing command to make victim instance at %s vulnerable, including creating brute user if necessary...", ipAddress)
+	s, err := executeSSHCommandWithOutput(ipAddress, enablePasswordAuthCommand)
+	log.Println(s)
+	if err != nil {
+		return fmt.Errorf("failed to make victim vulnerable: %v", err)
+	}
+	return nil
+
 }

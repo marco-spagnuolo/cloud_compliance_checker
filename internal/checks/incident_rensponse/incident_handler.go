@@ -1,10 +1,12 @@
 package incident_response
 
 import (
+	"cloud_compliance_checker/config"
+	"context"
 	"fmt"
-	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/sns"
 )
 
 // CheckIncidentHandling simula l'intero flusso di gestione degli incidenti con attacchi Nmap e Hydra
@@ -24,15 +26,15 @@ func CheckIncidentHandling(cfg aws.Config) error {
 
 	// Step 2: Simulate Nmap attack
 	fmt.Println("Starting Nmap attack simulation...")
-	err = simulateNoisyNmapAttack(cfg)
+	err = simulateNmapAttack(cfg)
 	if err != nil {
-		return fmt.Errorf("error during Nmap attack: %v", err)
+		return fmt.Errorf("error during blindshell attack: %v", err)
 	}
 	fmt.Println("Nmap attack simulation completed successfully.")
 
 	// Step 3: Simulate Hydra attack
 	fmt.Println("Starting Hydra brute force attack simulation...")
-	err = simulateHydraAttack(cfg)
+	err = simulateHydraAttack(cfg, false)
 	if err != nil {
 		return fmt.Errorf("error during Hydra attack: %v", err)
 	}
@@ -56,7 +58,7 @@ func CheckIncidentHandling(cfg aws.Config) error {
 	// Step 6: Send an alert using SNS if needed
 	alertMessage := "Incident detected after Nmap and Hydra attacks, and action taken. Victim instance isolated."
 	fmt.Printf("Sending SNS alert with message: %s\n", alertMessage)
-	err = SendAlert(cfg, "arn:aws:sns:us-east-1:682033472444:IncidentAlert", alertMessage)
+	err = SendAlert(cfg, alertMessage)
 	if err != nil {
 		return fmt.Errorf("error sending SNS alert: %v", err)
 	}
@@ -64,34 +66,22 @@ func CheckIncidentHandling(cfg aws.Config) error {
 	return nil
 }
 
-// Function to unblock and make the victim instance vulnerable before the attack
-func unblockAndMakeVulnerable(cfg aws.Config, instanceID, ipAddress string) error {
-	// Step 1: Unblock the victim instance by restoring security group rules
-	fmt.Println("Unblocking victim instance...")
-	err := unblockEC2Instance(cfg, instanceID)
-	if err != nil {
-		return fmt.Errorf("error unblocking EC2 instance: %v", err)
+// Send an SNS alert with the incident response status
+func SendAlert(cfg aws.Config, message string) error {
+	topicArn := config.AppConfig.AWS.SnsTopicArn
+	fmt.Printf("Sending SNS alert with message: %s\n", message)
+	fmt.Printf("SNS topic ARN: %s\n", topicArn)
+	if topicArn == "" {
+		return fmt.Errorf("SNS topic ARN not found in configuration")
 	}
-	fmt.Println("Victim instance unblocked successfully.")
+	snsClient := sns.NewFromConfig(cfg)
 
-	// Step 2: Make the victim instance more vulnerable (enable password auth and remove limits)
-	fmt.Println("Making the victim more vulnerable to brute force attacks...")
-	err = makeVictimVulnerable(ipAddress)
+	_, err := snsClient.Publish(context.TODO(), &sns.PublishInput{
+		Message:  &message,
+		TopicArn: &topicArn,
+	})
 	if err != nil {
-		return fmt.Errorf("failed to make victim vulnerable: %v", err)
+		return fmt.Errorf("failed to send SNS alert: %v", err)
 	}
-	fmt.Println("Victim instance made vulnerable.")
 	return nil
-}
-
-// Enable password authentication and remove rate limiting
-func makeVictimVulnerable(ipAddress string) error {
-	enablePasswordAuthCommand := `
-		sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config &&
-		sudo sed -i 's/#MaxAuthTries 6/MaxAuthTries 1000/' /etc/ssh/sshd_config &&  
-		sudo sed -i 's/#LoginGraceTime 2m/LoginGraceTime 10m/' /etc/ssh/sshd_config &&  
-		sudo systemctl restart sshd
-	`
-	log.Printf("Executing command to make victim instance at %s vulnerable...", ipAddress)
-	return executeSSHCommand(ipAddress, enablePasswordAuthCommand)
 }

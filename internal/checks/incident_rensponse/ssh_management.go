@@ -14,6 +14,9 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+// attacker and victim instances are in the same VPC
+// same security group and have the same SSH key for this example
+
 // Function to execute SSH command on EC2 instance
 func executeSSHCommand(ipAddress string, command string) error {
 	// Caricare la configurazione dell'attaccante dal file YAML
@@ -144,6 +147,58 @@ func executeSSHCommandWithOutput(ipaddress string, command string) (string, erro
 	}
 	defer session.Close()
 
+	output, err := session.CombinedOutput(command)
+	if err != nil {
+		return "", fmt.Errorf("failed to run command: %v, output: %s", err, output)
+	}
+
+	fmt.Printf("Command output: %s\n", output)
+	return string(output), nil
+}
+
+// Function to execute SSH command on an EC2 instance with a custom SSH key (e.g., victim)
+func executeSSHCommandWithOutputUsingKey(ipAddress, command, keyPath string) (string, error) {
+	// Ensure the SSH key file exists
+	if _, err := os.Stat(keyPath); os.IsNotExist(err) {
+		return "", fmt.Errorf("SSH key not found at path: %s", keyPath)
+	}
+
+	// Load the private key
+	key, err := os.ReadFile(keyPath)
+	if err != nil {
+		return "", fmt.Errorf("unable to read private key: %v", err)
+	}
+
+	// Parse the private key
+	signer, err := ssh.ParsePrivateKey(key)
+	if err != nil {
+		return "", fmt.Errorf("unable to parse private key: %v", err)
+	}
+
+	// Configure SSH client
+	config := &ssh.ClientConfig{
+		User: "ec2-user", // fix it on the actual user for the victim instance
+		Auth: []ssh.AuthMethod{
+			ssh.PublicKeys(signer),
+		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+
+	// Connect to the instance via SSH
+	client, err := ssh.Dial("tcp", ipAddress+":22", config)
+	if err != nil {
+		return "", fmt.Errorf("failed to connect via SSH: %v", err)
+	}
+	defer client.Close()
+
+	// Create a new session and execute the command
+	session, err := client.NewSession()
+	if err != nil {
+		return "", fmt.Errorf("failed to create SSH session: %v", err)
+	}
+	defer session.Close()
+
+	// Capture the command output
 	output, err := session.CombinedOutput(command)
 	if err != nil {
 		return "", fmt.Errorf("failed to run command: %v, output: %s", err, output)
