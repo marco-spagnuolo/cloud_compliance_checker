@@ -36,17 +36,24 @@ func DetectIncidents(cfg aws.Config) ([]types.Finding, error) {
 	fmt.Println("Waiting for GuardDuty to detect any findings...")
 	time.Sleep(5 * time.Second)
 
-	// List recent findings (potential incidents)
-	fmt.Println("Listing GuardDuty findings...")
+	// **List only non-archived findings (those in active or suppressed state)**
+	fmt.Println("Listing non-archived GuardDuty findings...")
 	listFindingsInput := &guardduty.ListFindingsInput{
 		DetectorId: &detectorId,
+		FindingCriteria: &types.FindingCriteria{
+			Criterion: map[string]types.Condition{
+				"service.archived": {
+					Eq: []string{"false"}, // This ensures only non-archived findings are retrieved
+				},
+			},
+		},
 	}
 	findings, err := guarddutyClient.ListFindings(context.TODO(), listFindingsInput)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve GuardDuty findings: %v", err)
 	}
 	if len(findings.FindingIds) == 0 {
-		fmt.Println("No findings detected by GuardDuty")
+		fmt.Println("No non-archived findings detected by GuardDuty")
 		return nil, nil
 	}
 
@@ -66,11 +73,21 @@ func DetectIncidents(cfg aws.Config) ([]types.Finding, error) {
 	}
 
 	// Log and return detected findings
-	fmt.Printf("\n--- Detected Incidents (GuardDuty Findings) ---\n")
+	fmt.Printf("\n--- Detected Incidents (Non-Archived GuardDuty Findings) ---\n")
 	for _, finding := range allFindings {
+		// Parse and format the timestamp of the event
+		eventTime, err := time.Parse(time.RFC3339, *finding.Service.EventFirstSeen)
+		if err != nil {
+			fmt.Printf("Error parsing event time for finding ID %s: %v\n", *finding.Id, err)
+			continue
+		}
+		formattedTime := eventTime.Format("2006-01-02 15:04:05")
+
+		// Print incident details including the event time
 		fmt.Printf("Incident: %s - %s\n", *finding.Title, *finding.Description)
 		fmt.Printf("Severity: %f\n", *finding.Severity)
 		fmt.Printf("Resource affected: %s\n", *finding.Resource.ResourceType)
+		fmt.Printf("Time of event: %s\n", formattedTime)
 	}
 	fmt.Printf("Total findings detected: %d\n", len(allFindings))
 	return allFindings, nil
@@ -136,12 +153,19 @@ func collectAndSaveGuardDutyFindings(cfg aws.Config) error {
 			return fmt.Errorf("failed to get details for finding ID %s: %v", findingID, err)
 		}
 		for _, finding := range findingOutput.Findings {
+			eventTime, err := time.Parse(time.RFC3339, *finding.Service.EventFirstSeen)
+			if err != nil {
+				fmt.Printf("Error parsing event time for finding ID %s: %v\n", *finding.Id, err)
+				continue
+			}
+			formattedTime := eventTime.Format("2006-01-02 15:04:05")
+
 			findingDetails = append(findingDetails, map[string]interface{}{
 				"ID":          finding.Id,
 				"Type":        finding.Type,
 				"Description": finding.Description,
 				"Severity":    finding.Severity,
-				"Time":        parseTime(aws.ToString(finding.Service.EventFirstSeen)),
+				"Time":        formattedTime,
 			})
 
 		}

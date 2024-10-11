@@ -204,6 +204,5 @@ func executeSSHCommandWithOutputUsingKey(ipAddress, command, keyPath string) (st
 		return "", fmt.Errorf("failed to run command: %v, output: %s", err, output)
 	}
 
-	fmt.Printf("Command output: %s\n", output)
 	return string(output), nil
 }

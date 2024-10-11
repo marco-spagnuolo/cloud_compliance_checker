@@ -4,12 +4,19 @@ import (
 	"cloud_compliance_checker/config"
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
-	"github.com/aws/aws-sdk-go-v2/service/sts"
 )
+
+// CheckIncidentHandling gestisce il flusso di gestione degli incidenti con un flag per scegliere l'upload
+func CheckIncidentHandling(cfg aws.Config, uploadToS3 bool) error {
+	if !uploadToS3 {
+		return CheckIncidentHandlingNoUpload(cfg)
+	} else {
+		return CheckIncidentHandlingUploads3(cfg)
+	}
+}
 
 // CheckIncidentHandling simula l'intero flusso di gestione degli incidenti con attacchi Nmap e Hydra
 // Function to simulate the complete incident handling process with Nmap and Hydra attacks
@@ -27,21 +34,29 @@ func CheckIncidentHandlingNoUpload(cfg aws.Config) error {
 	}
 	fmt.Println("Victim instance unblocked and made vulnerable.")
 
-	// Step 2: Simulate Nmap attack
-	fmt.Println("Starting Nmap attack simulation...")
-	err = simulateNmapAttack(cfg)
-	if err != nil {
-		return fmt.Errorf("error during blindshell attack: %v", err)
-	}
-	fmt.Println("Nmap attack simulation completed successfully.")
+	// // Step 2: Simulate Nmap attack
+	// fmt.Println("Starting Nmap attack simulation...")
+	// err = simulateNmapAttack(cfg)
+	// if err != nil {
+	// 	return fmt.Errorf("error during blindshell attack: %v", err)
+	// }
+	// fmt.Println("Nmap attack simulation completed successfully.")
 
 	// Step 3: Simulate Hydra attack
 	fmt.Println("Starting Hydra brute force attack simulation...")
-	err = simulateHydraAttack(cfg, false)
+	err = simulateHydraAttack(cfg, true)
 	if err != nil {
 		return fmt.Errorf("error during Hydra attack: %v", err)
 	}
 	fmt.Println("Hydra brute force attack simulation completed successfully.")
+
+	//simulate brute force attack
+	// Step 3: Simulate bf attack
+	// fmt.Println("Starting brute force attack simulation...")
+	// err = simulateBruteForceAttack(cfg)
+	// if err != nil {
+	// 	return fmt.Errorf("error during Hydra attack: %v", err)
+	// }
 
 	// Step 4: Detect incidents using GuardDuty
 	fmt.Println("Starting detection of incidents after Nmap and Hydra attacks...")
@@ -60,7 +75,6 @@ func CheckIncidentHandlingNoUpload(cfg aws.Config) error {
 
 	// Step 6: Send an alert using SNS if needed
 	alertMessage := "Incident detected after Nmap and Hydra attacks, and action taken. Victim instance isolated."
-	fmt.Printf("Sending SNS alert with message: %s\n", alertMessage)
 	err = SendAlert(cfg, alertMessage)
 	if err != nil {
 		return fmt.Errorf("error sending SNS alert: %v", err)
@@ -113,7 +127,7 @@ func CheckIncidentHandlingUploads3(cfg aws.Config) error {
 
 	// Step 3: Simulate Hydra attack
 	fmt.Println("Starting Hydra brute force attack simulation...")
-	err = simulateHydraAttack(cfg, false)
+	err = simulateHydraAttack(cfg, true)
 	if err != nil {
 		return fmt.Errorf("error during Hydra attack: %v", err)
 	}
@@ -132,50 +146,15 @@ func CheckIncidentHandlingUploads3(cfg aws.Config) error {
 	if err != nil {
 		return fmt.Errorf("error isolating victim instance: %v", err)
 	}
-	fmt.Println("Victim instance isolated successfully.")
+	alertMessage := "Incident detected after Nmap and Hydra attacks, and action taken. Victim instance isolated."
+
+	fmt.Println(alertMessage)
 
 	// Step 6: Send an alert using SNS if needed
-	alertMessage := "Incident detected after Nmap and Hydra attacks, and action taken. Victim instance isolated."
-	fmt.Printf("Sending SNS alert with message: %s\n", alertMessage)
 	err = SendAlert(cfg, alertMessage)
 	if err != nil {
 		return fmt.Errorf("error sending SNS alert: %v", err)
 	}
 	fmt.Println("Incident response workflow after Nmap and Hydra attacks completed successfully.")
 	return nil
-}
-
-// parseTime analizza il tempo in una stringa
-func parseTime(timeStr string) string {
-	t, err := time.Parse(time.RFC3339, timeStr)
-	if err != nil {
-		return timeStr
-	}
-	return t.Format("2006-01-02 15:04:05")
-}
-
-// Funzione per stampare l'identità dell'utente AWS
-func printCallerIdentity(cfg aws.Config) error {
-	stsClient := sts.NewFromConfig(cfg)
-
-	identityOutput, err := stsClient.GetCallerIdentity(context.TODO(), &sts.GetCallerIdentityInput{})
-	if err != nil {
-		return fmt.Errorf("failed to get caller identity: %v", err)
-	}
-
-	fmt.Printf("AWS Caller Identity:\n")
-	fmt.Printf("Account: %s\n", *identityOutput.Account)
-	fmt.Printf("ARN: %s\n", *identityOutput.Arn)
-	fmt.Printf("User ID: %s\n", *identityOutput.UserId)
-
-	return nil
-}
-
-// CheckIncidentHandling gestisce il flusso di gestione degli incidenti con un flag per scegliere l'upload
-func CheckIncidentHandling(cfg aws.Config, uploadToS3 bool) error {
-	if !uploadToS3 {
-		return CheckIncidentHandlingNoUpload(cfg)
-	} else {
-		return CheckIncidentHandlingUploads3(cfg)
-	}
 }

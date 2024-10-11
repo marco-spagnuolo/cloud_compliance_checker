@@ -17,7 +17,7 @@ import (
 func SimulateRealIncident(cfg aws.Config) error {
 	// Step 1: Lanciare tentativi di accesso SSH falliti su una delle istanze
 	fmt.Println("Simulating failed SSH login attempts...")
-	err := simulateFailedSSHAttempts(cfg)
+	err := simulateHydraAttack(cfg, false)
 	if err != nil {
 		return fmt.Errorf("failed to simulate SSH attempts: %v", err)
 	}
@@ -38,9 +38,8 @@ func SimulateRealIncident(cfg aws.Config) error {
 
 	// Step 4: Attendere il rilevamento di GuardDuty e raccogliere gli incidenti
 	fmt.Println("Waiting for GuardDuty to detect suspicious activity...")
-	time.Sleep(120 * time.Second) // Attendi qualche minuto per il rilevamento da parte di GuardDuty
 
-	err = detectIncidentsWithGuardDuty(cfg)
+	err = detectRecentGuardDutyFindings(cfg)
 	if err != nil {
 		return fmt.Errorf("failed to detect incidents with GuardDuty: %v", err)
 	}
@@ -65,7 +64,6 @@ func simulateFailedSSHAttempts(cfg aws.Config) error {
 		} else {
 			return fmt.Errorf("SSH attempt unexpectedly succeeded")
 		}
-		time.Sleep(2 * time.Second) // Pausa tra i tentativi
 	}
 
 	return nil
@@ -148,8 +146,26 @@ func simulateUnauthorizedConnection(cfg aws.Config) error {
 	return nil
 }
 
-// detectIncidentsWithGuardDuty rileva gli incidenti simulati con GuardDuty
-func detectIncidentsWithGuardDuty(cfg aws.Config) error {
+// simulatePortScan simula una scansione delle porte della vittima
+func simulatePortScan(cfg aws.Config) error {
+	victimIPAddress, err := getVictimIPAddress(cfg)
+	if err != nil {
+		return fmt.Errorf("failed to get victim IP: %v", err)
+	}
+
+	// Simula una scansione delle porte usando nmap
+	cmd := exec.Command("nmap", "-sS", "-p-", victimIPAddress)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("port scan failed: %v", err)
+	}
+
+	fmt.Printf("Port scan result: %s\n", string(output))
+	return nil
+}
+
+// detectRecentGuardDutyFindings rileva gli incidenti simulati con GuardDuty e verifica che siano recenti
+func detectRecentGuardDutyFindings(cfg aws.Config) error {
 	client := guardduty.NewFromConfig(cfg)
 
 	// Recupera l'elenco dei detector GuardDuty
@@ -181,9 +197,37 @@ func detectIncidentsWithGuardDuty(cfg aws.Config) error {
 		return nil
 	}
 
-	// Mostra gli incidenti rilevati
-	for _, findingID := range findings.FindingIds {
-		fmt.Printf("GuardDuty detected incident: %s\n", findingID)
+	// Recupera i dettagli degli incidenti e controlla se sono recenti (nell'ultima ora)
+	getFindingInput := &guardduty.GetFindingsInput{
+		DetectorId: &detectorID,
+		FindingIds: findings.FindingIds,
+	}
+	findingOutput, err := client.GetFindings(context.TODO(), getFindingInput)
+	if err != nil {
+		return fmt.Errorf("failed to get details for findings: %v", err)
+	}
+
+	recentFindings := 0
+	oneHourAgo := time.Now().Add(-1 * time.Hour)
+
+	for _, finding := range findingOutput.Findings {
+		findingTime, err := time.Parse(time.RFC3339, *finding.Service.EventFirstSeen)
+		if err != nil {
+			fmt.Printf("Error parsing finding time: %v\n", err)
+			continue
+		}
+
+		if findingTime.After(oneHourAgo) {
+			fmt.Printf("Recent finding detected: ID=%s, Type=%s, Time=%s\n",
+				*finding.Id, *finding.Type, findingTime.Format("2024-01-02 15:04:05"))
+			recentFindings++
+		}
+	}
+
+	if recentFindings == 0 {
+		fmt.Println("No recent findings detected by GuardDuty within the last hour.")
+	} else {
+		fmt.Printf("%d recent findings detected by GuardDuty.\n", recentFindings)
 	}
 
 	return nil

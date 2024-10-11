@@ -132,7 +132,6 @@ type AttackerInstanceConfig struct {
 	SecurityGroup  string `mapstructure:"security_group"`
 	SSHUser        string `mapstructure:"ssh_user"`
 	PrivateKeyPath string `mapstructure:"private_key_path"`
-	TargetIP       string `mapstructure:"target_ip"`
 }
 
 // AppConfig is the global configuration

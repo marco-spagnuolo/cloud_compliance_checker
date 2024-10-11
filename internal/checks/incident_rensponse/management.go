@@ -10,9 +10,11 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 )
 
 // Funzione per l'upload su S3
@@ -49,6 +51,39 @@ func uploadToS3(cfg aws.Config, bucketName, fileName string) error {
 	}
 
 	fmt.Println("File uploaded to S3 successfully!")
+	return nil
+}
+
+// Create a dummy file and upload to S3 bucket
+func uploadTestFileToS3(cfg aws.Config, bucketName, fileName string) error {
+	// Create a dummy file
+	file, err := os.Create(fileName)
+	if err != nil {
+		return fmt.Errorf("failed to create file: %v", err)
+	}
+	defer file.Close()
+
+	// Write some dummy data to the file
+	file.WriteString("This is a test file for unauthorized access simulation.")
+
+	// Upload the file to S3
+	uploader := manager.NewUploader(s3.NewFromConfig(cfg))
+	f, err := os.Open(fileName)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %v", err)
+	}
+	defer f.Close()
+
+	_, err = uploader.Upload(context.TODO(), &s3.PutObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(fileName),
+		Body:   f,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to upload file to S3: %v", err)
+	}
+
+	fmt.Printf("File %s uploaded successfully to bucket %s\n", fileName, bucketName)
 	return nil
 }
 
@@ -258,7 +293,7 @@ func unblockAndMakeVulnerable(cfg aws.Config, instanceID, ipAddress string) erro
 
 	// Step 2: Make the victim instance more vulnerable (enable password auth and remove limits)
 	fmt.Println("Making the victim more vulnerable to brute force attacks...")
-	err = makeVictimVulnerable(ipAddress)
+	err = makeVictimVulnerable(ipAddress, usernamebf, passwordbf)
 	if err != nil {
 		return fmt.Errorf("failed to make victim vulnerable: %v", err)
 	}
@@ -266,31 +301,49 @@ func unblockAndMakeVulnerable(cfg aws.Config, instanceID, ipAddress string) erro
 	return nil
 }
 
-// Enable password authentication, remove rate limiting, and create brute_force user if not exists
-func makeVictimVulnerable(ipAddress string) error {
-	enablePasswordAuthCommand := `
+// makeVictimVulnerable updates an instance's SSH config to be vulnerable and creates a user with dynamic parameters
+func makeVictimVulnerable(ipAddress string, username string, password string) error {
+	// Use dynamic parameters for user creation and password setting
+	enablePasswordAuthCommand := fmt.Sprintf(`
 		# Enable password authentication and remove rate limiting
 		sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config &&
-		sudo sed -i 's/#MaxAuthTries 6/MaxAuthTries 1000/' /etc/ssh/sshd_config &&  
+		sudo sed -i 's/#MaxAuthTries 6/MaxAuthTries 10/' /etc/ssh/sshd_config &&  
 		sudo sed -i 's/#LoginGraceTime 2m/LoginGraceTime 10m/' /etc/ssh/sshd_config &&  
 		sudo systemctl restart sshd &&
 		
-		# Check if brute_force user exists, and create it if not
-		if id "brute" &>/dev/null; then
-		    echo "User brute already exists, skipping creation."
+		# Check if %s user exists, and create it if not
+		if id "%s" &>/dev/null; then
+		    echo "User %s already exists, skipping creation."
 		else
-		    sudo useradd -m -s /bin/bash brute &&
-		    echo 'brute:poppypig' | sudo chpasswd &&
-		    sudo usermod -aG sudo brute &&
-		    echo "User brute created successfully."
+		    sudo useradd -m -s /bin/bash %s &&
+		    echo '%s:%s' | sudo chpasswd &&
+		    sudo usermod -aG sudo %s &&
+		    echo "User %s created successfully."
 		fi
-	`
-	log.Printf("Executing command to make victim instance at %s vulnerable, including creating brute user if necessary...", ipAddress)
+	`, username, username, username, username, username, password, username, username)
+
+	log.Printf("Executing command to make victim instance at %s vulnerable, including creating %s user if necessary...", ipAddress, username)
 	s, err := executeSSHCommandWithOutput(ipAddress, enablePasswordAuthCommand)
 	log.Println(s)
 	if err != nil {
 		return fmt.Errorf("failed to make victim vulnerable: %v", err)
 	}
 	return nil
+}
 
+// Funzione per stampare l'identità dell'utente AWS
+func printCallerIdentity(cfg aws.Config) error {
+	stsClient := sts.NewFromConfig(cfg)
+
+	identityOutput, err := stsClient.GetCallerIdentity(context.TODO(), &sts.GetCallerIdentityInput{})
+	if err != nil {
+		return fmt.Errorf("failed to get caller identity: %v", err)
+	}
+
+	fmt.Printf("AWS Caller Identity:\n")
+	fmt.Printf("Account: %s\n", *identityOutput.Account)
+	fmt.Printf("ARN: %s\n", *identityOutput.Arn)
+	fmt.Printf("User ID: %s\n", *identityOutput.UserId)
+
+	return nil
 }
