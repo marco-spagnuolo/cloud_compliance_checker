@@ -50,10 +50,10 @@ func CheckIncidentHandlingNoUpload(cfg aws.Config) error {
 	}
 	fmt.Println("Hydra brute force attack simulation completed successfully.")
 
-	//simulate brute force attack
-	// Step 3: Simulate bf attack
+	// // simulate brute force attack
+	// // Step 3: Simulate bf attack
 	// fmt.Println("Starting brute force attack simulation...")
-	// err = simulateBruteForceAttack(cfg)
+	// err = simulateDoSWithUnusualProtocol(cfg)
 	// if err != nil {
 	// 	return fmt.Errorf("error during Hydra attack: %v", err)
 	// }
@@ -151,6 +151,71 @@ func CheckIncidentHandlingUploads3(cfg aws.Config) error {
 	fmt.Println(alertMessage)
 
 	// Step 6: Send an alert using SNS if needed
+	err = SendAlert(cfg, alertMessage)
+	if err != nil {
+		return fmt.Errorf("error sending SNS alert: %v", err)
+	}
+	fmt.Println("Incident response workflow after Nmap and Hydra attacks completed successfully.")
+	return nil
+}
+
+// CheckIncidentHandling simula l'intero flusso di gestione degli incidenti con attacchi Nmap e Hydra
+// Function to simulate the complete incident handling process with Nmap and Hydra attacks
+func CheckIncidentHandlingNoUpload2(cfg aws.Config) error {
+	// Step 1: Get or launch victim instance and unblock it
+	victimInstanceID, victimIPAddress, err := launchInstanceIfNotExists(cfg, "victim")
+	if err != nil {
+		return fmt.Errorf("failed to get or launch victim instance: %v", err)
+	}
+
+	fmt.Println("Unblocking victim instance and making it vulnerable before the attack...")
+	err = unblockAndMakeVulnerable(cfg, victimInstanceID, victimIPAddress)
+	if err != nil {
+		return fmt.Errorf("error unblocking or making victim vulnerable: %v", err)
+	}
+	fmt.Println("Victim instance unblocked and made vulnerable.")
+
+	// // Step 2: Simulate Nmap attack
+	// fmt.Println("Starting Nmap attack simulation...")
+	// err = simulateNmapAttack(cfg)
+	// if err != nil {
+	// 	return fmt.Errorf("error during blindshell attack: %v", err)
+	// }
+	// fmt.Println("Nmap attack simulation completed successfully.")
+
+	// Step 3: Simulate Hydra attack
+	fmt.Println("Starting Hydra brute force attack simulation...")
+	err = simulateHydraAttack(cfg, true)
+	if err != nil {
+		return fmt.Errorf("error during Hydra attack: %v", err)
+	}
+	fmt.Println("Hydra brute force attack simulation completed successfully.")
+
+	// simulate brute force attack
+	// // Step 3: Simulate bf attack
+	// fmt.Println("Starting brute force attack simulation...")
+	// err = simulateDoSWithUnusualProtocol(cfg)
+	// if err != nil {
+	// 	return fmt.Errorf("error during Hydra attack: %v", err)
+	// }
+
+	// Step 4: Detect incidents using GuardDuty
+	fmt.Println("Starting detection of incidents after Nmap and Hydra attacks...")
+	err = detectIncidents(cfg)
+	if err != nil {
+		return fmt.Errorf("error detecting incidents: %v", err)
+	}
+
+	// Step 5: Isolate victim instance after the attack
+	fmt.Println("Isolating the victim instance after the attack to prevent further vulnerability...")
+	err = isolateEC2Instance(cfg, victimInstanceID)
+	if err != nil {
+		return fmt.Errorf("error isolating victim instance: %v", err)
+	}
+	fmt.Println("Victim instance isolated successfully.")
+
+	// Step 6: Send an alert using SNS if needed
+	alertMessage := "Incident detected after Nmap and Hydra attacks, and action taken. Victim instance isolated."
 	err = SendAlert(cfg, alertMessage)
 	if err != nil {
 		return fmt.Errorf("error sending SNS alert: %v", err)

@@ -2,6 +2,7 @@ package incident_response
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 )
@@ -312,24 +313,88 @@ func simulateBlindShellWithPortControl(cfg aws.Config) error {
 	return nil
 }
 
-// simulate a brute force attack on the victim instance ssh
+// simulateBruteForceAttack performs repeated SSH login attempts to simulate a brute force attack that will be detected by AWS GuardDuty
 func simulateBruteForceAttack(cfg aws.Config) error {
+	// Step 1: Launch or get attacker instance
 	_, attackerIPAddress, err := launchInstanceIfNotExists(cfg, "attacker")
 	if err != nil {
 		return fmt.Errorf("failed to get or launch attacker instance: %v", err)
 	}
 
+	// Step 2: Get victim instance IP
 	victimIPAddress, err := getVictimIPAddress(cfg)
 	if err != nil {
 		return fmt.Errorf("failed to get victim IP: %v", err)
 	}
 
-	// Dynamically construct the brute force attack command with the victim's IP
-	bruteForceCommand := fmt.Sprintf("for i in {1..10000}; do sshpass -p test ssh -o StrictHostKeyChecking=no jon@%s; done", victimIPAddress)
+	// Step 3: Brute force attack loop - simulate repeated failed SSH login attempts
+	fmt.Println("Starting brute force attack simulation...")
 
-	err = executeSSHCommand(attackerIPAddress, bruteForceCommand)
-	if err != nil {
-		return fmt.Errorf("failed to execute brute force attack: %v", err)
+	// Command template for SSH attempt
+	bruteForceCommandTemplate := fmt.Sprintf("sshpass -p wrongpassword ssh -o StrictHostKeyChecking=no %s@%s", usernamebf, victimIPAddress)
+
+	// Simulate 100 SSH attempts to trigger GuardDuty detection
+	for i := 0; i < 100; i++ {
+		// Execute the SSH command using an incorrect password
+		err := executeSSHCommand(attackerIPAddress, bruteForceCommandTemplate)
+		if err != nil {
+			fmt.Printf("Attempt %d failed as expected.\n", i+1)
+		} else {
+			fmt.Printf("Unexpected success on attempt %d.\n", i+1)
+		}
+
+		// Delay between attempts to mimic realistic brute force timing
+		time.Sleep(1 * time.Second)
 	}
+
+	fmt.Println("Brute force attack simulation completed.")
+	return nil
+}
+
+// simulateDoSWithUnusualProtocol simulates a DoS attack using an unusual protocol (e.g., IGMP) from an EC2 instance
+func simulateDoSWithUnusualProtocol(cfg aws.Config) error {
+	// Step 1: Launch or get attacker instance
+	_, attackerIPAddress, err := launchInstanceIfNotExists(cfg, "attacker")
+	if err != nil {
+		return fmt.Errorf("failed to get or launch attacker instance: %v", err)
+	}
+
+	// Step 2: Get victim instance IP
+	victimIPAddress, err := getVictimIPAddress(cfg)
+	if err != nil {
+		return fmt.Errorf("failed to get victim IP: %v", err)
+	}
+
+	// // Step 3: Install hping3 on the attacker instance if not already installed
+	// installHping3Command := "sudo apt-get update && sudo apt-get install -y hping3"
+	// fmt.Println("Installing hping3 on the attacker instance...")
+	// err = executeSSHCommand(attackerIPAddress, installHping3Command)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to install hping3 on attacker instance: %v", err)
+	// }
+
+	// Step 4: Run DoS attack using an unusual protocol (IGMP in this case)
+	// Using hping3 to flood with IGMP traffic to victim
+	dosCommand := fmt.Sprintf("sudo hping3 --icmp --icmp-ipver 4 --flood %s", victimIPAddress)
+	fmt.Printf("Running DoS attack with unusual protocol (IGMP) from attacker instance %s to victim IP %s...\n", attackerIPAddress, victimIPAddress)
+
+	// Execute the DoS attack command
+	err = executeSSHCommand(attackerIPAddress, dosCommand)
+	if err != nil {
+		return fmt.Errorf("failed to execute DoS attack with unusual protocol: %v", err)
+	}
+
+	// Let the attack run for a period of time to simulate sustained traffic
+	fmt.Println("Sustaining the DoS attack for 30 seconds...")
+	time.Sleep(30 * time.Second)
+
+	// Optionally, stop the DoS attack by killing the hping3 process on the attacker instance
+	stopCommand := "sudo pkill hping3"
+	err = executeSSHCommand(attackerIPAddress, stopCommand)
+	if err != nil {
+		fmt.Println("Warning: failed to stop hping3 after the attack. Please stop it manually.")
+	}
+
+	fmt.Println("DoS attack simulation with unusual protocol completed.")
 	return nil
 }

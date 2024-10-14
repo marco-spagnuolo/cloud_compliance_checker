@@ -94,3 +94,79 @@ func restoreEgressRules(svc *ec2.Client, groupID *string) error {
 	fmt.Println("Egress rule restored successfully.")
 	return nil
 }
+
+// UnisolateInstance rimuove il gruppo di sicurezza di isolamento e ripristina i gruppi di sicurezza originali
+func UnisolateInstance(cfg aws.Config, instanceID string, originalSecurityGroupIDs []string) error {
+	svc := ec2.NewFromConfig(cfg)
+
+	// Rimuovi il gruppo di sicurezza di isolamento (es: "quarantine") e ripristina i gruppi di sicurezza originali
+	input := &ec2.ModifyInstanceAttributeInput{
+		InstanceId: aws.String(instanceID),
+		Groups:     originalSecurityGroupIDs, // Ripristina i gruppi di sicurezza originali
+	}
+
+	_, err := svc.ModifyInstanceAttribute(context.TODO(), input)
+	if err != nil {
+		return fmt.Errorf("failed to restore original security groups: %v", err)
+	}
+
+	fmt.Println("Instance successfully un-isolated and original security groups restored.")
+	return nil
+}
+
+func IsolateInstanceWithSecurityGroupByName(cfg aws.Config, instanceID, securityGroupName string) error {
+	// Trova il Security Group tramite il nome
+	groupID, err := FindSecurityGroupByName(cfg, securityGroupName)
+	if err != nil {
+		return fmt.Errorf("failed to find security group by name: %v", err)
+	}
+
+	// Ora applica il Security Group all'istanza
+	return IsolateInstanceWithSecurityGroup(cfg, instanceID, groupID)
+}
+
+// IsolateInstanceWithSecurityGroup associa il Security Group trovato all'istanza per isolarla
+func IsolateInstanceWithSecurityGroup(cfg aws.Config, instanceID, groupID string) error {
+	svc := ec2.NewFromConfig(cfg)
+
+	// Associa il gruppo di sicurezza di isolamento all'istanza
+	input := &ec2.ModifyInstanceAttributeInput{
+		InstanceId: aws.String(instanceID),
+		Groups:     []string{groupID},
+	}
+
+	_, err := svc.ModifyInstanceAttribute(context.TODO(), input)
+	if err != nil {
+		return fmt.Errorf("failed to apply quarantine security group: %v", err)
+	}
+
+	fmt.Println("Instance successfully isolated with security group:", groupID)
+	return nil
+}
+
+// FindSecurityGroupByName cerca un Security Group tramite il suo nome
+func FindSecurityGroupByName(cfg aws.Config, groupName string) (string, error) {
+	svc := ec2.NewFromConfig(cfg)
+
+	input := &ec2.DescribeSecurityGroupsInput{
+		Filters: []ec2types.Filter{
+			{
+				Name:   aws.String("group-name"),
+				Values: []string{groupName},
+			},
+		},
+	}
+
+	// Chiamata API DescribeSecurityGroups per trovare il gruppo di sicurezza
+	output, err := svc.DescribeSecurityGroups(context.TODO(), input)
+	if err != nil {
+		return "", fmt.Errorf("failed to describe security groups: %v", err)
+	}
+
+	// Verifica se c'è almeno un gruppo di sicurezza trovato
+	for _, sg := range output.SecurityGroups {
+		return *sg.GroupId, nil
+	}
+
+	return "", fmt.Errorf("no security group found with name %s", groupName)
+}
