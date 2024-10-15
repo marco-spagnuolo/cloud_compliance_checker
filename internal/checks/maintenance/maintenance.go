@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -31,6 +32,7 @@ func ExecuteMaintenanceCommand(instanceID, command string, awsCfg aws.Config) er
 
 	_, err := svc.SendCommand(context.TODO(), input)
 	if err != nil {
+		log.Printf("Error executing command on instance %s: %v", instanceID, err)
 		return fmt.Errorf("failed to execute command on instance %s: %v", instanceID, err)
 	}
 
@@ -54,6 +56,7 @@ func ScanForMalware(instanceID, detectorID string, awsCfg aws.Config) error {
 
 	_, err := guarddutySvc.ListFindings(context.TODO(), input)
 	if err != nil {
+		log.Printf("Error during GuardDuty scan for instance %s: %v", instanceID, err)
 		return fmt.Errorf("failed to scan for malicious code: %v", err)
 	}
 
@@ -61,13 +64,15 @@ func ScanForMalware(instanceID, detectorID string, awsCfg aws.Config) error {
 	return nil
 }
 
-// MonitorS3Bucket ensures no CUI is present on an S3 bucket using Macie
 func MonitorS3Bucket(bucketName, accountID string, awsCfg aws.Config) error {
 	log.Printf("Starting Macie CUI scan for bucket %s", bucketName)
 	svc := macie2.NewFromConfig(awsCfg)
 
+	// Generate a unique job name by appending the current timestamp
+	jobName := fmt.Sprintf("CUI-Scan-Job-%s", time.Now().Format("20060102-150405"))
+
 	jobInput := &macie2.CreateClassificationJobInput{
-		Name: aws.String("CUI-Scan-Job"),
+		Name: aws.String(jobName),
 		S3JobDefinition: &mtypes.S3JobDefinition{
 			BucketDefinitions: []mtypes.S3BucketDefinitionForJob{
 				{
@@ -81,6 +86,7 @@ func MonitorS3Bucket(bucketName, accountID string, awsCfg aws.Config) error {
 
 	_, err := svc.CreateClassificationJob(context.TODO(), jobInput)
 	if err != nil {
+		log.Printf("Error starting Macie classification job for bucket %s: %v", bucketName, err)
 		return fmt.Errorf("failed to start Macie classification job for bucket %s: %v", bucketName, err)
 	}
 
@@ -174,26 +180,3 @@ func ValidateTool(instanceID, toolName string, cfg config.MaintenanceConfig) boo
 	}
 	return false
 }
-
-/*
-To retrieve the GuardDuty detector ID and the AWS account ID, you can use the AWS CLI commands:
-1. Get GuardDuty Detector ID:
-
-bash
-
-aws guardduty list-detectors --region <region>
-
-This will return the detector ID for GuardDuty in the specified region.
-2. Get AWS Account ID:
-
-bash
-
-aws sts get-caller-identity --query Account --output text
-
-Steps to Enable Macie:
-
-
-
-aws macie2 enable-macie --region <your-region>
-
-*/

@@ -728,6 +728,7 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 
 		}
