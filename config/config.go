@@ -137,17 +137,29 @@ type AttackerInstanceConfig struct {
 
 // MaintenanceConfig holds the details related to maintenance operations
 type MaintenanceConfig struct {
-	ApprovedMaintenanceTools []string      `mapstructure:"approved_maintenance_tools"`
-	AccountID                string        `mapstructure:"account_id"`
-	BucketName               string        `mapstructure:"bucket_name"`
-	GuardDutyDetectorID      string        `mapstructure:"guardduty_detector_id"`
-	EC2MonitoredInstances    []EC2Instance `mapstructure:"ec2_monitored_instances"`
+	ApprovedMaintenanceTools []string            `mapstructure:"approved_maintenance_tools"`
+	AccountID                string              `mapstructure:"account_id"`
+	BucketName               string              `mapstructure:"bucket_name"`
+	GuardDutyDetectorID      string              `mapstructure:"guardduty_detector_id"`
+	EC2MonitoredInstances    []EC2Instance       `mapstructure:"ec2_monitored_instances"`
+	NonLocalMaintenance      NonLocalMaintenance `mapstructure:"non_local_maintenance"`
+	AuthorizedUsers          AuthorizedUsers     `mapstructure:"authorized_users"`
 }
 
 // EC2Instance holds the details for an EC2 instance and its monitoring tools
 type EC2Instance struct {
 	InstanceID      string   `mapstructure:"instance_id"`
 	MonitoringTools []string `mapstructure:"monitoring_tools"`
+}
+
+// NonLocalMaintainers holds the details of non-local maintainers
+type NonLocalMaintenance struct {
+	UserNames []string `mapstructure:"user_names"`
+}
+
+// AuthorizedUsers holds the details of authorized users
+type AuthorizedUsers struct {
+	UserNames []string `mapstructure:"user_names"`
 }
 
 // AppConfig is the global configuration
