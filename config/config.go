@@ -30,6 +30,7 @@ type AWSConfig struct {
 	AttackerInstance               AttackerInstanceConfig `mapstructure:"attacker_instance"`
 	SnsTopicArn                    string                 `mapstructure:"sns_topic_arn"`
 	TestIncidentRensponseFrequency string                 `mapstructure:"test_incident_response_frequency"`
+	MaintenanceConfig              MaintenanceConfig      `mapstructure:"maintainance"`
 }
 
 // User represents a user in the configuration
@@ -132,6 +133,21 @@ type AttackerInstanceConfig struct {
 	SecurityGroup  string `mapstructure:"security_group"`
 	SSHUser        string `mapstructure:"ssh_user"`
 	PrivateKeyPath string `mapstructure:"private_key_path"`
+}
+
+// MaintenanceConfig holds the details related to maintenance operations
+type MaintenanceConfig struct {
+	ApprovedMaintenanceTools []string      `mapstructure:"approved_maintenance_tools"`
+	AccountID                string        `mapstructure:"account_id"`
+	BucketName               string        `mapstructure:"bucket_name"`
+	GuardDutyDetectorID      string        `mapstructure:"guardduty_detector_id"`
+	EC2MonitoredInstances    []EC2Instance `mapstructure:"ec2_monitored_instances"`
+}
+
+// EC2Instance holds the details for an EC2 instance and its monitoring tools
+type EC2Instance struct {
+	InstanceID      string   `mapstructure:"instance_id"`
+	MonitoringTools []string `mapstructure:"monitoring_tools"`
 }
 
 // AppConfig is the global configuration

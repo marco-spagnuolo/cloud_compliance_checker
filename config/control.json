@@ -443,6 +443,18 @@
           "value": 5
         }
       ]
+    },
+    {
+      "id": "03.07.4",
+      "name": "Maintenance Tools",
+    "description": "Approve, control, and monitor the use of system maintenance tools.\nCheck media with diagnostic and test programs for malicious code before it is used in the system.\nPrevent the removal of system maintenance equipment containing CUI by verifying that there is no CUI on the equipment, sanitizing or destroying the equipment, or retaining the equipment within the facility.",
+      "criteria": [
+        {
+          "description": "Approve, control, and monitor the use of system maintenance tools.\nCheck media with diagnostic and test programs for malicious code before it is used in the system.\nPrevent the removal of system maintenance equipment containing CUI by verifying that there is no CUI on the equipment, sanitizing or destroying the equipment, or retaining the equipment within the facility.",
+          "check_function": "CheckMaintainanceTools",
+          "value": 5
+        }
+      ]
     }
   ],
   "responses": {

@@ -58,6 +58,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.179.2
 	github.com/aws/aws-sdk-go-v2/service/guardduty v1.49.0
 	github.com/aws/aws-sdk-go-v2/service/iam v1.35.3
+	github.com/aws/aws-sdk-go-v2/service/macie2 v1.43.2
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.65.2
 	github.com/aws/aws-sdk-go-v2/service/ses v1.27.3
 	github.com/aws/aws-sdk-go-v2/service/sns v1.33.0

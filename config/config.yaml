@@ -1,85 +1,173 @@
 aws:
+  access_key: 
+  secret_key: 
   region: us-east-1
-  credentials:
-    access_key_id: YOUR_AWS_ACCESS_KEY_ID
-    secret_access_key: YOUR_AWS_SECRET_ACCESS_KEY
-  config_service:
-    role_arn: arn:aws:iam::YOUR_ACCOUNT_ID:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig
-    bucket_name: your-config-bucket
-  s3:
-    bucket_name: your-log-bucket
-  config_rules:
-    - name: approved-amis-by-id
-      description: Checks whether running instances are using specified AMIs. Optionally checks root volumes and any attached volumes.
-      resource_types:
-        - AWS::EC2::Instance
-      source:
-        owner: AWS
-        source_identifier: APPROVED_AMIS_BY_ID
-      input_parameters:
-        amiIds: ami-12345678,ami-23456789
-      maximum_execution_frequency: Six_Hours
-    - name: security-configuration
-      description: Ensure security configurations are applied.
-      resource_types:
-        - AWS::EC2::Instance
-      source:
-        owner: AWS
-        source_identifier: SECURITY_CONFIGURATION
-      maximum_execution_frequency: Six_Hours
-    - name: configuration-changes
-      description: Ensure configuration changes are tracked and managed.
-      resource_types:
-        - AWS::EC2::Instance
-      source:
-        owner: AWS
-        source_identifier: CONFIGURATION_CHANGES
-      maximum_execution_frequency: Six_Hours
-    - name: security-impact-analysis
-      description: Analyze the security impact of changes.
-      resource_types:
-        - AWS::EC2::Instance
-      source:
-        owner: AWS
-        source_identifier: SECURITY_IMPACT_ANALYSIS
-      maximum_execution_frequency: Six_Hours
-    - name: access-restrictions
-      description: Ensure access restrictions are enforced.
-      resource_types:
-        - AWS::EC2::Instance
-      source:
-        owner: AWS
-        source_identifier: ACCESS_RESTRICTIONS
-      maximum_execution_frequency: Six_Hours
-    - name: least-functionality
-      description: Ensure least functionality.
-      resource_types:
-        - AWS::EC2::Instance
-      source:
-        owner: AWS
-        source_identifier: LEAST_FUNCTIONALITY
-      maximum_execution_frequency: Six_Hours
-    - name: nonessential-functions
-      description: Restrict nonessential functions.
-      resource_types:
-        - AWS::EC2::Instance
-      source:
-        owner: AWS
-        source_identifier: NONESSENTIAL_FUNCTIONS
-      maximum_execution_frequency: Six_Hours
-    - name: software-policies
-      description: Ensure software policies compliance.
-      resource_types:
-        - AWS::EC2::Instance
-      source:
-        owner: AWS
-        source_identifier: SOFTWARE_POLICIES
-      maximum_execution_frequency: Six_Hours
-    - name: user-installed-software
-      description: Control and monitor user-installed software.
-      resource_types:
-        - AWS::EC2::Instance
-      source:
-        owner: AWS
-        source_identifier: USER_INSTALLED_SOFTWARE
-      maximum_execution_frequency: Six_Hours
+  users:
+    - name: AdminUser
+      policies: [AdministratorAccess]
+      security_functions: [AdministratorAccess]
+      is_privileged: true
+      mfa_required: true
+      reauth_conditions: 
+        - privileged_operation 
+        - role_change 
+        - "time_elapsed: 1h"
+      identifier_status: active
+    - name: marco_admin
+      policies: [AdministratorAccess]
+      security_functions: [AdministratorAccess]
+      is_privileged: true
+      mfa_required: true
+      reauth_conditions: 
+        - privileged_operation 
+        - role_change 
+        - "time_elapsed: 1h"
+      identifier_status: active
+    - name: ReadOnlyUser
+      policies: [AmazonEC2ReadOnlyAccess]
+      security_functions: []
+      is_privileged: false
+      mfa_required: false
+      reauth_conditions: 
+        - time_elapsed: 1h
+      identifier_status: active
+    - name: SelfManagedUser
+      policies: [IAMSelfManageServiceSpecificCredentials]
+      security_functions: []
+      is_privileged: false
+      mfa_required: false
+      reauth_conditions: 
+        - time_elapsed: 1h
+      identifier_status: active
+    - name: marco
+      policies: [ReadOnlyAccess]
+      security_functions: []
+      is_privileged: false
+      mfa_required: false
+      reauth_conditions: 
+        - time_elapsed: 1h
+      identifier_status: active
+    - name: SSMUser
+      policies: [AmazonSSMManagedInstanceCore]
+      security_functions: []
+      is_privileged: false
+      mfa_required: false
+      reauth_conditions: []
+      identifier_status: active
+  accepted_policies:
+    - AdministratorAccess
+    - PowerUserAccess
+    - ReadOnlyAccess
+    - AWSCloudFormationReadOnlyAccess
+    - CloudFrontFullAccess
+    - AWSCloudHSMFullAccess
+    - AWSCloudHSMReadOnlyAccess
+    - ResourceGroupsandTagEditorFullAccess
+    - ResourceGroupsandTagEditorReadOnlyAccess
+    - CloudFrontReadOnlyAccess
+    - CloudSearchFullAccess
+    - CloudSearchReadOnlyAccess
+    - CloudWatchFullAccess
+    - CloudWatchReadOnlyAccess
+    - CloudWatchLogsFullAccess
+    - CloudWatchLogsReadOnlyAccess
+    - AWSDirectConnectFullAccess
+    - AWSDirectConnectReadOnlyAccess
+    - AmazonAppStreamFullAccess
+    - AmazonAppStreamReadOnlyAccess
+    - AmazonDynamoDBFullAccess
+    - AmazonDynamoDBReadOnlyAccess
+    - AmazonEC2FullAccess
+    - AmazonEC2ReadOnlyAccess
+    - AmazonElastiCacheFullAccess
+    - AmazonElastiCacheReadOnlyAccess
+    - AmazonElasticMapReduceFullAccess
+    - AmazonElasticMapReduceReadOnlyAccess
+    - AmazonGlacierFullAccess
+    - AmazonGlacierReadOnlyAccess
+    - AmazonKinesisFullAccess
+    - AmazonKinesisReadOnlyAccess
+    - SecurityAudit
+    - AmazonSESFullAccess
+    - AmazonSESReadOnlyAccess
+  security_groups:
+    - name: default
+      allowed_ingress_ports: []
+      allowed_egress_ports: []
+    - name: launch-wizard-1
+      allowed_ingress_ports: [22]
+      allowed_egress_ports: []
+    - name: my-security-group
+      allowed_ingress_ports: [22, 443]
+      allowed_egress_ports: [80, 443]
+    - name: another-security-group
+      allowed_ingress_ports: [80, 443]
+      allowed_egress_ports: []
+    - name: SSM-Managed
+      allowed_ingress_ports: [443]
+      allowed_egress_ports: [443]
+    - name: quarantine
+      allowed_ingress_ports: []
+      allowed_egress_ports: []
+  s3_buckets:
+    - name: my-cui-bucket
+      encryption: AES256
+    - name: another-sensitive-bucket
+      encryption: aws:kms
+  critical_role:
+    - role_name: AdminRole
+      sensitive_functions: [ManageIAM, ManageEC2]
+    - role_name: EC2SSMRole
+      sensitive_functions: [SSMCoreAccess]
+  login_policy:
+    max_unsuccessful_attempts: 5
+    lockout_duration_minutes: 15
+    action_on_lockout: lock_account
+  mission_essential_config:
+    functions: [SSH Access, HTTP Web Server]
+    ports: [22, 443]
+    protocols: [TCP, HTTPS]
+    services: [sshd, nginx]
+  ec2_instances:
+    - instance_id: i-03feff3c4b19de9d6
+      authorized_software: [nginx, docker, sshd]
+      mac_address: 12:74:ff:56:d1:d7
+    - instance_id: i-0c693eaede6b16d2d
+      authorized_software: [apache2, sshd]
+      mac_address: 00:1B:2C:3D:4E:5F
+  high_risk_travel_config:
+    pre_travel_config:
+      ec2_security_group: restrictive
+      s3_encryption: AES-256
+    post_travel_checks:
+      cloudtrail_check: true
+      verify_sec_groups: true
+      verify_encryption: true
+    users:
+      - user_id: u123
+        name: John Doe
+        role: Engineer
+      - user_id: u124
+        name: Jane Smith
+        role: Admin
+  identifier_management:
+    authorized_roles: [AdminUser, marco_admin]
+    reuse_prevention_period: 1h
+    identifier_characteristics: status
+  password_policy:
+    min_length: 12
+    require_numbers: true
+    require_symbols: true
+    require_uppercase: true
+    require_lowercase: true
+  attacker_instance:
+    ami: ami-0fff1b9a61dec8a5f
+    instance_type: t2.micro
+    key_name: attackerkey
+    security_group: sg-0117d2e82d65830bd
+    ssh_user: ec2-user
+    private_key_path: attackerkey.pem
+    target_ip: 54.172.141.85
+  sns_topic_arn: "arn:aws:sns:us-east-1:682033472444:IncidentAlert"
+  test_incident_response_frequency: "weekly"
+  
