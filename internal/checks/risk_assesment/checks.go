@@ -142,7 +142,7 @@ func SimulateVendorCompliance(vendor string) bool {
 }
 
 // VerifyAutoRiskAssessment checks if AWS Inspector or a similar service is set up for automatic risk assessment
-// 03.11.3
+// 03.11.4
 
 func VerifyAutoRiskAssessment(awsCfg aws.Config) error {
 	svc := inspector2.NewFromConfig(awsCfg)
