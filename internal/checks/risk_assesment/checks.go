@@ -12,9 +12,13 @@ import (
 )
 
 /*
-AWS Inspector can be considered a tool for risk assessment, particularly in the context of security and vulnerability management. It automatically assesses applications for vulnerabilities and deviations from best practices. By scanning for software vulnerabilities, security misconfigurations, and unintended network exposure, AWS Inspector helps identify risks associated with system configurations, software versions, and network setups.
+AWS Inspector can be considered a tool for risk assessment, particularly in the context of security and
+vulnerability management. It automatically assesses applications for vulnerabilities and deviations from best practices.
+By scanning for software vulnerabilities, security misconfigurations, and unintended network exposure,
+AWS Inspector helps identify risks associated with system configurations, software versions, and network setups.
 
-In the context of NIST SP 800-171, this helps fulfill requirements to assess risks by identifying potential threats and vulnerabilities, which are crucial for protecting CUI
+In the context of NIST SP 800-171, this helps fulfill requirements to assess risks by identifying
+potential threats and vulnerabilities, which are crucial for protecting CUI
 */
 // CheckLastAssessmentRun retrieves the latest completed assessment run for a given template
 func CheckLastAssessmentRun(templateArn string, awsCfg aws.Config) (time.Time, error) {
@@ -120,20 +124,6 @@ func ScheduleRiskAssessment(awsCfg aws.Config) error {
 	// }
 
 	return nil
-}
-
-// getFrequencyDuration converts frequency string to time.Duration
-func getFrequencyDuration(frequency string) time.Duration {
-	switch frequency {
-	case "daily":
-		return 24 * time.Hour
-	case "weekly":
-		return 7 * 24 * time.Hour
-	case "monthly":
-		return 30 * 24 * time.Hour
-	default:
-		return 24 * time.Hour
-	}
 }
 
 // SimulateVendorCompliance simulates checking the compliance status of a vendor

@@ -165,10 +165,25 @@ type AuthorizedUsers struct {
 
 // RiskAssessmentConfig holds the details related to risk assessment
 type RiskAssessmentConfig struct {
-	Frequency           string   `mapstructure:"frequency"`
-	SupplyChainVendors  []string `mapstructure:"supply_chain_vendors"`
-	AssessmentTemplates []string `mapstructure:"assessment_templates"`
-	Arn                 string   `mapstructure:"assessment_template_arn"`
+	Frequency             string                      `mapstructure:"frequency"`
+	SupplyChainVendors    []string                    `mapstructure:"supply_chain_vendors"`
+	AssessmentTemplates   []string                    `mapstructure:"assessment_templates"`
+	Arn                   string                      `mapstructure:"assessment_template_arn"`
+	VulnerabilityScanning VulnerabilityScanningConfig `mapstructure:"vulnerability_scanning"`
+}
+
+type VulnerabilityScanningConfig struct {
+	Frequency              string              `mapstructure:"frequency"`
+	RensponseTime          RensponseTimeConfig `mapstructure:"rensponse_time"`
+	ScanOnNewVulnerability bool                `mapstructure:"scan_on_new_vulnerability"`
+	AssessmentTemplateArn  string              `mapstructure:"assessment_template_arn"`
+}
+
+type RensponseTimeConfig struct {
+	Critical string `mapstructure:"critical"`
+	High     string `mapstructure:"high"`
+	Medium   string `mapstructure:"medium"`
+	Low      string `mapstructure:"low"`
 }
 
 // AppConfig is the global configuration

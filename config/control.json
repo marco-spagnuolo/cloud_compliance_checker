@@ -491,6 +491,18 @@
           "value": 5
         }
       ]
+    },
+    {
+      "id": "03.11.2",
+    "name": "Vulnerability Monitoring and Scanning",
+    "description": "Monitor and scan the system for vulnerabilities [Assignment: organization-defined frequency] and when new vulnerabilities affecting the system are identified. Remediate system vulnerabilities within [Assignment: organization-defined response times]. Update system vulnerabilities to be scanned [Assignment: organization-defined frequency] and when new vulnerabilities are identified and reported.",
+      "criteria": [
+        {
+          "description": "Monitor and scan the system for vulnerabilities [Assignment: organization-defined frequency] and when new vulnerabilities affecting the system are identified. Remediate system vulnerabilities within [Assignment: organization-defined response times]. Update system vulnerabilities to be scanned [Assignment: organization-defined frequency] and when new vulnerabilities are identified and reported.",
+          "check_function": "CheckMonitorAndScanning",
+          "value": 5
+        }
+      ]
     }
   ],
   "responses": {
