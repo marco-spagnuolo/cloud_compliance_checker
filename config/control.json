@@ -479,6 +479,18 @@
           "value": 5
         }
       ]
+    },
+    {
+      "id": "03.11.1",
+      "name": "Risk Assessment",
+    "description": "Assess the risk (including supply chain risk) of unauthorized disclosure resulting from the processing, storage, or transmission of CUI.\n    Update risk assessments [Assignment: organization-defined frequency].",
+      "criteria": [
+        {
+          "description": "Assess the risk (including supply chain risk) of unauthorized disclosure resulting from the processing, storage, or transmission of CUI.\n    Update risk assessments [Assignment: organization-defined frequency].",
+          "check_function": "CheckRA",
+          "value": 5
+        }
+      ]
     }
   ],
   "responses": {

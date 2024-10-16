@@ -31,6 +31,7 @@ type AWSConfig struct {
 	SnsTopicArn                    string                 `mapstructure:"sns_topic_arn"`
 	TestIncidentRensponseFrequency string                 `mapstructure:"test_incident_response_frequency"`
 	MaintenanceConfig              MaintenanceConfig      `mapstructure:"maintainance"`
+	RiskAssessmentConfig           RiskAssessmentConfig   `mapstructure:"risk_assessment"`
 }
 
 // User represents a user in the configuration
@@ -160,6 +161,14 @@ type NonLocalMaintenance struct {
 // AuthorizedUsers holds the details of authorized users
 type AuthorizedUsers struct {
 	UserNames []string `mapstructure:"user_names"`
+}
+
+// RiskAssessmentConfig holds the details related to risk assessment
+type RiskAssessmentConfig struct {
+	Frequency           string   `mapstructure:"frequency"`
+	SupplyChainVendors  []string `mapstructure:"supply_chain_vendors"`
+	AssessmentTemplates []string `mapstructure:"assessment_templates"`
+	Arn                 string   `mapstructure:"assessment_template_arn"`
 }
 
 // AppConfig is the global configuration

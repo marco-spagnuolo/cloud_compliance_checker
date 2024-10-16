@@ -1,7 +1,7 @@
 package evaluation
 
 import (
-	"cloud_compliance_checker/internal/checks/maintenance"
+	"cloud_compliance_checker/internal/checks/risk_assesment"
 	"cloud_compliance_checker/models"
 	"fmt"
 
@@ -718,52 +718,73 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 	// 		Impact:      0,
 	// 	}
 
-	case "CheckMaintainanceTools":
+	// case "CheckMaintainanceTools":
 
-		err := maintenance.RunMonitorCheck(cfg)
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			fmt.Printf("\n[ERROR]: %v\n", err)
-			return result
+	// 	err := maintenance.RunMonitorCheck(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		fmt.Printf("\n[ERROR]: %v\n", err)
+	// 		return result
 
-		}
+	// 	}
 
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckNonLocalMaintainance":
 
-	case "CheckNonLocalMaintainance":
+	// 	err := maintenance.CheckNonLocalMaintenanceCompliance(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		fmt.Printf("\n[ERROR]: %v\n", err)
+	// 		return result
 
-		err := maintenance.CheckNonLocalMaintenanceCompliance(cfg)
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			fmt.Printf("\n[ERROR]: %v\n", err)
-			return result
+	// 	}
 
-		}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	// case "CheckMaintainancePersonnel":
 
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
-	case "CheckMaintainancePersonnel":
+	// 	err := maintenance.CheckMaintenanceAuthorization(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		fmt.Printf("\n[ERROR]: %v\n", err)
+	// 		return result
 
-		err := maintenance.CheckMaintenanceAuthorization(cfg)
+	// 	}
+
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+
+	case "CheckRA":
+
+		err := risk_assesment.ScheduleRiskAssessment(cfg)
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,
