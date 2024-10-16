@@ -16,6 +16,7 @@ import (
 // https://docs.aws.amazon.com/inspector/latest/user/getting_started_tutorial.html amazon inspector agent needed on machines
 // TODO - change to linux version compatible with amazon inspector without registration
 // CheckAndStartVulnerabilityScan verifies if a scan is due and starts it
+// 03.11.2
 func CheckAndStartVulnerabilityScan(awsCfg aws.Config) error {
 	log.Printf("Initiating vulnerability scan - Frequency: %s", config.AppConfig.AWS.RiskAssessmentConfig.VulnerabilityScanning.Frequency)
 	// lastRun, err := GetLastRun(config.AppConfig.AWS.RiskAssessmentConfig.VulnerabilityScanning.AssessmentTemplateArn, awsCfg)

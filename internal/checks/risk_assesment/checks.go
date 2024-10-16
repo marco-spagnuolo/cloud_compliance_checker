@@ -9,6 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/inspector"
+	"github.com/aws/aws-sdk-go-v2/service/inspector2"
 )
 
 /*
@@ -70,6 +71,7 @@ func CheckLastAssessmentRun(templateArn string, awsCfg aws.Config) (time.Time, e
 }
 
 // ScheduleRiskAssessment performs automated risk checks
+// 03.11.1
 func ScheduleRiskAssessment(awsCfg aws.Config) error {
 	log.Printf("Initiating risk assessment - Frequency: %s", config.AppConfig.AWS.RiskAssessmentConfig.Frequency)
 
@@ -137,4 +139,35 @@ func SimulateVendorCompliance(vendor string) bool {
 		log.Printf("Vendor %s is NOT compliant", vendor)
 	}
 	return isCompliant
+}
+
+// VerifyAutoRiskAssessment checks if AWS Inspector or a similar service is set up for automatic risk assessment
+// 03.11.3
+
+func VerifyAutoRiskAssessment(awsCfg aws.Config) error {
+	svc := inspector2.NewFromConfig(awsCfg)
+
+	// Check for enabled auto-assessment configurations
+	input := &inspector2.ListAccountPermissionsInput{}
+	resp, err := svc.ListAccountPermissions(context.TODO(), input)
+	if err != nil {
+		return fmt.Errorf("error verifying automatic risk assessment configuration: %v", err)
+	}
+
+	// Loop through permissions to check if automatic assessments are enabled
+	autoRiskAssessmentEnabled := false
+	for _, permission := range resp.Permissions {
+		if permission.Service == "inspector" && permission.Operation == "EnableAutomatedScanning" {
+			autoRiskAssessmentEnabled = true
+			break
+		}
+	}
+
+	if !autoRiskAssessmentEnabled {
+		log.Println("No automatic risk assessment tool configured. Please enable AWS Inspector with automated scanning.")
+		return fmt.Errorf("automatic risk assessment not configured")
+	}
+
+	log.Println("Automatic risk assessment tool is configured.")
+	return nil
 }

@@ -503,6 +503,18 @@
           "value": 5
         }
       ]
+    },
+    {
+      "id": "03.11.3",
+    "name": "Risk Response",
+    "description": "Respond to findings from security assessments, monitoring, and audits.",
+      "criteria": [
+        {
+          "description": "Respond to findings from security assessments, monitoring, and audits.",
+          "check_function": "CheckRiskRensponse",
+          "value": 5
+        }
+      ]
     }
   ],
   "responses": {
