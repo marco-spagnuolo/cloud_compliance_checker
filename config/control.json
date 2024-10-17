@@ -948,6 +948,18 @@
           "value": 5
         }
       ]
+    },
+    {
+      "id": "03.13.10",
+      "name": "Cryptographic Key Establishment and Management",
+      "description": "Establish and manage cryptographic keys in the system in accordance with organization-defined requirements for key generation, distribution, storage, access, and destruction.",
+      "criteria": [
+        {
+          "description": "Verify that cryptographic keys are managed according to defined policies for generation, storage, and destruction.",
+          "check_function": "CheckCKEM",
+          "value": 5
+        }
+      ]
     }
   ],
   "responses": {

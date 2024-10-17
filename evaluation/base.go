@@ -953,9 +953,31 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 	// 		Impact:      0,
 	// 	}
 
-	case "CheckTSC":
+	// case "CheckTSC":
 
-		err := protection.CheckTransmissionAndStorageConfidentiality(cfg)
+	// 	err := protection.CheckTransmissionAndStorageConfidentiality(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		fmt.Printf("\n[ERROR]: %v\n", err)
+	// 		return result
+
+	// 	}
+
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+
+	case "CheckNetworkDisconnect":
+
+		err := protection.CheckSessionTimeouts(cfg)
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,
@@ -974,9 +996,9 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 			Response:    "Check passed",
 			Impact:      0,
 		}
-	case "CheckNetworkDisconnect":
+	case "CheckCKEM":
 
-		err := protection.CheckSessionTimeouts(cfg)
+		err := protection.CheckKeyManagement(cfg)
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,
