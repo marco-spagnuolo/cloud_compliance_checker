@@ -76,7 +76,7 @@ aws wafv2 create-web-acl \\
     --scope REGIONAL \\
     --default-action Block={} \\
     --visibility-config SampledRequestsEnabled=true,CloudWatchMetricsEnabled=true,MetricName="MyWebACLMetric" \\
-    --region us-east-1\
+    --region us-east-1
 ```
 
 **Explanation**: This command creates a new Web ACL named `MyRegionalWebACL` for regional use. It sets the default action to `Block`, enabling sample requests and CloudWatch metrics for monitoring purposes. Make sure to replace `"MyRegionalWebACL"` with your desired Web ACL name.
@@ -90,7 +90,7 @@ aws wafv2 create-web-acl \\
     --name "MyCloudFrontWebACL" \\
     --scope CLOUDFRONT \\
     --default-action Block={} \\
-    --visibility-config SampledRequestsEnabled=true,CloudWatchMetricsEnabled=true,MetricName="MyWebACLMetric"\
+    --visibility-config SampledRequestsEnabled=true,CloudWatchMetricsEnabled=true,MetricName="MyWebACLMetric"
 ```
 
 **Explanation**: This command creates a new Web ACL named `MyCloudFrontWebACL` for use with CloudFront distributions. The Web ACL will apply globally and will use `Block` as the default action, with metrics enabled for monitoring.
