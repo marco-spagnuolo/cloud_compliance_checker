@@ -876,6 +876,30 @@
           "value": 5
         }
       ]
+    },
+    {
+      "id": "03.12.05",
+    "name": "Information Exchange",
+    "description": "Approve and manage the exchange of CUI between the system and other systems using [Selection (one or more): interconnection security agreements; information exchange security agreements; memoranda of understanding or agreement; service-level agreements; user agreements; non-disclosure agreements; other types of agreements]. Document interface characteristics, security requirements, and responsibilities for each system as part of the exchange agreements. Review and update the exchange agreements [Assignment: organization-defined frequency].",
+      "criteria": [
+        {
+          "description": "Approve and manage the exchange of CUI between the system and other systems using [Selection (one or more): interconnection security agreements; information exchange security agreements; memoranda of understanding or agreement; service-level agreements; user agreements; non-disclosure agreements; other types of agreements]. Document interface characteristics, security requirements, and responsibilities for each system as part of the exchange agreements. Review and update the exchange agreements [Assignment: organization-defined frequency].",
+          "check_function": "CheckIE",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.13.01",
+      "name": "Boundary Protection",
+      "description": "Monitor and control communications at external managed interfaces to the system and key internal managed interfaces within the system. Implement subnetworks for publicly accessible system components that are physically or logically separated from internal networks. Connect to external systems only through managed interfaces that consist of boundary protection devices arranged in accordance with an organizational policy.",
+      "criteria": [
+        {
+          "description": "Ensure communications at external and key internal interfaces are monitored and controlled, and that publicly accessible components are segregated from internal networks.",
+          "check_function": "CheckBP",
+          "value": 5
+        }
+      ]
     }
   ],
   "responses": {

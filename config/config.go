@@ -33,6 +33,7 @@ type AWSConfig struct {
 	MaintenanceConfig              MaintenanceConfig        `mapstructure:"maintainance"`
 	RiskAssessmentConfig           RiskAssessmentConfig     `mapstructure:"risk_assessment"`
 	SecurityAssessmentConfig       SecurityAssessmentConfig `mapstructure:"security_assessment"`
+	Protection                     ProtectionConfig         `mapstructure:"protection"`
 }
 
 // User represents a user in the configuration
@@ -190,6 +191,12 @@ type RensponseTimeConfig struct {
 // SecurityAssessmentConfig holds the details related to security assessment
 type SecurityAssessmentConfig struct {
 	S3BucketName string `mapstructure:"s3_bucket_information_exchange"`
+}
+
+// ProtectionConfig holds the details related to protection
+type ProtectionConfig struct {
+	ManagedServices []string `mapstructure:"managed_services"`
+	LogGroupName    string   `mapstructure:"cloud_watch_log_group_name"`
 }
 
 // AppConfig is the global configuration

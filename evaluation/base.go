@@ -1,7 +1,7 @@
 package evaluation
 
 import (
-	audit "cloud_compliance_checker/internal/checks/security_assesment"
+	"cloud_compliance_checker/internal/checks/protection"
 	"cloud_compliance_checker/models"
 	"fmt"
 
@@ -888,9 +888,9 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 	// 		Impact:      0,
 	// 	}
 
-	case "CheckIE":
+	case "CheckBP":
 
-		err := audit.CheckExchangeAgreements(cfg)
+		err := protection.VerifyComponents(cfg)
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,
