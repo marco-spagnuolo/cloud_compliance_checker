@@ -7,7 +7,8 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/aws/aws-sdk-go-v2/service/ec2/types" // Add types import
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
@@ -16,7 +17,7 @@ import (
 func SecureAWSResources(cfg aws.Config) error {
 	// Step 1: Check all S3 Buckets
 	ctx := context.TODO()
-	if err := SecureAllS3Buckets(ctx, cfg); err != nil {
+	if err := SecureAllS3Buckets(cfg); err != nil {
 		return fmt.Errorf("failed to secure S3 buckets: %v", err)
 	}
 	log.Println("All S3 buckets have been checked.")
@@ -37,7 +38,8 @@ func SecureAWSResources(cfg aws.Config) error {
 }
 
 // SecureAllS3Buckets checks each S3 bucket to ensure it is not publicly accessible.
-func SecureAllS3Buckets(ctx context.Context, cfg aws.Config) error {
+func SecureAllS3Buckets(cfg aws.Config) error {
+	ctx := context.TODO()
 	svc := s3.NewFromConfig(cfg)
 
 	// List all S3 buckets
@@ -162,5 +164,103 @@ func SecurelyDeleteEBSVolume(ctx context.Context, cfg aws.Config, volumeId strin
 	}
 
 	log.Printf("EBS Volume %s has been securely deleted.\n", volumeId)
+	return nil
+}
+
+// CheckTransmissionAndStorageConfidentiality checks if cryptographic mechanisms are in place
+// to prevent unauthorized disclosure of CUI during transmission and storage.
+// 03.13.08
+func CheckTransmissionAndStorageConfidentiality(cfg aws.Config) error {
+	ctx := context.TODO()
+	// Check S3 bucket encryption and transmission settings
+	if err := checkS3Confidentiality(ctx, cfg); err != nil {
+		return fmt.Errorf("S3 confidentiality check failed: %v", err)
+	}
+
+	// Check EBS volume encryption
+	if err := checkEBSConfidentiality(ctx, cfg); err != nil {
+		return fmt.Errorf("EBS volume confidentiality check failed: %v", err)
+	}
+
+	// Check RDS instance encryption
+	if err := checkRDSConfidentiality(ctx, cfg); err != nil {
+		return fmt.Errorf("RDS confidentiality check failed: %v", err)
+	}
+
+	log.Println("Transmission and storage confidentiality checks passed.")
+	return nil
+}
+
+// Check if S3 buckets enforce encryption for data at rest and require SSL for transmission.
+func checkS3Confidentiality(ctx context.Context, cfg aws.Config) error {
+	s3Svc := s3.NewFromConfig(cfg)
+
+	// List all S3 buckets
+	result, err := s3Svc.ListBuckets(ctx, &s3.ListBucketsInput{})
+	if err != nil {
+		return fmt.Errorf("failed to list S3 buckets: %v", err)
+	}
+
+	for _, bucket := range result.Buckets {
+		log.Printf("Checking S3 Bucket: %s\n", *bucket.Name)
+
+		// Check if encryption is enabled
+		_, err := s3Svc.GetBucketEncryption(ctx, &s3.GetBucketEncryptionInput{
+			Bucket: bucket.Name,
+		})
+		if err != nil {
+			return fmt.Errorf("S3 bucket %s does not have encryption enabled: %v", *bucket.Name, err)
+		}
+
+		// Check if SSL is enforced during transmission
+		policyStatus, err := s3Svc.GetBucketPolicyStatus(ctx, &s3.GetBucketPolicyStatusInput{
+			Bucket: bucket.Name,
+		})
+		if err == nil && policyStatus.PolicyStatus != nil && *policyStatus.PolicyStatus.IsPublic {
+			return fmt.Errorf("S3 bucket %s allows unencrypted traffic. SSL must be enforced.", *bucket.Name)
+		}
+	}
+
+	log.Println("All S3 buckets are encrypted and enforce SSL for transmission.")
+	return nil
+}
+
+// Check if EBS volumes are encrypted.
+func checkEBSConfidentiality(ctx context.Context, cfg aws.Config) error {
+	ec2Svc := ec2.NewFromConfig(cfg)
+
+	// Describe all EBS volumes
+	result, err := ec2Svc.DescribeVolumes(ctx, &ec2.DescribeVolumesInput{})
+	if err != nil {
+		return fmt.Errorf("failed to describe EBS volumes: %v", err)
+	}
+
+	for _, volume := range result.Volumes {
+		if !*volume.Encrypted {
+			return fmt.Errorf("EBS volume %s is not encrypted", *volume.VolumeId)
+		}
+	}
+
+	log.Println("All EBS volumes are encrypted.")
+	return nil
+}
+
+// Check if RDS instances have encryption enabled.
+func checkRDSConfidentiality(ctx context.Context, cfg aws.Config) error {
+	rdsSvc := rds.NewFromConfig(cfg)
+
+	// Describe all RDS instances
+	result, err := rdsSvc.DescribeDBInstances(ctx, &rds.DescribeDBInstancesInput{})
+	if err != nil {
+		return fmt.Errorf("failed to describe RDS instances: %v", err)
+	}
+
+	for _, dbInstance := range result.DBInstances {
+		if !*dbInstance.StorageEncrypted {
+			return fmt.Errorf("RDS instance %s does not have encryption enabled", *dbInstance.DBInstanceIdentifier)
+		}
+	}
+
+	log.Println("All RDS instances are encrypted.")
 	return nil
 }

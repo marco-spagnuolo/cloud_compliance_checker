@@ -924,6 +924,18 @@
           "value": 5
         }
       ]
+    },
+    {
+      "id": "03.13.08",
+      "name": "Transmission and Storage Confidentiality",
+      "description": "Implement cryptographic mechanisms to prevent the unauthorized disclosure of CUI during transmission and while in storage.",
+      "criteria": [
+        {
+          "description": "Ensure that cryptographic methods are in place to protect CUI during both transmission and storage.",
+          "check_function": "CheckTSC",
+          "value": 5
+        }
+      ]
     }
   ],
   "responses": {
