@@ -888,9 +888,31 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 	// 		Impact:      0,
 	// 	}
 
-	case "CheckBP":
+	// case "CheckBP":
 
-		err := protection.VerifyComponents(cfg)
+	// 	err := protection.VerifyComponents(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		fmt.Printf("\n[ERROR]: %v\n", err)
+	// 		return result
+
+	// 	}
+
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+
+	case "CheckISR":
+
+		err := protection.SecureAWSResources(cfg)
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,

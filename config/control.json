@@ -900,6 +900,18 @@
           "value": 5
         }
       ]
+    },
+    {
+      "id": "03.13.04",
+      "name": "Information in Shared System Resources",
+      "description": "Prevent unauthorized and unintended information transfer via shared system resources.",
+      "criteria": [
+        {
+          "description": "Check for controls that prevent unauthorized information transfer through shared resources.",
+          "check_function": "CheckISR",
+          "value": 5
+        }
+      ]
     }
   ],
   "responses": {
