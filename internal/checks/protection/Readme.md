@@ -9,7 +9,7 @@ This document provides a set of AWS CLI commands that can be used to verify and 
 To list all the NAT Gateways in your AWS environment, use the following command:
 
 ```bash\
-aws ec2 describe-nat-gateways --query "NatGateways[*].NatGatewayId"\
+aws ec2 describe-nat-gateways --query "NatGateways[*].NatGatewayId"
 ```
 
 **Explanation**: This command retrieves and displays the IDs of all NAT Gateways configured in your AWS account. NAT Gateways are used to allow private subnets to access the internet without exposing them directly.
@@ -19,7 +19,7 @@ aws ec2 describe-nat-gateways --query "NatGateways[*].NatGatewayId"\
 To list all the Internet Gateways, run:
 
 ```bash\
-aws ec2 describe-internet-gateways --query "InternetGateways[*].InternetGatewayId"\
+aws ec2 describe-internet-gateways --query "InternetGateways[*].InternetGatewayId"
 ```
 
 **Explanation**: This command retrieves the IDs of all Internet Gateways in your AWS environment. Internet Gateways enable communication between your VPC and the internet.
@@ -29,7 +29,7 @@ aws ec2 describe-internet-gateways --query "InternetGateways[*].InternetGatewayI
 To check the VPN Connections, use:
 
 ```bash\
-aws ec2 describe-vpn-connections --query "VpnConnections[*].VpnConnectionId"\
+aws ec2 describe-vpn-connections --query "VpnConnections[*].VpnConnectionId"
 ```
 
 **Explanation**: This command lists all the VPN Connections available in your account, which are used to securely connect your on-premises network to your AWS VPC.
@@ -39,7 +39,7 @@ aws ec2 describe-vpn-connections --query "VpnConnections[*].VpnConnectionId"\
 To view the existing CloudWatch Log Groups, use:
 
 ```bash\
-aws logs describe-log-groups --query "logGroups[*].logGroupName"\
+aws logs describe-log-groups --query "logGroups[*].logGroupName"
 ```
 
 **Explanation**: This command retrieves the names of all CloudWatch Log Groups. CloudWatch Log Groups help you collect and monitor logs from different AWS resources.
@@ -49,7 +49,7 @@ aws logs describe-log-groups --query "logGroups[*].logGroupName"\
 To list all Regional Web ACLs (e.g., for Application Load Balancers or API Gateways):
 
 ```bash\
-aws wafv2 list-web-acls --scope REGIONAL --query "WebACLs[*].Name" --region us-east-1\
+aws wafv2 list-web-acls --scope REGIONAL --query "WebACLs[*].Name" --region us-east-1
 ```
 
 **Explanation**: This command checks for the presence of Web ACLs configured under the `REGIONAL` scope. Regional Web ACLs protect resources like ALBs and API Gateways from security threats.
@@ -59,7 +59,7 @@ aws wafv2 list-web-acls --scope REGIONAL --query "WebACLs[*].Name" --region us-e
 To list Web ACLs configured for CloudFront (global):
 
 ```bash\
-aws wafv2 list-web-acls --scope CLOUDFRONT --query "WebACLs[*].Name"\
+aws wafv2 list-web-acls --scope CLOUDFRONT --query "WebACLs[*].Name"
 ```
 
 **Explanation**: This command retrieves Web ACLs configured under the `CLOUDFRONT` scope. Web ACLs for CloudFront help protect your CloudFront distributions globally from various web threats.
