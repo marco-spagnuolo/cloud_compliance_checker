@@ -56,6 +56,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.40.3
 	github.com/aws/aws-sdk-go-v2/service/configservice v1.49.1
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.179.2
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.28.2
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.40.0
 	github.com/aws/aws-sdk-go-v2/service/guardduty v1.49.0
 	github.com/aws/aws-sdk-go-v2/service/iam v1.35.3
 	github.com/aws/aws-sdk-go-v2/service/inspector v1.25.2

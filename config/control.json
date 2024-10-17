@@ -936,6 +936,18 @@
           "value": 5
         }
       ]
+    },
+    {
+      "id": "03.13.09",
+      "name": "Network Disconnect",
+      "description": "Terminate the network connection associated with a communications session at the end of the session or after an organization-defined time period of inactivity.",
+      "criteria": [
+        {
+          "description": "Check for automatic termination of network connections after sessions end or periods of inactivity.",
+          "check_function": "CheckNetworkDisconnect",
+          "value": 5
+        }
+      ]
     }
   ],
   "responses": {
