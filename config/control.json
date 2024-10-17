@@ -960,6 +960,18 @@
           "value": 5
         }
       ]
+    },
+    {
+      "id": "03.13.11",
+      "name": "Cryptographic Protection",
+      "description": "Implement the organization-defined types of cryptography to protect the confidentiality of CUI.",
+      "criteria": [
+        {
+          "description": "Ensure appropriate cryptographic methods are used to safeguard CUI.",
+          "check_function": "CheckCP",
+          "value": 5
+        }
+      ]
     }
   ],
   "responses": {

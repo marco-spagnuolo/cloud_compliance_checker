@@ -173,7 +173,7 @@ func SecurelyDeleteEBSVolume(ctx context.Context, cfg aws.Config, volumeId strin
 func CheckTransmissionAndStorageConfidentiality(cfg aws.Config) error {
 	ctx := context.TODO()
 	// Check S3 bucket encryption and transmission settings
-	if err := checkS3Confidentiality(ctx, cfg); err != nil {
+	if err := CheckS3Confidentiality(cfg); err != nil {
 		return fmt.Errorf("S3 confidentiality check failed: %v", err)
 	}
 
@@ -192,7 +192,9 @@ func CheckTransmissionAndStorageConfidentiality(cfg aws.Config) error {
 }
 
 // Check if S3 buckets enforce encryption for data at rest and require SSL for transmission.
-func checkS3Confidentiality(ctx context.Context, cfg aws.Config) error {
+// 03.13.11
+func CheckS3Confidentiality(cfg aws.Config) error {
+	ctx := context.TODO()
 	s3Svc := s3.NewFromConfig(cfg)
 
 	// List all S3 buckets
