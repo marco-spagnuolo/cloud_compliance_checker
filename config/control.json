@@ -912,6 +912,18 @@
           "value": 5
         }
       ]
+    },
+    {
+      "id": "03.13.06",
+      "name": "Network Communications — Deny by Default — Allow by Exception",
+      "description": "Deny network communications traffic by default, and allow network communications traffic by exception.",
+      "criteria": [
+        {
+          "description": "Verify that network traffic is denied by default and only allowed by explicit exceptions.",
+          "check_function": "CheckNetworkTraffic",
+          "value": 5
+        }
+      ]
     }
   ],
   "responses": {

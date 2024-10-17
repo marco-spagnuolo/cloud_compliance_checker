@@ -11,6 +11,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
+// CheckExchangeAgreements checks for existing CUI exchange agreements in the specified S3 bucket
+// 03.12.05
 func CheckExchangeAgreements(awsCfg aws.Config) error {
 	bucketName := config.AppConfig.AWS.SecurityAssessmentConfig.S3BucketName
 	log.Println("Checking for existing CUI exchange agreements...")
