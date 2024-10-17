@@ -972,6 +972,18 @@
           "value": 5
         }
       ]
+    },
+    {
+      "id": "03.13.12",
+      "name": "Collaborative Computing Devices and Applications",
+      "description": "Prohibit the remote activation of collaborative computing devices and applications with organization-defined exceptions. Provide an explicit indication of use to users physically present at the devices.",
+      "criteria": [
+        {
+          "description": "Check for controls that prohibit remote activation of devices, with clear indicators of use for physically present users.",
+          "check_function": "CheckCCDA",
+          "value": 5
+        }
+      ]
     }
   ],
   "responses": {
