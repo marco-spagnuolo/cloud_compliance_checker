@@ -1017,31 +1017,75 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 	// 		Impact:      0,
 	// 	}
 
-	case "CheckCP":
+	// case "CheckCP":
 
-		err := protection.CheckS3Confidentiality(cfg)
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			fmt.Printf("\n[ERROR]: %v\n", err)
-			return result
+	// 	err := protection.CheckS3Confidentiality(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		fmt.Printf("\n[ERROR]: %v\n", err)
+	// 		return result
 
-		}
+	// 	}
 
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
 
-	case "CheckCCDA":
+	// case "CheckCCDA":
 
-		err := protection.CheckCollaborativeDeviceSettings(cfg)
+	// 	err := protection.CheckCollaborativeDeviceSettings(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		fmt.Printf("\n[ERROR]: %v\n", err)
+	// 		return result
+
+	// 	}
+
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+
+	// case "CheckMC":
+
+	// 	err := protection.CheckMobileCode(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		fmt.Printf("\n[ERROR]: %v\n", err)
+	// 		return result
+
+	// 	}
+
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+
+	case "CheckSessionAuthenticity":
+
+		err := protection.CheckSessionAuthenticity(cfg)
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,

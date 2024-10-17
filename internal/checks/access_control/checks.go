@@ -1,10 +1,7 @@
-// Modulo principale per i controlli di conformità AWS
-
 package iampolicy
 
 import (
 	"cloud_compliance_checker/config"
-	"cloud_compliance_checker/internal/checks/access_control/iampolicy/utils"
 	"context"
 	"fmt"
 	"log"
@@ -41,13 +38,13 @@ func (c *IAMCheck) RunCheckPolicies() error {
 	// Elenca gli utenti IAM su AWS
 	listUsersOutput, err := c.IAMClient.ListUsers(context.TODO(), &iam.ListUsersInput{})
 	if err != nil {
-		return utils.LogAndReturnError("impossibile elencare gli utenti IAM", err)
+		return LogAndReturnError("impossibile elencare gli utenti IAM", err)
 	}
 
 	// Carica la configurazione utenti e policy dal file YAML
 	usersFromConfig, err := LoadUsersFromConfig()
 	if err != nil {
-		return utils.LogAndReturnError("impossibile caricare gli utenti dal file di configurazione", err)
+		return LogAndReturnError("impossibile caricare gli utenti dal file di configurazione", err)
 	}
 
 	// Itera sugli utenti AWS e verifica le policy assegnate
@@ -59,7 +56,7 @@ func (c *IAMCheck) RunCheckPolicies() error {
 			UserName: awsUser.UserName,
 		})
 		if err != nil {
-			return utils.LogAndReturnError(fmt.Sprintf("impossibile elencare le policy assegnate all'utente %s", *awsUser.UserName), err)
+			return LogAndReturnError(fmt.Sprintf("impossibile elencare le policy assegnate all'utente %s", *awsUser.UserName), err)
 		}
 
 		// Cerca l'utente nel file di configurazione
@@ -79,7 +76,7 @@ func (c *IAMCheck) RunCheckPolicies() error {
 			fmt.Printf("=======> L'utente %s ha la policy: %s\n", *awsUser.UserName, *awsPolicy.PolicyName)
 
 			// Confronta la policy assegnata su AWS con quelle definite nel file YAML
-			if !utils.ContainsString(configUser.Policies, *awsPolicy.PolicyName) {
+			if !ContainsString(configUser.Policies, *awsPolicy.PolicyName) {
 				fmt.Printf("ERRORE: La policy %s per l'utente %s non è conforme (non trovata nel file di configurazione)\n", *awsPolicy.PolicyName, *awsUser.UserName)
 			}
 		}
@@ -123,7 +120,7 @@ func (c *IAMCheck) RunCheckAcceptedPolicies() error {
 		fmt.Printf("Policy trovata: %s/d", *policy.PolicyName)
 	}
 
-	policiesOnAWS := utils.MapAWSManagedPolicies(listPoliciesOutput.Policies)
+	policiesOnAWS := MapAWSManagedPolicies(listPoliciesOutput.Policies)
 
 	// Confronta le policy accettate con quelle effettivamente presenti su AWS
 	for _, acceptedPolicy := range acceptedPolicies {
@@ -163,7 +160,7 @@ func RunSecurityGroupCheck(securityGroupsFromConfig []config.SecurityGroup, secu
 		// Verifica le porte di ingresso
 		if awsSG.IpPermissions != nil {
 			for _, ingress := range awsSG.IpPermissions {
-				if ingress.FromPort != nil && !utils.Contains(configSG.AllowedIngressPorts, int(*ingress.FromPort)) {
+				if ingress.FromPort != nil && !Contains(configSG.AllowedIngressPorts, int(*ingress.FromPort)) {
 					fmt.Printf("Porta di ingresso %d non consentita per il gruppo %s\n", *ingress.FromPort, *awsSG.GroupName)
 					isCompliant = false
 				}
@@ -173,7 +170,7 @@ func RunSecurityGroupCheck(securityGroupsFromConfig []config.SecurityGroup, secu
 		// Verifica le porte di uscita
 		if awsSG.IpPermissionsEgress != nil {
 			for _, egress := range awsSG.IpPermissionsEgress {
-				if egress.FromPort != nil && !utils.Contains(configSG.AllowedEgressPorts, int(*egress.FromPort)) {
+				if egress.FromPort != nil && !Contains(configSG.AllowedEgressPorts, int(*egress.FromPort)) {
 					fmt.Printf("Porta di uscita %d non consentita per il gruppo %s\n", *egress.FromPort, *awsSG.GroupName)
 					isCompliant = false
 				}
@@ -194,15 +191,15 @@ func RunSecurityGroupCheck(securityGroupsFromConfig []config.SecurityGroup, secu
 func (c *IAMCheck) RunS3BucketCheck() error {
 	listBucketsOutput, err := c.S3Client.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
 	if err != nil {
-		return utils.LogAndReturnError("impossibile elencare i bucket S3", err)
+		return LogAndReturnError("impossibile elencare i bucket S3", err)
 	}
 
 	s3BucketsFromConfig, err := loadS3BucketsFromConfig()
 	if err != nil {
-		return utils.LogAndReturnError("errore nella decodifica dei bucket S3 dal file di configurazione", err)
+		return LogAndReturnError("errore nella decodifica dei bucket S3 dal file di configurazione", err)
 	}
 
-	return utils.CheckS3BucketsCompliance(c.S3Client, s3BucketsFromConfig, listBucketsOutput.Buckets)
+	return CheckS3BucketsCompliance(c.S3Client, s3BucketsFromConfig, listBucketsOutput.Buckets)
 }
 
 // RunCheckCUIFlow esegue i controlli di conformità richiesti per NIST SP 800-171 3.1.3
@@ -211,25 +208,25 @@ func (c *IAMCheck) RunCheckCUIFlow() error {
 	// Carica i gruppi di sicurezza dalla configurazione
 	securityGroupsFromConfig, err := loadSecurityGroupsFromConfig()
 	if err != nil {
-		return utils.LogAndReturnError("errore nella decodifica dei gruppi di sicurezza dal file di configurazione", err)
+		return LogAndReturnError("errore nella decodifica dei gruppi di sicurezza dal file di configurazione", err)
 	}
 
 	// Elenca i gruppi di sicurezza da AWS
 	describeSGOutput, err := c.EC2Client.DescribeSecurityGroups(context.TODO(), &ec2.DescribeSecurityGroupsInput{})
 	if err != nil {
-		return utils.LogAndReturnError("impossibile elencare i gruppi di sicurezza", err)
+		return LogAndReturnError("impossibile elencare i gruppi di sicurezza", err)
 	}
 
 	// Passa i dati caricati alla funzione RunSecurityGroupCheck
 	if err := RunSecurityGroupCheck(securityGroupsFromConfig, describeSGOutput.SecurityGroups); err != nil {
-		return utils.LogAndReturnError("errore durante il controllo dei gruppi di sicurezza", err)
+		return LogAndReturnError("errore durante il controllo dei gruppi di sicurezza", err)
 	}
 
 	fmt.Println("===== Controllo dei gruppi di sicurezza completato =====")
 
 	fmt.Println("===== Inizio controllo dei bucket S3 (3.1.3) =====")
 	if err := c.RunS3BucketCheck(); err != nil {
-		return utils.LogAndReturnError("errore durante il controllo dei bucket S3", err)
+		return LogAndReturnError("errore durante il controllo dei bucket S3", err)
 	}
 	fmt.Println("===== Controllo dei bucket S3 completato =====")
 
@@ -240,18 +237,18 @@ func (c *IAMCheck) RunCheckCUIFlow() error {
 func (c *IAMCheck) RunCheckSeparateDuties() error {
 	criticalRoles, err := loadCriticalRolesFromConfig()
 	if err != nil {
-		return utils.LogAndReturnError("impossibile caricare i ruoli critici dal file di configurazione", err)
+		return LogAndReturnError("impossibile caricare i ruoli critici dal file di configurazione", err)
 	}
 
 	listRolesOutput, err := c.IAMClient.ListRoles(context.TODO(), &iam.ListRolesInput{})
 	if err != nil {
-		return utils.LogAndReturnError("impossibile elencare i ruoli IAM su AWS", err)
+		return LogAndReturnError("impossibile elencare i ruoli IAM su AWS", err)
 	}
 
-	roleFunctionMap := utils.MapRolesToFunctions(listRolesOutput.Roles, c.IAMClient)
+	roleFunctionMap := MapRolesToFunctions(listRolesOutput.Roles, c.IAMClient)
 
 	for _, criticalRole := range criticalRoles {
-		if err := utils.VerifyCriticalRoleCompliance(criticalRole, roleFunctionMap); err != nil {
+		if err := VerifyCriticalRoleCompliance(criticalRole, roleFunctionMap); err != nil {
 			return err
 		}
 	}
@@ -265,7 +262,7 @@ func (c *IAMCheck) RunPrivilegeCheck() error {
 	// Carica gli utenti e le loro policy dalla configurazione
 	usersFromConfig, err := LoadUsersFromConfig()
 	if err != nil {
-		return utils.LogAndReturnError("impossibile caricare gli utenti dal file di configurazione", err)
+		return LogAndReturnError("impossibile caricare gli utenti dal file di configurazione", err)
 	}
 
 	// Verifica i privilegi e le funzioni di sicurezza per ogni utente
@@ -305,7 +302,7 @@ func (c *IAMCheck) RunPrivilegeCheck() error {
 func (c *IAMCheck) RunPrivilegeAccountCheck() error {
 	usersFromConfig, err := LoadUsersFromConfig()
 	if err != nil {
-		return utils.LogAndReturnError("Impossibile caricare gli utenti dal file di configurazione", err)
+		return LogAndReturnError("Impossibile caricare gli utenti dal file di configurazione", err)
 	}
 
 	for _, user := range usersFromConfig {
@@ -327,7 +324,7 @@ func (c *IAMCheck) RunPrivilegeAccountCheck() error {
 
 		// Verifica che le policy corrispondano alle funzioni di sicurezza
 		for _, sf := range user.SecurityFunctions {
-			if !utils.ContainsString(user.Policies, sf) {
+			if !ContainsString(user.Policies, sf) {
 				fmt.Printf("ERRORE: La policy %s per l'utente %s non corrisponde alla funzione di sicurezza %s\n", user.Policies, user.Name, sf)
 				return fmt.Errorf("funzioni di sicurezza non conformi per l'utente %s", user.Name)
 			}
@@ -346,7 +343,7 @@ func LoadUsersFromConfig() (map[string]config.User, error) {
 		return nil, fmt.Errorf("errore nella decodifica degli utenti dal file di configurazione: %v", err)
 	}
 
-	return utils.MapUsers(usersConfig), nil
+	return MapUsers(usersConfig), nil
 }
 
 // loadSecurityGroupsFromConfig carica i gruppi di sicurezza dal file di configurazione
@@ -394,7 +391,7 @@ func (c *IAMCheck) RunPrivilegedFunctionCheck() error {
 	// Carica gli utenti dal file di configurazione
 	usersFromConfig, err := LoadUsersFromConfig()
 	if err != nil {
-		return utils.LogAndReturnError("Impossibile caricare gli utenti dal file di configurazione", err)
+		return LogAndReturnError("Impossibile caricare gli utenti dal file di configurazione", err)
 	}
 
 	for _, user := range usersFromConfig {

@@ -16,14 +16,6 @@ type ComplianceResult struct {
 	Impact      int
 }
 
-// AssessmentResult represents the result of an asset assessment
-type AssessmentResult struct {
-	Asset         Asset
-	Implemented   bool
-	Planned       bool
-	NotApplicable bool
-}
-
 // Score represents the compliance score of an asset
 type Score struct {
 	Asset Asset

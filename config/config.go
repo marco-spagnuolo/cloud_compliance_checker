@@ -195,8 +195,10 @@ type SecurityAssessmentConfig struct {
 
 // ProtectionConfig holds the details related to protection
 type ProtectionConfig struct {
-	ManagedServices []string `mapstructure:"managed_services"`
-	LogGroupName    string   `mapstructure:"cloud_watch_log_group_name"`
+	ManagedServices       []string `mapstructure:"managed_services"`
+	LogGroupName          string   `mapstructure:"cloud_watch_log_group_name"`
+	MobileCodes           []string `mapstructure:"mobile_codes"`
+	CloudWatchMobileCodes []string `mapstructure:"cloud_watch_mobile_codes"`
 }
 
 // AppConfig is the global configuration

@@ -1,4 +1,4 @@
-package utils
+package iampolicy
 
 import (
 	"cloud_compliance_checker/config"

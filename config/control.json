@@ -984,6 +984,30 @@
           "value": 5
         }
       ]
+    },
+    {
+      "id": "03.13.13",
+      "name": "Mobile Code",
+      "description": "Define acceptable mobile code and mobile code technologies. Authorize, monitor, and control the use of mobile code.",
+      "criteria": [
+        {
+          "description": "Ensure the organization has policies in place for acceptable use of mobile code and monitors its implementation.",
+          "check_function": "CheckMC",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.13.15",
+      "name": "Session Authenticity",
+      "description": "Protect the authenticity of communications sessions.",
+      "criteria": [
+        {
+          "description": "Verify measures that ensure the authenticity and integrity of communications sessions.",
+          "check_function": "CheckSessionAuthenticity",
+          "value": 5
+        }
+      ]
     }
   ],
   "responses": {

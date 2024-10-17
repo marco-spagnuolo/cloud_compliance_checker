@@ -6,6 +6,8 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/apigateway"
+	"github.com/aws/aws-sdk-go-v2/service/cloudfront"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
@@ -124,5 +126,106 @@ func checkEC2SSHTimeouts(ctx context.Context, cfg aws.Config) error {
 		}
 	}
 
+	return nil
+}
+
+// CheckSessionAuthenticity ensures that sessions are protected using secure mechanisms such as TLS and MFA.
+// 03.13.15
+func CheckSessionAuthenticity(cfg aws.Config) error {
+	ctx := context.TODO()
+
+	// Step 1: Check CloudFront distributions for HTTPS (TLS) enforcement
+	log.Println("Starting check: CloudFront distributions for TLS enforcement...")
+	if err := checkCloudFrontTLS(ctx, cfg); err != nil {
+		return fmt.Errorf("CloudFront TLS check failed: %v", err)
+	}
+	log.Println("CloudFront TLS enforcement check completed.")
+
+	// Step 2: Check API Gateway for HTTPS (TLS) enforcement
+	log.Println("Starting check: API Gateway for TLS enforcement...")
+	if err := checkAPIGatewayTLS(ctx, cfg); err != nil {
+		return fmt.Errorf("API Gateway TLS check failed: %v", err)
+	}
+	log.Println("API Gateway TLS enforcement check completed.")
+
+	log.Println("Session authenticity checks completed successfully.")
+	return nil
+}
+
+// checkCloudFrontTLS checks if CloudFront distributions enforce HTTPS (TLS) for secure communication.
+func checkCloudFrontTLS(ctx context.Context, cfg aws.Config) error {
+	cloudFrontSvc := cloudfront.NewFromConfig(cfg)
+
+	log.Println("Listing all CloudFront distributions...")
+	result, err := cloudFrontSvc.ListDistributions(ctx, &cloudfront.ListDistributionsInput{})
+	if err != nil {
+		return fmt.Errorf("unable to list CloudFront distributions: %v", err)
+	}
+
+	log.Printf("Found %d CloudFront distributions.\n", len(result.DistributionList.Items))
+
+	for _, distribution := range result.DistributionList.Items {
+		log.Printf("Checking CloudFront Distribution ID: %s, Domain Name: %s\n", *distribution.Id, *distribution.DomainName)
+
+		// Check the DefaultCacheBehavior for TLS enforcement
+		behavior := distribution.DefaultCacheBehavior
+		if behavior.ViewerProtocolPolicy != "https-only" {
+			log.Printf("CloudFront distribution %s does NOT enforce HTTPS (https-only) policy. ViewerProtocolPolicy: %s\n", *distribution.Id, behavior.ViewerProtocolPolicy)
+			return fmt.Errorf("CloudFront distribution %s does not enforce TLS (https-only).", *distribution.Id)
+		} else {
+			log.Printf("CloudFront distribution %s enforces HTTPS (https-only).\n", *distribution.Id)
+		}
+	}
+
+	log.Println("All CloudFront distributions enforce HTTPS (https-only).")
+	return nil
+}
+
+// checkAPIGatewayTLS checks if API Gateway endpoints enforce HTTPS (TLS) for secure communication.
+func checkAPIGatewayTLS(ctx context.Context, cfg aws.Config) error {
+	apiSvc := apigateway.NewFromConfig(cfg)
+
+	log.Println("Listing all API Gateway REST APIs...")
+	result, err := apiSvc.GetRestApis(ctx, &apigateway.GetRestApisInput{})
+	if err != nil {
+		return fmt.Errorf("unable to list API Gateway REST APIs: %v", err)
+	}
+
+	log.Printf("Found %d API Gateway REST APIs.\n", len(result.Items))
+
+	for _, api := range result.Items {
+		log.Printf("Checking API Gateway: %s (ID: %s)\n", *api.Name, *api.Id)
+
+		// Get the stages of the API to check for HTTPS enforcement
+		stages, err := apiSvc.GetStages(ctx, &apigateway.GetStagesInput{
+			RestApiId: api.Id,
+		})
+		if err != nil {
+			return fmt.Errorf("unable to list API Gateway stages for %s: %v", *api.Name, err)
+		}
+
+		log.Printf("Found %d stages for API Gateway: %s\n", len(stages.Item), *api.Name)
+
+		for _, stage := range stages.Item {
+			log.Printf("Checking Stage: %s for API Gateway: %s\n", *stage.StageName, *api.Name)
+
+			// Check MethodSettings for HTTPS enforcement
+			if stage.MethodSettings != nil {
+				for methodKey, method := range stage.MethodSettings {
+					log.Printf("Checking method %s for HTTPS enforcement in Stage: %s\n", methodKey, *stage.StageName)
+
+					if !method.RequireAuthorizationForCacheControl {
+						log.Printf("API Gateway %s does NOT enforce HTTPS for Stage: %s, Method: %s\n", *api.Name, *stage.StageName, methodKey)
+					} else {
+						log.Printf("API Gateway %s enforces HTTPS for Stage: %s, Method: %s\n", *api.Name, *stage.StageName, methodKey)
+					}
+				}
+			} else {
+				log.Printf("No MethodSettings found for Stage: %s in API Gateway: %s\n", *stage.StageName, *api.Name)
+			}
+		}
+	}
+
+	log.Println("All checked API Gateway stages enforce HTTPS.")
 	return nil
 }

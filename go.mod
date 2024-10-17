@@ -52,6 +52,8 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.32.2
 	github.com/aws/aws-sdk-go-v2/config v1.27.43
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.31
+	github.com/aws/aws-sdk-go-v2/service/apigateway v1.27.2
+	github.com/aws/aws-sdk-go-v2/service/cloudfront v1.40.2
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.43.1
 	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.40.3
 	github.com/aws/aws-sdk-go-v2/service/configservice v1.49.1
