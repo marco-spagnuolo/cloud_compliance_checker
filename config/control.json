@@ -3,10 +3,10 @@
     {
       "id": "03.01.01",
       "name": "Account Management",
-      "description": "Instance has a specific security group: Ensure access control policies are established and implemented.",
+      "description": "Define the types of system accounts allowed and prohibited.\n Create, enable, modify, disable, and remove system accounts in accordance with policy, procedures, prerequisites, and criteria.\n Specify: Authorized users of the system, Group and role membership, and Access authorizations (i.e., privileges) for each account.\n Authorize access to the system based on: A valid access authorization and...",
       "criteria": [
         {
-          "description": "Instance has a specific security group",
+          "description": "Define the types of system accounts allowed and prohibited.\n Create, enable, modify, disable, and remove system accounts in accordance with policy, procedures, prerequisites, and criteria.\n Specify: Authorized users of the system, Group and role membership, and Access authorizations (i.e., privileges) for each account.\n Authorize access to the system based on: A valid access authorization and...",
           "check_function": "CheckUsersPolicies",
           "value": 5
         }
@@ -15,10 +15,10 @@
     {
       "id": "03.01.02",
       "name": "Access Enforcement",
-      "description": "Ensure only authorized transactions and functions are allowed.",
+      "description": "Enforce approved authorizations for logical access to CUI and system resources in accordance with applicable access control policies.",
       "criteria": [
         {
-          "description": "Ensure only authorized transactions and functions are allowed",
+          "description": "Enforce approved authorizations for logical access to CUI and system resources in accordance with applicable access control policies.",
           "check_function": "CheckAcceptedPolicies",
           "value": 5
         }
@@ -27,10 +27,10 @@
     {
       "id": "03.01.03",
       "name": "Information Flow Enforcement",
-      "description": "Ensure CUI flow is controlled.",
+      "description": "Enforce approved authorizations for controlling the flow of CUI within the system and between connected systems.",
       "criteria": [
         {
-          "description": "Control the flow of CUI in accordance with approved authorizations.",
+          "description": "Enforce approved authorizations for controlling the flow of CUI within the system and between connected systems.",
           "check_function": "CheckCUIFlow",
           "value": 5
         }
@@ -39,10 +39,10 @@
     {
       "id": "03.01.04",
       "name": "Separation of Duties",
-      "description": "Ensure duties are separated to reduce the risk of malevolent activity without collusion.",
+      "description": "Identify the duties of individuals requiring separation. Define system access authorizations to support separation of duties.",
       "criteria": [
         {
-          "description": "Instance has roles with separate duties",
+          "description": "Identify the duties of individuals requiring separation. Define system access authorizations to support separation of duties.",
           "check_function": "CheckSeparateDuties",
           "value": 5
         }
@@ -97,12 +97,24 @@
       ]
     },
     {
-      "id": "03.01.10",
-      "name": "Session Lock with Pattern-Hiding Displays",
-      "description": "Ensure session lock with pattern-hiding displays is used.",
+      "id": "03.01.09",
+      "name": "System Use Notification",
+      "description": "Display a system use notification message with privacy and security notices consistent with applicable CUI rules before granting access to the system.",
       "criteria": [
         {
-          "description": "Instance uses session lock with pattern-hiding displays",
+          "description": "Display a system use notification message with privacy and security notices consistent with applicable CUI rules before granting access to the system.",
+          "check_function": "//",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.01.10",
+      "name": "Device Lock",
+      "description": "Prevent access to the system by [Selection (one or more): initiating a device lock after\n [Assignment: organization-defined time period] of inactivity; requiring the user to initiate a device lock before leaving the system unattended].\n Retain the device lock until the user reestablishes access using established identification and authentication procedures..",
+      "criteria": [
+        {
+          "description": "Prevent access to the system by [Selection (one or more): initiating a device lock after\n [Assignment: organization-defined time period] of inactivity; requiring the user to initiate a device lock before leaving the system unattended].\n Retain the device lock until the user reestablishes access using established identification and authentication procedures..",
           "check_function": "CheckSessionLock",
           "value": 5
         }
@@ -133,6 +145,30 @@
       ]
     },
     {
+      "id": "03.01.16",
+      "name": "Wirless Access",
+      "description": "stablish usage restrictions, configuration requirements, and connection requirements for each type of wireless access to the system.\n Authorize each type of wireless access to the system prior to establishing such connections.\n Disable, when not intended for use, wireless networking capabilities prior to issuance and deployment.\n Protect wireless access to the system using authentication and encryption.",
+      "criteria": [
+        {
+          "description": "stablish usage restrictions, configuration requirements, and connection requirements for each type of wireless access to the system.\n Authorize each type of wireless access to the system prior to establishing such connections.\n Disable, when not intended for use, wireless networking capabilities prior to issuance and deployment.\n Protect wireless access to the system using authentication and encryption.",
+          "check_function": "//",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.01.18",
+      "name": " Access Control for Mobile Devices",
+      "description": "Establish usage restrictions, configuration requirements, and connection requirements for mobile devices.\n Authorize the connection of mobile devices to the system. Implement full-device or container-based encryption to protect the confidentiality of CUI on mobile devices.",
+      "criteria": [
+        {
+          "description": "Establish usage restrictions, configuration requirements, and connection requirements for mobile devices.\n Authorize the connection of mobile devices to the system. Implement full-device or container-based encryption to protect the confidentiality of CUI on mobile devices.",
+          "check_function": "//",
+          "value": 5
+        }
+      ]
+    },
+    {
       "id": "03.01.20",
       "name": "Use of External Systems",
       "description": "Ensure connections to external systems are verified and controlled.",
@@ -140,6 +176,42 @@
         {
           "description": "Instance controls connections to external systems",
           "check_function": "CheckExternalSystemConnections",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.01.22",
+      "name": "Publicly Accessible Content",
+      "description": "Train authorized individuals to ensure that publicly accessible information does not contain CUI.\n Review the content on publicly accessible systems for CUI and remove such information, if discovered.",
+      "criteria": [
+        {
+          "description": "Train authorized individuals to ensure that publicly accessible information does not contain CUI.\n Review the content on publicly accessible systems for CUI and remove such information, if discovered.",
+          "check_function": "//",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.02.01",
+      "name": "Publicly Accessible Content",
+      "description": "Provide security literacy training to system users: As part of initial training for new users and [Assignment: organization-defined frequency] thereafter, When required by system changes or following [Assignment: organization-defined events],\n and On recognizing and reporting indicators of insider threat, social engineering, and social mining",
+      "criteria": [
+        {
+          "description": "Provide security literacy training to system users: As part of initial training for new users and [Assignment: organization-defined frequency] thereafter, When required by system changes or following [Assignment: organization-defined events],\n and On recognizing and reporting indicators of insider threat, social engineering, and social mining",
+          "check_function": "//",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.02.02",
+      "name": "Publicly Accessible Content",
+      "description": "Provide role-based security training to organizational personnel:\n Before authorizing access to the system or CUI, before performing assigned duties, and \n[Assignment: organization-defined frequency] thereafter When required by system changes or following \n[Assignment: organization-defined events].\n Update role-based training content [Assignment: organization-defined frequency] and following [Assignment: organization-defined events].",
+      "criteria": [
+        {
+          "description": "Train authorized individuals to ensure that publicly accessible information does not contain CUI.\n Review the content on publicly accessible systems for CUI and remove such information, if discovered.",
+          "check_function": "//",
           "value": 5
         }
       ]
@@ -265,6 +337,42 @@
       ]
     },
     {
+      "id": "03.04.03",
+      "name": "Configuration Change Control",
+      "description": "Define the types of changes to the system that are configuration-controlled.\n Review proposed configuration-controlled changes to the system, and approve or disapprove such changes with explicit consideration for security impacts.\n Implement and document approved configuration-controlled changes to the system.\n Monitor and review activities associated with configuration-controlled changes to the system..",
+      "criteria": [
+        {
+          "description": "Define the types of changes to the system that are configuration-controlled.\n Review proposed configuration-controlled changes to the system, and approve or disapprove such changes with explicit consideration for security impacts.\n Implement and document approved configuration-controlled changes to the system.\n Monitor and review activities associated with configuration-controlled changes to the system..",
+          "check_function": "tbi",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.04.04",
+      "name": " Impact Analyses",
+      "description": "Analyze changes to the system to determine potential security impacts prior to change implementation.\n Verify that the security requirements for the system continue to be satisfied after the system changes have been implemented..",
+      "criteria": [
+        {
+          "description": "Analyze changes to the system to determine potential security impacts prior to change implementation.\n Verify that the security requirements for the system continue to be satisfied after the system changes have been implemented..",
+          "check_function": "tbi",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.04.05",
+      "name": "Access Restrictions for Change",
+      "description": "Define, document, approve, and enforce physical and logical access restrictions associated with changes to the system..",
+      "criteria": [
+        {
+          "description": "Define, document, approve, and enforce physical and logical access restrictions associated with changes to the system..",
+          "check_function": "tbi",
+          "value": 5
+        }
+      ]
+    },
+    {
       "id": "03.04.06",
       "name": "Least Functionality",
       "description": "Configure the system to provide only mission-essential capabilities.",
@@ -284,6 +392,18 @@
         {
           "description": "Identify software programs authorized to execute on the system.",
           "check_function": "CheckAuthorizedSoftware",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.04.10",
+      "name": "System Component Inventory",
+      "description": "Develop and document an inventory of system components. Review and update the system component inventory [Assignment: organization-defined frequency].\n Update the system component inventory as part of installations, removals, and system updates..",
+      "criteria": [
+        {
+          "description": "Develop and document an inventory of system components. Review and update the system component inventory [Assignment: organization-defined frequency].\n Update the system component inventory as part of installations, removals, and system updates..",
+          "check_function": "CheckInformationLocation",
           "value": 5
         }
       ]
@@ -445,6 +565,30 @@
       ]
     },
     {
+      "id": "03.06.04",
+      "name": "Incident Response Training",
+      "description": "Provide incident response training to system users consistent with assigned roles and responsibilities: Within \n[Assignment: organization-defined time period] of assuming an incident response role or responsibility or acquiring system access,\n When required by system changes, and [Assignment: organization-defined frequency] thereafter.\n Review and update incident response training content [Assignment: organization-defined frequency] and following [Assignment: organization-defined events].",
+      "criteria": [
+        {
+          "description": "Provide incident response training to system users consistent with assigned roles and responsibilities: Within \n[Assignment: organization-defined time period] of assuming an incident response role or responsibility or acquiring system access,\n When required by system changes, and [Assignment: organization-defined frequency] thereafter.\n Review and update incident response training content [Assignment: organization-defined frequency] and following [Assignment: organization-defined events].",
+          "check_function": "??",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.06.05",
+      "name": "Incident Response Plan",
+      "description": "Develop an incident response plan that: Provides the organization with a roadmap for implementing its incident response capability.",
+      "criteria": [
+        {
+          "description": "Develop an incident response plan that: Provides the organization with a roadmap for implementing its incident response capability.",
+          "check_function": "??",
+          "value": 5
+        }
+      ]
+    },
+    {
       "id": "03.07.04",
       "name": "Maintenance Tools",
     "description": "Approve, control, and monitor the use of system maintenance tools.\nCheck media with diagnostic and test programs for malicious code before it is used in the system.\nPrevent the removal of system maintenance equipment containing CUI by verifying that there is no CUI on the equipment, sanitizing or destroying the equipment, or retaining the equipment within the facility.",
@@ -493,6 +637,175 @@
       ]
     },
     {
+        "id": "03.08.01",
+        "name": "Media Storage",
+        "description": "Physically control and securely store system media that contain CUI.",
+        "criteria": [
+          {
+            "description": "Ensure physical control and secure storage of system media containing CUI.",
+            "check_function": "//",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "03.08.02",
+        "name": "Media Access",
+        "description": "Restrict access to CUI on system media to authorized personnel or roles.",
+        "criteria": [
+          {
+            "description": "Verify that only authorized personnel or roles can access CUI on system media.",
+            "check_function": "//",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "03.08.03",
+        "name": "Media Sanitization",
+        "description": "Sanitize system media that contain CUI prior to disposal, release out of organizational control, or release for reuse.",
+        "criteria": [
+          {
+            "description": "Ensure system media containing CUI are sanitized before disposal or reuse.",
+            "check_function": "//",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "03.08.04",
+        "name": "Media Marking",
+        "description": "Mark system media that contain CUI to indicate distribution limitations, handling caveats, and applicable CUI markings.",
+        "criteria": [
+          {
+            "description": "Verify system media containing CUI are properly marked with handling and distribution information.",
+            "check_function": "//",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "03.08.05",
+        "name": "Media Transport",
+        "description": "Protect and control system media that contain CUI during transport outside of controlled areas. Maintain accountability of system media that contain CUI during transport outside of controlled areas. Document activities associated with the transport of system media that contain CUI.",
+        "criteria": [
+          {
+            "description": "Ensure protection and accountability of CUI media during transport, and document transport activities.",
+            "check_function": "//",
+            "value": 5
+          }
+        ]
+      },
+      {
+        "id": "03.08.07",
+        "name": "Media Use",
+        "description": "Restrict or prohibit the use of organization-defined types of system media. Prohibit the use of removable system media without an identifiable owner.",
+        "criteria": [
+          {
+            "description": "Enforce restrictions on system media usage, including removable media without identifiable ownership.",
+            "check_function": "//",
+            "value": 5
+          }
+        ]
+      },
+      {
+      "id": "03.08.09",
+       "name": "System Backup — Cryptographic Protection",
+       "description": "Protect the confidentiality of backup information. Implement cryptographic mechanisms to prevent unauthorized disclosure of CUI at backup storage locations.",
+       "criteria": [
+         {
+           "description": "Ensure backups containing CUI are protected with cryptographic mechanisms to prevent unauthorized access.",
+           "check_function": "//",
+           "value": 5
+         }
+       ]
+    },
+    {
+    "id": "03.09.01",
+    "name": "Personnel Screening",
+    "description": "Screen individuals prior to authorizing access to the system. Rescreen individuals in accordance with organization-defined conditions requiring rescreening.",
+    "criteria": [
+      {
+        "description": "Verify that individuals are screened before being granted system access, and that rescreening is conducted as per defined conditions.",
+        "check_function": "//",
+        "value": 5
+      }
+    ]
+    },
+    {
+    "id": "03.09.02",
+    "name": "Personnel Termination and Transfer",
+    "description": "When individual employment is terminated: Disable system access within the organization-defined time period, terminate or revoke authenticators and credentials associated with the individual, and retrieve security-related system property. When individuals are reassigned or transferred to other positions in the organization: Review and confirm the ongoing operational need for current logical and physical access authorizations.",
+    "criteria": [
+      {
+        "description": "Ensure system access is disabled and credentials are revoked when employment is terminated, and access authorizations are reviewed during personnel transfers.",
+        "check_function": "//",
+        "value": 5
+      }
+    ]
+    },
+
+  {
+    "id": "03.10.01",
+    "name": "Physical Access Authorizations",
+    "description": "Develop, approve, and maintain a list of individuals with authorized access to the facility where the system resides. Issue authorization credentials for facility access. Review the facility access list at an organization-defined frequency. Remove individuals from the facility access list when access is no longer required.",
+    "criteria": [
+      {
+        "description": "Ensure there is a maintained list of individuals with facility access, that credentials are issued, and access lists are regularly reviewed and updated.",
+        "check_function": "//",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "id": "03.10.02",
+    "name": "Monitoring Physical Access",
+    "description": "Monitor physical access to the facility where the system resides to detect and respond to physical security incidents. Review physical access logs at an organization-defined frequency and upon occurrence of specific events or potential indicators of events.",
+    "criteria": [
+      {
+        "description": "Verify that physical access to the facility is monitored, and access logs are regularly reviewed and analyzed for incidents.",
+        "check_function": "//",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "id": "03.10.06",
+    "name": "Alternate Work Site",
+    "description": "Determine alternate work sites allowed for use by employees. Employ the organization-defined security requirements at alternate work sites.",
+    "criteria": [
+      {
+        "description": "Ensure that alternate work sites are defined and meet specific security requirements set by the organization.",
+        "check_function": "//",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "id": "03.10.07",
+    "name": "Physical Access Control",
+    "description": "Enforce physical access authorizations at entry and exit points to the facility where the system resides by verifying individual physical access authorizations before granting access and controlling ingress and egress with physical access control systems, devices, or guards. Maintain physical access audit logs for entry or exit points and ensure visitor escort and control.",
+    "criteria": [
+      {
+        "description": "Check that physical access control measures are in place, including verification of authorizations, use of control systems, and maintenance of audit logs.",
+        "check_function": "//",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "id": "03.10.08",
+    "name": "Access Control for Transmission",
+    "description": "Control physical access to system distribution and transmission lines within organizational facilities.",
+    "criteria": [
+      {
+        "description": "Verify that access to system distribution and transmission lines is controlled to prevent unauthorized physical access.",
+        "check_function": "//",
+        "value": 5
+      }
+    ]
+  },
+  {
       "id": "03.11.02",
     "name": "Vulnerability Monitoring and Scanning",
     "description": "Monitor and scan the system for vulnerabilities [Assignment: organization-defined frequency] and when new vulnerabilities affecting the system are identified. Remediate system vulnerabilities within [Assignment: organization-defined response times]. Update system vulnerabilities to be scanned [Assignment: organization-defined frequency] and when new vulnerabilities are identified and reported.",
@@ -524,6 +837,42 @@
         {
           "description": "Assess the security requirements for the system and its environment of operation [Assignment: organization-defined frequency] to determine if the requirements have been satisfied.",
           "check_function": "CheckSA",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.12.02",
+    "name": " Plan of Action and Milestones",
+    "description": "Develop a plan of action and milestones for the system:\nTo document the planned remediation actions to correct weaknesses or deficiencies noted during security assessments and\nTo reduce or eliminate known system vulnerabilities.\nUpdate the existing plan of action and milestones based on the findings from:\nSecurity assessments,\nAudits or reviews, and\nContinuous monitoring activities.",
+      "criteria": [
+        {
+          "description": "Develop a plan of action and milestones for the system:\nTo document the planned remediation actions to correct weaknesses or deficiencies noted during security assessments and\nTo reduce or eliminate known system vulnerabilities.\nUpdate the existing plan of action and milestones based on the findings from:\nSecurity assessments,\nAudits or reviews, and\nContinuous monitoring activities.",
+          "check_function": "",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.12.03",
+    "name": "Continuous Monitoring",
+    "description": "Develop and implement a system-level continuous monitoring strategy that includes ongoing monitoring and security assessments.",
+      "criteria": [
+        {
+          "description": "Develop and implement a system-level continuous monitoring strategy that includes ongoing monitoring and security assessments.",
+          "check_function": "CheckCM",
+          "value": 5
+        }
+      ]
+    }, 
+    {
+      "id": "03.12.05",
+    "name": "Information Exchange",
+    "description": "Approve and manage the exchange of CUI between the system and other systems using [Selection (one or more): interconnection security agreements; information exchange security agreements; memoranda of understanding or agreement; service-level agreements; user agreements; non-disclosure agreements; other types of agreements]. Document interface characteristics, security requirements, and responsibilities for each system as part of the exchange agreements. Review and update the exchange agreements [Assignment: organization-defined frequency].",
+      "criteria": [
+        {
+          "description": "Approve and manage the exchange of CUI between the system and other systems using [Selection (one or more): interconnection security agreements; information exchange security agreements; memoranda of understanding or agreement; service-level agreements; user agreements; non-disclosure agreements; other types of agreements]. Document interface characteristics, security requirements, and responsibilities for each system as part of the exchange agreements. Review and update the exchange agreements [Assignment: organization-defined frequency].",
+          "check_function": "CheckIE",
           "value": 5
         }
       ]

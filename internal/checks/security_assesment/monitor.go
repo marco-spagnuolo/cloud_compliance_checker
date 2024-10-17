@@ -1,4 +1,4 @@
-package audit
+package security_assesment
 
 import (
 	"context"

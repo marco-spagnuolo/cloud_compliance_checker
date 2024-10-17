@@ -13,25 +13,26 @@ type Config struct {
 
 // AWSConfig contains the AWS configuration
 type AWSConfig struct {
-	AccessKey                      string                 `mapstructure:"access_key"`
-	SecretKey                      string                 `mapstructure:"secret_key"`
-	Region                         string                 `mapstructure:"region"`
-	User                           []User                 `mapstructure:"user"`
-	AcceptedPolicies               []string               `mapstructure:"accepted_policies"`
-	SecurityGroups                 []SecurityGroup        `mapstructure:"security_groups"`
-	S3Buckets                      []S3Bucket             `mapstructure:"s3_buckets"`
-	CriticalRole                   []CriticalRole         `mapstructure:"critical_roles"`
-	LoginPolicy                    LoginPolicy            `mapstructure:"login_policy"`
-	MissionEssentialConfig         MissionEssentialConfig `mapstructure:"mission_essential_capabilities"`
-	EC2Instances                   []EC2Config            `mapstructure:"ec2_instances"`
-	HighRiskTravelConfig           HighRiskTravelConfig   `mapstructure:"high_risk_travel"`
-	IdentifierManagement           IdentifierManagement   `mapstructure:"identifier_management"`
-	PasswordPolicy                 PasswordPolicy         `mapstructure:"password_policy"`
-	AttackerInstance               AttackerInstanceConfig `mapstructure:"attacker_instance"`
-	SnsTopicArn                    string                 `mapstructure:"sns_topic_arn"`
-	TestIncidentRensponseFrequency string                 `mapstructure:"test_incident_response_frequency"`
-	MaintenanceConfig              MaintenanceConfig      `mapstructure:"maintainance"`
-	RiskAssessmentConfig           RiskAssessmentConfig   `mapstructure:"risk_assessment"`
+	AccessKey                      string                   `mapstructure:"access_key"`
+	SecretKey                      string                   `mapstructure:"secret_key"`
+	Region                         string                   `mapstructure:"region"`
+	User                           []User                   `mapstructure:"user"`
+	AcceptedPolicies               []string                 `mapstructure:"accepted_policies"`
+	SecurityGroups                 []SecurityGroup          `mapstructure:"security_groups"`
+	S3Buckets                      []S3Bucket               `mapstructure:"s3_buckets"`
+	CriticalRole                   []CriticalRole           `mapstructure:"critical_roles"`
+	LoginPolicy                    LoginPolicy              `mapstructure:"login_policy"`
+	MissionEssentialConfig         MissionEssentialConfig   `mapstructure:"mission_essential_capabilities"`
+	EC2Instances                   []EC2Config              `mapstructure:"ec2_instances"`
+	HighRiskTravelConfig           HighRiskTravelConfig     `mapstructure:"high_risk_travel"`
+	IdentifierManagement           IdentifierManagement     `mapstructure:"identifier_management"`
+	PasswordPolicy                 PasswordPolicy           `mapstructure:"password_policy"`
+	AttackerInstance               AttackerInstanceConfig   `mapstructure:"attacker_instance"`
+	SnsTopicArn                    string                   `mapstructure:"sns_topic_arn"`
+	TestIncidentRensponseFrequency string                   `mapstructure:"test_incident_response_frequency"`
+	MaintenanceConfig              MaintenanceConfig        `mapstructure:"maintainance"`
+	RiskAssessmentConfig           RiskAssessmentConfig     `mapstructure:"risk_assessment"`
+	SecurityAssessmentConfig       SecurityAssessmentConfig `mapstructure:"security_assessment"`
 }
 
 // User represents a user in the configuration
@@ -184,6 +185,11 @@ type RensponseTimeConfig struct {
 	High     string `mapstructure:"high"`
 	Medium   string `mapstructure:"medium"`
 	Low      string `mapstructure:"low"`
+}
+
+// SecurityAssessmentConfig holds the details related to security assessment
+type SecurityAssessmentConfig struct {
+	S3BucketName string `mapstructure:"s3_bucket_information_exchange"`
 }
 
 // AppConfig is the global configuration
