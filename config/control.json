@@ -295,7 +295,7 @@
       "criteria": [
         {
           "description": "Instance synchronizes system clocks with an authoritative source",
-          "check_function": "CheckTimeSynchronization",
+          "check_function": "TBI",
           "value": 5
         }
       ]
@@ -331,7 +331,7 @@
       "criteria": [
         {
           "description": "Establish, document, and implement the following configuration settings for the system that reflect the most restrictive mode consistent with operational requirements: [Assignment: organization-defined configuration settings].",
-          "check_function": "tbi",
+          "check_function": "TBI",
           "value": 5
         }
       ]
@@ -343,7 +343,7 @@
       "criteria": [
         {
           "description": "Define the types of changes to the system that are configuration-controlled. Review and approve or disapprove proposed changes with explicit consideration for security impacts. Implement and document approved changes, and monitor activities related to configuration-controlled changes to the system.",
-          "check_function": "tbi",
+          "check_function": "TBI",
           "value": 5
         }
       ]
@@ -355,7 +355,7 @@
       "criteria": [
         {
           "description": "Analyze changes to the system to determine potential security impacts before implementation. Verify that security requirements continue to be met after changes are implemented.",
-          "check_function": "tbi",
+          "check_function": "TBI",
           "value": 5
         }
       ]
@@ -367,7 +367,7 @@
       "criteria": [
         {
           "description": "Define, document, approve, and enforce physical and logical access restrictions associated with changes to the system..",
-          "check_function": "tbi",
+          "check_function": "TBI",
           "value": 5
         }
       ]
@@ -536,7 +536,7 @@
       "criteria": [
         {
           "description": "Implement an incident-handling capability that is consistent with the incident response plan and includes preparation, detection and analysis, containment, eradication, and recovery.",
-          "check_function": "CheckIRHandling",
+          "check_function": "CheckRA",
           "value": 5
         }
       ]
@@ -548,7 +548,7 @@
       "criteria": [
         {
          "description": "Track and document system security incidents. Report suspected incidents to the organizational incident response team within the organization-defined time period and to designated authorities. Provide an incident response support resource for user assistance in handling and reporting incidents.",
-          "check_function": "CheckIRHandlingAndStore",
+          "check_function": "CheckRA",
           "value": 5
         }
       ]
@@ -560,7 +560,7 @@
       "criteria": [
         {
           "description": "Test the effectiveness of the incident response capability [Assignment: organization-defined frequency].",
-          "check_function": "CheckIRTesting",
+          "check_function": "CheckRA",
           "value": 5
         }
       ]
@@ -572,7 +572,7 @@
       "criteria": [
         {
           "description": "Provide incident response training to users based on roles within organization-defined timeframes, system changes, and at regular intervals. Review and update training after major events.",
-          "check_function": "??",
+          "check_function": "CheckRA",
           "value": 5
         }
       ]
@@ -584,7 +584,7 @@
       "criteria": [
         {
           "description": "Develop an incident response plan that: Provides the organization with a roadmap for implementing its incident response capability.",
-          "check_function": "??",
+          "check_function": "CheckRA",
           "value": 5
         }
       ]
@@ -621,18 +621,6 @@
         {
           "description": "Establish a process for maintenance personnel authorization. Maintain a list of authorized maintenance personnel or organizations. Verify that non-escorted maintenance personnel have the necessary access authorizations. Assign authorized personnel with technical competence to supervise maintenance activities when required.",
           "check_function": "CheckMaintainancePersonnel",
-          "value": 5
-        }
-      ]
-    },
-    {
-      "id": "03.11.01",
-      "name": "Risk Assessment",
-    "description": "Assess the risk (including supply chain risk) of unauthorized disclosure resulting from the processing, storage, or transmission of CUI.\n    Update risk assessments [Assignment: organization-defined frequency].",
-      "criteria": [
-        {
-          "description": "Assess the risk (including supply chain risk) of unauthorized disclosure resulting from the processing, storage, or transmission of CUI.\n    Update risk assessments [Assignment: organization-defined frequency].",
-          "check_function": "CheckRA",
           "value": 5
         }
       ]
@@ -807,6 +795,18 @@
     ]
   },
   {
+    "id": "03.11.01",
+    "name": "Risk Assessment",
+  "description": "Assess the risk (including supply chain risk) of unauthorized disclosure resulting from the processing, storage, or transmission of CUI.\n    Update risk assessments [Assignment: organization-defined frequency].",
+    "criteria": [
+      {
+        "description": "Assess the risk (including supply chain risk) of unauthorized disclosure resulting from the processing, storage, or transmission of CUI.\n    Update risk assessments [Assignment: organization-defined frequency].",
+        "check_function": "CheckRA",
+        "value": 5
+      }
+    ]
+  },
+  {
       "id": "03.11.02",
     "name": "Vulnerability Monitoring and Scanning",
     "description": "Monitor and scan the system for vulnerabilities at organization-defined intervals and when new vulnerabilities are identified. Remediate vulnerabilities within organization-defined response times. Update vulnerability scans at defined intervals and when new vulnerabilities are reported.",
@@ -844,12 +844,12 @@
     },
     {
       "id": "03.12.02",
-    "name": " Plan of Action and Milestones",
+    "name": "Plan of Action and Milestones",
     "description": "Develop and update a plan of action to remediate weaknesses and reduce vulnerabilities based on security assessments, audits, and monitoring.",
       "criteria": [
         {
           "description": "Develop and update a plan of action to remediate weaknesses and reduce vulnerabilities based on security assessments, audits, and monitoring.",
-          "check_function": "",
+          "check_function": "TBI",
           "value": 5
         }
       ]
@@ -862,18 +862,6 @@
         {
           "description": "Develop and implement a system-level continuous monitoring strategy that includes ongoing monitoring and security assessments.",
           "check_function": "CheckCM",
-          "value": 5
-        }
-      ]
-    }, 
-    {
-      "id": "03.12.05",
-    "name": "Information Exchange",
-    "description": "Approve and manage CUI exchanges between systems using agreements such as security agreements, MOUs, SLAs, or NDAs. Document interface characteristics, security requirements, and responsibilities. Review and update agreements at organization-defined intervals.",
-      "criteria": [
-        {
-          "description": "Approve and manage CUI exchanges between systems using agreements such as security agreements, MOUs, SLAs, or NDAs. Document interface characteristics, security requirements, and responsibilities. Review and update agreements at organization-defined intervals.",
-          "check_function": "CheckIE",
           "value": 5
         }
       ]
@@ -1065,7 +1053,7 @@
       "criteria": [
         {
           "description": "Verify that CUI is managed and retained in compliance with legal and operational requirements.",
-          "check_function": "na",
+          "check_function": "TBI",
           "value": 5
         }
       ]
