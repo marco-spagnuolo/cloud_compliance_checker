@@ -74,6 +74,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sns v1.33.0
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.54.3
 	github.com/aws/aws-sdk-go-v2/service/wafv2 v1.54.2
+	github.com/aws/aws-sdk-go-v2/service/wellarchitected v1.34.2
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/spf13/viper v1.19.0
 	golang.org/x/crypto v0.28.0

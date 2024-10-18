@@ -1056,7 +1056,164 @@
           "value": 5
         }
       ]
-    }
+    },
+    {
+      "id": "03.14.08",
+      "name": "Information Management and Retention",
+      "description": "Manage and retain CUI within the system and CUI output from the system in accordance with applicable laws, Executive Orders, directives, regulations, policies, standards, guidelines, and operational requirements.",
+      "criteria": [
+        {
+          "description": "Verify that CUI is managed and retained in compliance with legal and operational requirements.",
+          "check_function": "na",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.15.01",
+      "name": "Policy and Procedures",
+      "description": "Develop, document, and disseminate to organizational personnel or roles the policies and procedures needed to satisfy the security requirements for the protection of CUI. Review and update policies and procedures at an organization-defined frequency.",
+      "criteria": [
+        {
+          "description": "Ensure that security policies and procedures are developed, documented, disseminated, and regularly reviewed and updated.",
+          "check_function": "//",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.15.02",
+      "name": "System Security Plan",
+      "description": "Develop a system security plan that defines the system components, identifies the information types processed, stored, and transmitted by the system, describes specific threats of concern, describes the operational environment, and provides security requirements.",
+      "criteria": [
+        {
+          "description": "Verify that a comprehensive system security plan is developed, maintained, and addresses system components, threats, and security requirements.",
+          "check_function": "//",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.15.03",
+      "name": "Rules of Behavior",
+      "description": "Establish rules that describe the responsibilities and expected behavior for system usage and protecting CUI. Provide rules to individuals requiring system access and receive documented acknowledgments from them. Review and update rules at an organization-defined frequency.",
+      "criteria": [
+        {
+          "description": "Check that rules of behavior are established, disseminated, acknowledged by users, and regularly reviewed.",
+          "check_function": "//",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.16.01",
+      "name": "Security Engineering Principles",
+      "description": "Apply organization-defined systems security engineering principles to the development or modification of the system and system components.",
+      "criteria": [
+        {
+          "description": "Ensure that security engineering principles are applied to system development and modifications.",
+          "check_function": "CheckSEP",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.16.02",
+      "name": "Unsupported System Components",
+      "description": "Replace system components when support is no longer available from the developer, vendor, or manufacturer. Provide risk mitigation options or alternative sources for support of components that cannot be replaced.",
+      "criteria": [
+        {
+          "description": "Verify that unsupported system components are replaced or that risk mitigation measures are implemented when replacement is not possible.",
+          "check_function": "//",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.16.03",
+      "name": "External System Services",
+      "description": "Require external system service providers used for processing, storage, or transmission of CUI to comply with organization-defined security requirements. Define and document user roles and responsibilities regarding external system services, and implement monitoring of service provider compliance.",
+      "criteria": [
+        {
+          "description": "Ensure that external service providers comply with defined security requirements, and that roles and monitoring processes are in place.",
+          "check_function": "//",
+          "value": 5
+        }
+      ]
+    },
+
+  {
+    "id": "03.17.01",
+    "name": "Supply Chain Risk Management Plan",
+    "description": "Develop a plan for managing supply chain risks associated with the research and development, design, manufacturing, acquisition, delivery, integration, operations, maintenance, and disposal of the system, system components, or system services. Review and update the plan at an organization-defined frequency. Protect the plan from unauthorized disclosure.",
+    "criteria": [
+      {
+        "description": "Ensure a supply chain risk management plan is developed, maintained, regularly reviewed, and protected from unauthorized access.",
+        "check_function": "//",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "id": "03.17.02",
+    "name": "Acquisition Strategies, Tools, and Methods",
+    "description": "Develop and implement acquisition strategies, contract tools, and procurement methods to identify, protect against, and mitigate supply chain risks.",
+    "criteria": [
+      {
+        "description": "Verify that acquisition strategies, tools, and methods are in place to mitigate supply chain risks.",
+        "check_function": "//",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "id": "03.17.03",
+    "name": "Supply Chain Requirements and Processes",
+    "description": "Establish a process for identifying and addressing weaknesses or deficiencies in supply chain elements and processes. Enforce security requirements to protect against supply chain risks to the system, system components, or system services and to limit the harm from supply chain-related events.",
+    "criteria": [
+      {
+        "description": "Ensure processes are in place to address supply chain risks and that security requirements are enforced to protect the system and its components.",
+        "check_function": "//",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "id": "03.17.01",
+    "name": "Supply Chain Risk Management Plan",
+    "description": "Develop a plan for managing supply chain risks associated with the research and development, design, manufacturing, acquisition, delivery, integration, operations, maintenance, and disposal of the system, system components, or system services. Review and update the plan at an organization-defined frequency. Protect the plan from unauthorized disclosure.",
+    "criteria": [
+      {
+        "description": "Ensure a supply chain risk management plan is developed, maintained, regularly reviewed, and protected from unauthorized access.",
+        "check_function": "//",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "id": "03.17.02",
+    "name": "Acquisition Strategies, Tools, and Methods",
+    "description": "Develop and implement acquisition strategies, contract tools, and procurement methods to identify, protect against, and mitigate supply chain risks.",
+    "criteria": [
+      {
+        "description": "Verify that acquisition strategies, tools, and methods are in place to mitigate supply chain risks.",
+        "check_function": "//",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "id": "03.17.03",
+    "name": "Supply Chain Requirements and Processes",
+    "description": "Establish a process for identifying and addressing weaknesses or deficiencies in supply chain elements and processes. Enforce security requirements to protect against supply chain risks to the system, system components, or system services and to limit the harm from supply chain-related events.",
+    "criteria": [
+      {
+        "description": "Ensure processes are in place to address supply chain risks and that security requirements are enforced to protect the system and its components.",
+        "check_function": "//",
+        "value": 5
+      }
+    ]
+  }
   ],
   "responses": {
     "Implemented": 0,

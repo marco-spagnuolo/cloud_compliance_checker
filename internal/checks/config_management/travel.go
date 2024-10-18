@@ -293,14 +293,20 @@ func checkS3PostTravel(cfg aws.Config, bucketName string) {
 	}
 }
 
-// Example compliance check function for high-risk travel
 func CheckHighRiskTravelCompliance(awsCfg aws.Config) error {
 	// Discover assets (EC2, S3) assigned for high-risk travel
 	assets := discovery.DiscoverAssets(awsCfg)
 
+	// Check if we have any users defined for high-risk travel
+	users := config.AppConfig.AWS.HighRiskTravelConfig.Users
+	if len(users) == 0 {
+		return fmt.Errorf("no users defined for high-risk travel")
+	}
+
 	// Assign the user based on the high-risk travel configuration
 	for i, asset := range assets {
-		userID := config.AppConfig.AWS.HighRiskTravelConfig.Users[i%len(config.AppConfig.AWS.HighRiskTravelConfig.Users)].UserID
+		// Safely cycle through the users using modulus
+		userID := users[i%len(users)].UserID
 		AssignAWSAssetForHighRiskTravel(awsCfg, userID, asset.Name, asset.Type, "high-risk-location")
 
 		// Perform post-travel checks

@@ -16,7 +16,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
 )
 
 // loadControls carica i controlli di conformità da un file JSON
@@ -71,14 +70,11 @@ func main() {
 		log.Fatalf("Unable to load AWS SDK config, %v", err)
 	}
 
-	// Inizializza i client AWS per CloudTrail
-	cloudTrailClient := cloudtrail.NewFromConfig(awsCfg)
-
 	// Scopre gli asset AWS
 	assets := discovery.DiscoverAssets(awsCfg)
 
 	// Valuta solo gli asset che non sono bucket S3
-	results := evaluation.EvaluateAssets(controls, awsCfg, cloudTrailClient)
+	results := evaluation.EvaluateAssets(controls, awsCfg)
 
 	// Stampa i risultati e gli asset
 	fmt.Println("\n===== Compliance Evaluation Results =====")
