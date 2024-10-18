@@ -34,6 +34,7 @@ type AWSConfig struct {
 	RiskAssessmentConfig           RiskAssessmentConfig     `mapstructure:"risk_assessment"`
 	SecurityAssessmentConfig       SecurityAssessmentConfig `mapstructure:"security_assessment"`
 	Protection                     ProtectionConfig         `mapstructure:"protection"`
+	Integrity                      IntegrityConfig          `mapstructure:"integrity"`
 }
 
 // User represents a user in the configuration
@@ -199,6 +200,12 @@ type ProtectionConfig struct {
 	LogGroupName          string   `mapstructure:"cloud_watch_log_group_name"`
 	MobileCodes           []string `mapstructure:"mobile_codes"`
 	CloudWatchMobileCodes []string `mapstructure:"cloud_watch_mobile_codes"`
+}
+
+// IntegrityConfig holds the details related to integrity
+type IntegrityConfig struct {
+	BucketNames []string `mapstructure:"bucket_names"`
+	LambdaName  string   `mapstructure:"lambda_name"`
 }
 
 // AppConfig is the global configuration

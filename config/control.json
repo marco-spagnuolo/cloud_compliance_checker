@@ -1032,6 +1032,18 @@
           "value": 5
         }
       ]
+    },
+    {
+      "id": "03.14.03",
+      "name": "Security Alerts, Advisories, and Directives",
+      "description": "Receive system security alerts, advisories, and directives from external organizations on an ongoing basis. Generate and disseminate internal system security alerts, advisories, and directives, as necessary.",
+      "criteria": [
+        {
+          "description": "Verify that the organization receives external security alerts and disseminates internal alerts as needed.",
+          "check_function": "CheckSecurityAlerts",
+          "value": 5
+        }
+      ]
     }
   ],
   "responses": {
