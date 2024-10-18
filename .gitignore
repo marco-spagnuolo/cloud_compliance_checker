@@ -1,3 +1,4 @@
 cred.yaml
 *.txt
 *.pem
+.gitconfig

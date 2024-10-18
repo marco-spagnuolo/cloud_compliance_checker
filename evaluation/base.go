@@ -93,6 +93,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -109,6 +110,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -126,6 +128,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -143,6 +146,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -160,6 +164,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -177,6 +182,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -194,6 +200,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -212,6 +219,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 
@@ -224,6 +232,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    "Impossibile eseguire il controllo senza l'utente marco_admin",
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 
@@ -231,7 +240,7 @@ func evaluateCriteria(criteria models.Criteria,
 		loginPolicy := config.AppConfig.AWS.LoginPolicy
 
 		// Esegui il controllo del tentativo di accesso per marco_admin
-		err = check.RunLoginAttemptCheck(user.Name, false, loginPolicy) // Simula un tentativo fallito
+		err = check.RunLoginAttemptCheck(user.Name, false, loginPolicy)
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,
@@ -239,6 +248,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 
@@ -257,6 +267,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -274,6 +285,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -292,6 +304,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -309,6 +322,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -327,6 +341,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -345,6 +360,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -363,6 +379,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -381,6 +398,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -400,6 +418,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -418,6 +437,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -426,17 +446,7 @@ func evaluateCriteria(criteria models.Criteria,
 			Response:    "Check passed",
 			Impact:      0,
 		}
-	case "CheckTimeSynchronization":
-		// print the current time and the zone it is in
-		fmt.Println("Current Time in UTC: ", time.Now().UTC())
-		fmt.Println("Clock in logs are synchronized with the system clock")
 
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
 	case "CheckAuditSecurity":
 		aa := audit_and_accountability.NewAuditProtectionCheck(cfg, "marco_admin")
 		err := aa.RunAuditProtectionCheck()
@@ -447,6 +457,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -466,6 +477,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 		}
 		result = models.ComplianceResult{
@@ -484,6 +496,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 
 		}
@@ -505,6 +518,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 
 		}
@@ -528,6 +542,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 
 		}
@@ -548,6 +563,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 
 		}
@@ -568,6 +584,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 
 		}
@@ -587,6 +604,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 
 		}
@@ -611,14 +629,13 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 
 		}
 	case "CheckRRA":
-		// Create IAM client
 		iamClient := iam.NewFromConfig(cfg)
 
-		// Enforce MFA for users
 		err := id_auth.EnforceMFAForUsers(iamClient)
 		if err != nil {
 			result = models.ComplianceResult{
@@ -627,6 +644,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 
 		}
@@ -639,9 +657,6 @@ func evaluateCriteria(criteria models.Criteria,
 		}
 
 	case "CheckIAM":
-		// Create IAM client
-
-		// Enforce MFA for users
 		err := id_auth.CheckIAM(cfg)
 		if err != nil {
 			result = models.ComplianceResult{
@@ -650,6 +665,7 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
 
 		}
@@ -660,9 +676,7 @@ func evaluateCriteria(criteria models.Criteria,
 			Impact:      0,
 		}
 	case "CheckPasswordComplexity":
-		// Create IAM client
 
-		// Enforce MFA for users
 		err := id_auth.CheckPasswordPolicyEnforcement(cfg)
 		if err != nil {
 			result = models.ComplianceResult{
@@ -671,8 +685,8 @@ func evaluateCriteria(criteria models.Criteria,
 				Response:    err.Error(),
 				Impact:      criteria.Value,
 			}
+			fmt.Printf("\n[ERROR]: %v\n", err)
 			return result
-
 		}
 
 		result = models.ComplianceResult{
