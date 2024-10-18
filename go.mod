@@ -76,6 +76,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/wafv2 v1.54.2
 	github.com/aws/aws-sdk-go-v2/service/wellarchitected v1.34.2
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/jung-kurt/gofpdf v1.16.2
 	github.com/spf13/viper v1.19.0
 	golang.org/x/crypto v0.28.0
 )
