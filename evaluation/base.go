@@ -1105,53 +1105,74 @@ func evaluateCriteria(svc *configservice.Client, criteria models.Criteria,
 	// 		Impact:      0,
 	// 	}
 
-	case "CheckFlawRemediation":
+	// case "CheckFlawRemediation":
 
-		err := integrity.CheckSystemFlawRemediation(cfg)
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			fmt.Printf("\n[ERROR]: %v\n", err)
-			return result
+	// 	err := integrity.CheckSystemFlawRemediation(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		fmt.Printf("\n[ERROR]: %v\n", err)
+	// 		return result
 
-		}
+	// 	}
 
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
 
-	case "CheckMalwareProtection":
+	// case "CheckMalwareProtection":
 
-		err := integrity.CheckSystemFlawRemediation(cfg)
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			fmt.Printf("\n[ERROR]: %v\n", err)
-			return result
+	// 	err := integrity.CheckSystemFlawRemediation(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		fmt.Printf("\n[ERROR]: %v\n", err)
+	// 		return result
 
-		}
+	// 	}
 
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
 
-	case "CheckSecurityAlerts":
+	// case "CheckSecurityAlerts":
 
-		err := integrity.CheckLambdaAndS3Notifications(cfg)
+	// 	err := integrity.CheckLambdaAndS3Notifications(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		fmt.Printf("\n[ERROR]: %v\n", err)
+	// 		return result
+
+	// 	}
+
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
+	case "CheckSystemMonitoring":
+
+		err := integrity.CheckSystemMonitoring(cfg)
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,

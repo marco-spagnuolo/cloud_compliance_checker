@@ -1044,6 +1044,18 @@
           "value": 5
         }
       ]
+    },
+    {
+      "id": "03.14.06",
+      "name": "System Monitoring",
+      "description": "Monitor the system to detect attacks, potential attack indicators, and unauthorized connections. Identify unauthorized use of the system. Monitor inbound and outbound communications traffic to detect unusual or unauthorized activities.",
+      "criteria": [
+        {
+          "description": "Ensure that system monitoring is in place to detect attacks, unauthorized connections, and unusual activities.",
+          "check_function": "CheckSystemMonitoring",
+          "value": 5
+        }
+      ]
     }
   ],
   "responses": {
