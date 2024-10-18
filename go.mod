@@ -65,6 +65,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/inspector v1.25.2
 	github.com/aws/aws-sdk-go-v2/service/inspector2 v1.32.2
 	github.com/aws/aws-sdk-go-v2/service/kms v1.37.2
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.63.2
 	github.com/aws/aws-sdk-go-v2/service/macie2 v1.43.2
 	github.com/aws/aws-sdk-go-v2/service/rds v1.87.3
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.65.2

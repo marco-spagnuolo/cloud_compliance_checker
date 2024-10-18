@@ -1008,6 +1008,30 @@
           "value": 5
         }
       ]
+    },
+    {
+      "id": "03.14.01",
+      "name": "Flaw Remediation",
+      "description": "Identify, report, and correct system flaws. Install security-relevant software and firmware updates within the organization-defined time period of the release of the updates.",
+      "criteria": [
+        {
+          "description": "Ensure system flaws are identified, reported, and corrected. Verify that security updates are installed within the defined time frame.",
+          "check_function": "CheckFlawRemediation",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "03.14.02",
+      "name": "Malicious Code Protection",
+      "description": "Implement malicious code protection mechanisms at system entry and exit points to detect and eradicate malicious code. Update malicious code protection mechanisms as new releases are available in accordance with configuration management policies. Configure mechanisms to perform system scans and real-time scans of files from external sources.",
+      "criteria": [
+        {
+          "description": "Check that malicious code protection mechanisms are in place, updated regularly, and configured to scan the system at defined intervals.",
+          "check_function": "CheckMalwareProtection",
+          "value": 5
+        }
+      ]
     }
   ],
   "responses": {
