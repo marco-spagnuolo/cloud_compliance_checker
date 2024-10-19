@@ -3,6 +3,7 @@ package audit_and_accountability
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -36,7 +37,7 @@ func NewLoggingFailureCheck(cfg aws.Config, alertTimePeriod time.Duration, addit
 
 // RunLoggingFailureCheck esegue il controllo per verificare se ci sono stati fallimenti nel processo di logging
 func (c *LoggingFailureCheck) RunLoggingFailureCheck() error {
-	fmt.Println("Inizio del controllo dei fallimenti del processo di logging...")
+	log.Println("Inizio del controllo dei fallimenti del processo di logging...")
 
 	// Controllo lo stato di CloudTrail per verificare eventuali fallimenti
 	trailStatusInput := &cloudtrail.GetTrailStatusInput{
@@ -70,7 +71,7 @@ func (c *LoggingFailureCheck) RunLoggingFailureCheck() error {
 		// Esegui azioni aggiuntive
 		c.AdditionalActions()
 	} else {
-		fmt.Println("SUCCESSO: Nessun fallimento del logging rilevato nel periodo di monitoraggio.")
+		log.Println("SUCCESSO: Nessun fallimento del logging rilevato nel periodo di monitoraggio.")
 	}
 
 	return nil
@@ -78,7 +79,7 @@ func (c *LoggingFailureCheck) RunLoggingFailureCheck() error {
 
 // SendEmail invia una email utilizzando Amazon SES
 func (c *LoggingFailureCheck) SendEmail(message string) error {
-	fmt.Println("Invio di un'email di notifica...")
+	log.Println("Invio di un'email di notifica...")
 
 	input := &ses.SendEmailInput{
 		Destination: &types.Destination{
@@ -102,10 +103,10 @@ func (c *LoggingFailureCheck) SendEmail(message string) error {
 	_, err := c.SESClient.SendEmail(context.TODO(), input)
 	if err != nil {
 		errorMessage := fmt.Sprintf("Errore durante l'invio dell'email: %v", err)
-		fmt.Println(errorMessage)
+		log.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	fmt.Println("Email inviata con successo.")
+	log.Println("Email inviata con successo.")
 	return nil
 }

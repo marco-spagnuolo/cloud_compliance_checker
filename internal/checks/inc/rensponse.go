@@ -26,7 +26,7 @@ func enableGuardDutySamples(cfg aws.Config, detectorID string) error {
 		return fmt.Errorf("failed to create sample findings: %v", err)
 	}
 
-	fmt.Println("Sample findings have been successfully created.")
+	log.Println("Sample findings have been successfully created.")
 	return nil
 }
 
@@ -65,11 +65,11 @@ func getGuardDutyFindings(cfg aws.Config, detectorID string, findingIds []string
 	}
 
 	if len(resp.Findings) == 0 {
-		fmt.Println("No findings available.")
+		log.Println("No findings available.")
 	} else {
-		fmt.Printf("Retrieved %d findings:\n", len(resp.Findings))
+		log.Printf("Retrieved %d findings:\n", len(resp.Findings))
 		for _, finding := range resp.Findings {
-			fmt.Printf("Finding ID: %s, Type: %s, Severity: %f\n", *finding.Id, *finding.Type, *finding.Severity)
+			log.Printf("Finding ID: %s, Type: %s, Severity: %f\n", *finding.Id, *finding.Type, *finding.Severity)
 		}
 	}
 
@@ -95,7 +95,7 @@ func checkLambdaInvocationLogs(cfg aws.Config, logGroupName string) error {
 	}
 
 	if len(logStreams.LogStreams) == 0 {
-		fmt.Println("No log streams found for the Lambda function.")
+		log.Println("No log streams found for the Lambda function.")
 		return nil
 	}
 
@@ -115,19 +115,19 @@ func checkLambdaInvocationLogs(cfg aws.Config, logGroupName string) error {
 
 	// Check if there are any log events indicating the Lambda was invoked
 	if len(logEvents.Events) > 0 {
-		fmt.Println("Lambda was triggered successfully. Recent log events:")
+		log.Println("Lambda was triggered successfully. Recent log events:")
 		for _, event := range logEvents.Events {
 			message := *event.Message
-			fmt.Printf("Timestamp: %d, Message: %s\n", event.Timestamp, message)
+			log.Printf("Timestamp: %d, Message: %s\n", event.Timestamp, message)
 
 			// Check for the specific error message regarding the fake instance ID
 			if strings.Contains(message, "InvalidInstanceID.NotFound") {
-				fmt.Println("Lambda executed correctly,the instance ID 'i-99999999' does not exist as expected.")
+				log.Println("Lambda executed correctly,the instance ID 'i-99999999' does not exist as expected.")
 				return nil
 			}
 		}
 	} else {
-		fmt.Println("No log events found for the Lambda invocation.")
+		log.Println("No log events found for the Lambda invocation.")
 	}
 
 	return fmt.Errorf("Lambda did not execute as expected")

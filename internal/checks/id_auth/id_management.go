@@ -87,74 +87,74 @@ func CheckIAM(cfg aws.Config) error {
 	var errorMessages []string
 
 	// Check that authorized roles are properly loaded
-	fmt.Printf("Authorized Roles: %v\n", config.AppConfig.AWS.IdentifierManagement.AuthorizedRoles)
-	fmt.Printf("Reuse Prevention Period: %s\n", config.AppConfig.AWS.IdentifierManagement.ReusePreventionPeriod)
+	log.Printf("Authorized Roles: %v\n", config.AppConfig.AWS.IdentifierManagement.AuthorizedRoles)
+	log.Printf("Reuse Prevention Period: %s\n", config.AppConfig.AWS.IdentifierManagement.ReusePreventionPeriod)
 
 	// Loop through the IAM users and perform the necessary checks
 	for _, user := range result.Users {
-		fmt.Printf("\n\n--- Checking user: %s ---\n", aws.ToString(user.UserName))
+		log.Printf("\n\n--- Checking user: %s ---\n", aws.ToString(user.UserName))
 
 		// 1. Check if the role assigning this identifier is authorized
-		fmt.Printf("Checking if the user %s was created by an authorized role...\n", aws.ToString(user.UserName))
+		log.Printf("Checking if the user %s was created by an authorized role...\n", aws.ToString(user.UserName))
 		isAuthorizedRole := false
 		creatorRoleTagPresent := false
 		for _, tag := range user.Tags {
 			if aws.ToString(tag.Key) == "CreatorRole" {
 				creatorRoleTagPresent = true
-				fmt.Printf("CreatorRole for user %s is %s\n", aws.ToString(user.UserName), aws.ToString(tag.Value))
+				log.Printf("CreatorRole for user %s is %s\n", aws.ToString(user.UserName), aws.ToString(tag.Value))
 				if isAuthorized(aws.ToString(tag.Value), config.AppConfig.AWS.IdentifierManagement.AuthorizedRoles) {
 					isAuthorizedRole = true
-					fmt.Printf("User %s was created by an authorized role.\n", aws.ToString(user.UserName))
+					log.Printf("User %s was created by an authorized role.\n", aws.ToString(user.UserName))
 				}
 			}
 		}
 		if !creatorRoleTagPresent {
-			fmt.Printf("WARNING: User %s does not have a CreatorRole tag.\n", aws.ToString(user.UserName))
+			log.Printf("WARNING: User %s does not have a CreatorRole tag.\n", aws.ToString(user.UserName))
 		}
 		if !isAuthorizedRole && creatorRoleTagPresent {
 			errorMessage := fmt.Sprintf("ERROR: User %s was not created by an authorized role.", aws.ToString(user.UserName))
 			errorMessages = append(errorMessages, errorMessage)
-			fmt.Println(errorMessage)
+			log.Println(errorMessage)
 			continue
 		}
 
 		// 2. Check identifier reuse based on the user's creation date
 		if user.CreateDate == nil {
-			fmt.Printf("ERROR: User %s does not have a valid creation date.\n", aws.ToString(user.UserName))
+			log.Printf("ERROR: User %s does not have a valid creation date.\n", aws.ToString(user.UserName))
 			continue
 		}
-		fmt.Printf("Checking if the identifier for user %s is reusable...\n", aws.ToString(user.UserName))
+		log.Printf("Checking if the identifier for user %s is reusable...\n", aws.ToString(user.UserName))
 		reusable, err := isIdentifierReusable(*user.CreateDate, config.AppConfig.AWS.IdentifierManagement.ReusePreventionPeriod)
 		if err != nil {
 			errorMessage := fmt.Sprintf("ERROR: Error checking identifier reuse for user %s: %v", aws.ToString(user.UserName), err)
 			errorMessages = append(errorMessages, errorMessage)
-			fmt.Println(errorMessage)
+			log.Println(errorMessage)
 			continue
 		}
 		if !reusable {
 			errorMessage := fmt.Sprintf("ERROR: Identifier for user %s cannot be reused yet.", aws.ToString(user.UserName))
 			errorMessages = append(errorMessages, errorMessage)
-			fmt.Println(errorMessage)
+			log.Println(errorMessage)
 			continue
 		}
-		fmt.Printf("Identifier for user %s is reusable.\n", aws.ToString(user.UserName))
+		log.Printf("Identifier for user %s is reusable.\n", aws.ToString(user.UserName))
 
 		// 3. Check if the user has the correct status (active/inactive)
-		fmt.Printf("Checking status for user %s...\n", aws.ToString(user.UserName))
+		log.Printf("Checking status for user %s...\n", aws.ToString(user.UserName))
 		err = checkIdentifierStatus(&user, config.AppConfig.AWS.IdentifierManagement.IdentifierCharacteristics)
 		if err != nil {
 			errorMessages = append(errorMessages, err.Error())
-			fmt.Println(err.Error())
+			log.Println(err.Error())
 			continue
 		}
-		fmt.Printf("User %s has the correct status.\n", aws.ToString(user.UserName))
+		log.Printf("User %s has the correct status.\n", aws.ToString(user.UserName))
 
-		fmt.Printf("--- Completed checks for user: %s ---\n", aws.ToString(user.UserName))
+		log.Printf("--- Completed checks for user: %s ---\n", aws.ToString(user.UserName))
 	}
 
 	// If there are any error messages, return them as a single error
 	if len(errorMessages) > 0 {
-		fmt.Printf("Found non-compliant users: \n%s\n", strings.Join(errorMessages, "\n"))
+		log.Printf("Found non-compliant users: \n%s\n", strings.Join(errorMessages, "\n"))
 		return fmt.Errorf("non-compliant users found:\n%s", strings.Join(errorMessages, "\n"))
 	}
 

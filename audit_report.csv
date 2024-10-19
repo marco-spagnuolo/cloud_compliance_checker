@@ -1,51 +1,51 @@
 EventID,EventName,EventSource,EventTime,EventRegion,EventOutcome,Username
-a4204ff7-02bf-403a-bd2d-9936a9a09f57,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:18:08 +0000 UTC,us-east-1,Successo,Identità non disponibile
-c2b53ea6-1596-4f33-a518-acf8611b7dc4,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:18:07 +0000 UTC,us-east-1,Successo,Identità non disponibile
-0392aed4-c61e-43b6-9d89-53eccb584919,GenerateDataKey,kms.amazonaws.com,2024-10-18 23:18:01 +0000 UTC,us-east-1,Successo,Identità non disponibile
-0a09386f-56a3-4869-a7ef-9ed5719688a0,ListWorkflows,transfer.amazonaws.com,2024-10-18 23:18:01 +0000 UTC,us-east-1,Successo,ConfigResourceCompositionSession
-1ddf7113-c183-332f-a9fb-a1e56ade8a80,AssumeRole,sts.amazonaws.com,2024-10-18 23:18:01 +0000 UTC,us-east-1,Successo,Identità non disponibile
-3ebc2d76-c240-4e5e-b823-3e1f228b7df6,GetVariables,frauddetector.amazonaws.com,2024-10-18 23:18:01 +0000 UTC,us-east-1,Successo,ConfigResourceCompositionSession
-5de0083f-dc4d-3562-91f3-3f9d231820bb,AssumeRole,sts.amazonaws.com,2024-10-18 23:18:01 +0000 UTC,us-east-1,Successo,Identità non disponibile
-66542eb2-4d63-342c-8d56-7a30d68804c5,AssumeRole,sts.amazonaws.com,2024-10-18 23:18:01 +0000 UTC,us-east-1,Successo,Identità non disponibile
-7171a0ad-83db-3c04-b8a8-e66f39e311c5,AssumeRole,sts.amazonaws.com,2024-10-18 23:18:01 +0000 UTC,us-east-1,Successo,Identità non disponibile
-8218e30b-10af-4d89-879b-d58854e4256c,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:18:01 +0000 UTC,us-east-1,Successo,Identità non disponibile
-8e5fa10b-71a8-4154-a578-a2cff8187897,ListTagsForResource,appconfig.amazonaws.com,2024-10-18 23:18:01 +0000 UTC,us-east-1,Successo,ConfigResourceCompositionSession
-c9dee9cd-2998-473f-9476-67583fc488c9,ListContainerRecipes,imagebuilder.amazonaws.com,2024-10-18 23:18:01 +0000 UTC,us-east-1,Successo,ConfigResourceCompositionSession
-01791fed-adc2-4664-8d56-199f3cf7b77d,DescribeLoadBalancers,elasticloadbalancing.amazonaws.com,2024-10-18 23:18:00 +0000 UTC,us-east-1,Successo,ElasticLoadBalancingDescribeHandlerSession
-0df6af04-c4be-45a6-8637-88ba53a11820,ListTagsForResource,appconfig.amazonaws.com,2024-10-18 23:18:00 +0000 UTC,us-east-1,Successo,ConfigResourceCompositionSession
-12611a19-2ee2-3ccb-9627-fd7dd10ee62e,AssumeRole,sts.amazonaws.com,2024-10-18 23:18:00 +0000 UTC,us-east-1,Successo,Identità non disponibile
-2747f963-0863-4acd-9b49-7299fad52523,GetDeploymentStrategy,appconfig.amazonaws.com,2024-10-18 23:18:00 +0000 UTC,us-east-1,Successo,ConfigResourceCompositionSession
-39e7ae19-fc09-3660-b418-89c5c787ea67,AssumeRole,sts.amazonaws.com,2024-10-18 23:18:00 +0000 UTC,us-east-1,Successo,Identità non disponibile
-4350421e-1e1c-4666-8075-bee925f64a56,GetDeploymentStrategy,appconfig.amazonaws.com,2024-10-18 23:18:00 +0000 UTC,us-east-1,Successo,ConfigResourceCompositionSession
-43d72460-08f4-4997-8d17-a785e6c7d972,ListTagsForResource,appconfig.amazonaws.com,2024-10-18 23:18:00 +0000 UTC,us-east-1,Successo,ConfigResourceCompositionSession
-4dd1ebb1-d825-3f14-ba79-bfb4878f9a31,AssumeRole,sts.amazonaws.com,2024-10-18 23:18:00 +0000 UTC,us-east-1,Successo,Identità non disponibile
-51e80097-3367-3184-a433-b49599716ec6,AssumeRole,sts.amazonaws.com,2024-10-18 23:18:00 +0000 UTC,us-east-1,Successo,Identità non disponibile
-62209379-6beb-41bd-a955-408698c78ebf,ListDomains,profile.amazonaws.com,2024-10-18 23:18:00 +0000 UTC,us-east-1,Successo,ConfigResourceCompositionSession
-c1f19863-eaf4-4971-b55c-66bf7cfd01d1,ListDeploymentStrategies,appconfig.amazonaws.com,2024-10-18 23:18:00 +0000 UTC,us-east-1,Successo,ConfigResourceCompositionSession
-c8b19e9a-d819-4012-a7e9-7c3644a62f41,ListLocations,datasync.amazonaws.com,2024-10-18 23:18:00 +0000 UTC,us-east-1,Successo,ConfigResourceCompositionSession
-e53102f7-ac91-4e82-a0f5-f0bd3cd8551a,ListWorkteams,sagemaker.amazonaws.com,2024-10-18 23:18:00 +0000 UTC,us-east-1,Successo,ConfigResourceCompositionSession
-e905b689-0fc1-45ee-9bd8-c255974e8df0,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:18:00 +0000 UTC,us-east-1,Successo,Identità non disponibile
-e98c4cff-36eb-3cb4-a681-04e0b4b3a7eb,AssumeRole,sts.amazonaws.com,2024-10-18 23:18:00 +0000 UTC,us-east-1,Successo,Identità non disponibile
-ef059970-3621-4081-af34-b15ef4d27719,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:17:15 +0000 UTC,us-east-1,Successo,Identità non disponibile
-359cd72f-823e-40c3-95c9-a88deb6d5cfa,GenerateDataKey,kms.amazonaws.com,2024-10-18 23:16:59 +0000 UTC,us-east-1,Successo,Identità non disponibile
-f3c8b97b-74ef-4699-9e12-e3db07146d94,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:16:59 +0000 UTC,us-east-1,Successo,Identità non disponibile
-41c61764-7d7e-44e9-90a6-4ecb36131423,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:16:53 +0000 UTC,us-east-1,Successo,Identità non disponibile
-957120e4-437b-4bfc-a422-d56ce3f203b9,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:16:53 +0000 UTC,us-east-1,Successo,Identità non disponibile
-9eface90-ecb0-48f1-9e41-400d81ff9cdf,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:16:38 +0000 UTC,us-east-1,Successo,Identità non disponibile
-1beac472-57ee-4ded-9408-d2738f23695c,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:16:35 +0000 UTC,us-east-1,Successo,Identità non disponibile
-078390a2-8572-46be-a2b4-95c062abcf44,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:16:25 +0000 UTC,us-east-1,Successo,Identità non disponibile
-60850aec-ba94-4d88-8897-159d7a34c81b,GenerateDataKey,kms.amazonaws.com,2024-10-18 23:16:25 +0000 UTC,us-east-1,Successo,Identità non disponibile
-6c805894-2948-47c5-b043-7e21654406b6,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:16:22 +0000 UTC,us-east-1,Successo,Identità non disponibile
-78535f1a-94af-4d97-8ff0-88298cc67931,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:16:18 +0000 UTC,us-east-1,Successo,Identità non disponibile
-bafd7424-14cc-4c70-8fd7-9eaf5609b841,GenerateDataKey,kms.amazonaws.com,2024-10-18 23:16:18 +0000 UTC,us-east-1,Successo,Identità non disponibile
-c1aef803-1973-4a71-bd20-2feaaea169df,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:16:17 +0000 UTC,us-east-1,Successo,Identità non disponibile
-0c56b5c9-e316-43f1-a11b-26e5aafd324c,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:11:04 +0000 UTC,us-east-1,Successo,Identità non disponibile
-6eba8f8d-c514-4c50-9d71-5290fa1c47d0,GenerateDataKey,kms.amazonaws.com,2024-10-18 23:11:04 +0000 UTC,us-east-1,Successo,Identità non disponibile
-c13b4cc7-4a19-497f-949e-3a740fe089cd,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:11:04 +0000 UTC,us-east-1,Successo,Identità non disponibile
-86523a1c-5e54-4c67-bd4a-91cab069a4d9,GenerateDataKey,kms.amazonaws.com,2024-10-18 23:09:47 +0000 UTC,us-east-1,Successo,Identità non disponibile
-9b4e031b-e9ad-40e5-8359-1b81437b6125,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:09:47 +0000 UTC,us-east-1,Successo,Identità non disponibile
-e7ff68af-0d64-4cb7-a7b5-e8dff6d4dabc,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:09:47 +0000 UTC,us-east-1,Successo,Identità non disponibile
-d7cd8f35-d9e3-3c34-860d-46e22b488603,AssumeRole,sts.amazonaws.com,2024-10-18 23:09:42 +0000 UTC,us-east-1,Successo,Identità non disponibile
-25a1ee7f-da60-42d5-b83b-45309be50e13,GenerateDataKey,kms.amazonaws.com,2024-10-18 23:05:53 +0000 UTC,us-east-1,Successo,Identità non disponibile
-97f76a31-a011-4f15-92fc-bd83f25657b9,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:05:53 +0000 UTC,us-east-1,Successo,Identità non disponibile
-b70e1c01-4fc0-43c6-a9b5-4c647f20b7a0,GetBucketAcl,s3.amazonaws.com,2024-10-18 23:05:53 +0000 UTC,us-east-1,Successo,Identità non disponibile
+9f827123-5bba-4431-a7a6-326e031de65d,ListWorkloads,wellarchitected.amazonaws.com,2024-10-19 21:50:43 +0000 UTC,us-east-1,Successo,marco_admin
+bb6e4d9d-fc11-46cf-a4ce-f628c3887e1e,ListDetectors,guardduty.amazonaws.com,2024-10-19 21:50:43 +0000 UTC,us-east-1,Successo,marco_admin
+7567394f-fa99-4d8b-afa3-418522e05a81,DescribeFlowLogs,ec2.amazonaws.com,2024-10-19 21:50:42 +0000 UTC,us-east-1,Successo,marco_admin
+7e17be7b-7982-4081-8f26-c4fcbbe824b3,DescribeFlowLogs,ec2.amazonaws.com,2024-10-19 21:50:42 +0000 UTC,us-east-1,Successo,marco_admin
+90078db5-c021-4e9d-a355-d4d3f3679732,DescribeLogGroups,logs.amazonaws.com,2024-10-19 21:50:42 +0000 UTC,us-east-1,Successo,marco_admin
+2d19e7c9-6822-4106-967f-3d310b54d114,DescribeVpcs,ec2.amazonaws.com,2024-10-19 21:50:41 +0000 UTC,us-east-1,Successo,marco_admin
+7b8c7476-d8fa-41e0-95f5-cd24bd0d1917,ListDetectors,guardduty.amazonaws.com,2024-10-19 21:50:41 +0000 UTC,us-east-1,Successo,marco_admin
+16986251-1951-4fdd-9d75-1e735a3bf956,GetFunction20150331v2,lambda.amazonaws.com,2024-10-19 21:50:40 +0000 UTC,us-east-1,Successo,marco_admin
+2f8e15ed-e524-4104-86e2-3ba42e6b6042,Decrypt,kms.amazonaws.com,2024-10-19 21:50:40 +0000 UTC,us-east-1,Successo,marco_admin
+fc618cc0-6b66-4d59-b740-c9b475c545c4,GetBucketNotification,s3.amazonaws.com,2024-10-19 21:50:40 +0000 UTC,us-east-1,Successo,marco_admin
+2907e15a-f0a3-4578-8e50-619de48a03d2,ListFunctions20150331,lambda.amazonaws.com,2024-10-19 21:50:39 +0000 UTC,us-east-1,Successo,marco_admin
+2a5536cf-35f3-49c5-8036-1c6e745e1e36,Decrypt,kms.amazonaws.com,2024-10-19 21:50:39 +0000 UTC,us-east-1,Successo,marco_admin
+2e40032a-6ad6-499b-b76b-f62e26beaac2,Decrypt,kms.amazonaws.com,2024-10-19 21:50:39 +0000 UTC,us-east-1,Successo,marco_admin
+891a9ed1-4a01-4f33-8d45-53e56af298e0,DescribeDBInstances,rds.amazonaws.com,2024-10-19 21:50:39 +0000 UTC,us-east-1,Successo,marco_admin
+8ad037e2-cb0d-497d-a27d-e200da0f8cd2,DescribeInstances,ec2.amazonaws.com,2024-10-19 21:50:38 +0000 UTC,us-east-1,Successo,marco_admin
+b28b0255-b7f5-4aaa-be25-76ff403d3cf1,DescribeInstanceInformation,ssm.amazonaws.com,2024-10-19 21:50:38 +0000 UTC,us-east-1,Successo,marco_admin
+42a6f051-376c-49d4-ba67-c97213bca622,DescribeDBInstances,rds.amazonaws.com,2024-10-19 21:50:37 +0000 UTC,us-east-1,Successo,marco_admin
+71514727-e1ae-4449-9303-4a0c625c7642,Decrypt,kms.amazonaws.com,2024-10-19 21:50:37 +0000 UTC,us-east-1,Successo,marco_admin
+769f8024-c2e3-4ae1-87ed-350941f3990d,ListFunctions20150331,lambda.amazonaws.com,2024-10-19 21:50:37 +0000 UTC,us-east-1,Successo,marco_admin
+aed24510-3a08-4792-82b3-60e17dcfa9f8,Decrypt,kms.amazonaws.com,2024-10-19 21:50:37 +0000 UTC,us-east-1,Successo,marco_admin
+0f9c2354-79da-4bc3-9062-ee9945d995a5,DescribeInstanceInformation,ssm.amazonaws.com,2024-10-19 21:50:36 +0000 UTC,us-east-1,Successo,marco_admin
+639276c6-d301-4d21-8adc-394656492f9e,GetRestApis,apigateway.amazonaws.com,2024-10-19 21:50:35 +0000 UTC,us-east-1,Successo,marco_admin
+8ea533f5-45fa-47b2-9f8c-b88bcb9cda50,DescribeInstances,ec2.amazonaws.com,2024-10-19 21:50:35 +0000 UTC,us-east-1,Successo,marco_admin
+1cfb3471-ef18-49a8-a1c4-9aa09fb313f9,ListDistributions,cloudfront.amazonaws.com,2024-10-19 21:50:34 +0000 UTC,us-east-1,Successo,marco_admin
+eedcc5e3-1ed9-4c2e-8a9a-539aa70c4a06,ListDistributions,cloudfront.amazonaws.com,2024-10-19 21:50:34 +0000 UTC,us-east-1,Successo,marco_admin
+abc566bd-808f-4fc0-8db1-65ab1eeb64a9,ListBuckets,s3.amazonaws.com,2024-10-19 21:50:33 +0000 UTC,us-east-1,Successo,marco_admin
+e5b3eba5-b92a-4f6d-b3fb-f09eae2de411,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:33 +0000 UTC,us-east-1,Successo,marco_admin
+28361e5f-bae5-420f-bca3-3b2396d55338,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:32 +0000 UTC,us-east-1,Successo,marco_admin
+2fca1cfe-11af-45c9-a990-72b3699ca780,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:32 +0000 UTC,us-east-1,Successo,marco_admin
+791f127c-88c9-4ef4-ac5c-c35fe475ca57,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:32 +0000 UTC,us-east-1,Successo,marco_admin
+7b78c089-30bf-41d9-b28a-bdd718090ce1,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:32 +0000 UTC,us-east-1,Successo,marco_admin
+0ab655d4-b144-46de-9083-41f4e9215e88,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:31 +0000 UTC,us-east-1,Successo,marco_admin
+440ae864-1d24-444a-8b6d-d706dee9b795,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:31 +0000 UTC,us-east-1,Successo,marco_admin
+5e9a9006-a4db-44cd-b534-6bd87c63836c,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:31 +0000 UTC,us-east-1,Successo,marco_admin
+abd6131c-ffcb-4555-aa5d-5cf1e40488f4,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:31 +0000 UTC,us-east-1,Successo,marco_admin
+d7512785-179b-40bc-a997-f63c2eb453ab,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:31 +0000 UTC,us-east-1,Successo,marco_admin
+efd6ad71-54ef-45a6-a7a4-6e2e70a80a7f,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:31 +0000 UTC,us-east-1,Successo,marco_admin
+29b5d92f-8981-4e95-9f9e-f0425bfbbfbb,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:30 +0000 UTC,us-east-1,Successo,marco_admin
+afa07d36-6747-4c09-8329-9e5f00ce3f04,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:30 +0000 UTC,us-east-1,Successo,marco_admin
+b5557bf2-6528-49e2-a2ef-f959d4da6c6a,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:30 +0000 UTC,us-east-1,Successo,marco_admin
+c7a6a1cc-c896-4b19-a9b6-1a86bbb89ce2,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:30 +0000 UTC,us-east-1,Successo,marco_admin
+cdb9b723-b5fb-4fac-aa31-c714ac6f67a4,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:30 +0000 UTC,us-east-1,Successo,marco_admin
+d20ab80d-ba51-4462-be75-5eaec4a957f2,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:30 +0000 UTC,us-east-1,Successo,marco_admin
+02e05bc3-923c-437d-a8f2-a5a7130b9b5b,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:29 +0000 UTC,us-east-1,Successo,marco_admin
+391cf9c5-20d6-476b-a1f4-af0515cc97b5,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:29 +0000 UTC,us-east-1,Successo,marco_admin
+539844b0-3021-4c97-9450-64a25fe2dec8,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:29 +0000 UTC,us-east-1,Successo,marco_admin
+93f1125c-77a3-4d28-8ce5-06e6d79de2de,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:29 +0000 UTC,us-east-1,Successo,marco_admin
+bd19f2e9-574f-43e9-9579-56f905b93371,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:29 +0000 UTC,us-east-1,Successo,marco_admin
+c4fbbd2b-2a56-4620-80ea-fa684a9a3167,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:29 +0000 UTC,us-east-1,Successo,marco_admin
+1bd3b7de-acd6-4f4d-b6b7-478f948bce7a,GetPolicyVersion,iam.amazonaws.com,2024-10-19 21:50:28 +0000 UTC,us-east-1,Successo,marco_admin

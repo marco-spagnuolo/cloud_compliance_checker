@@ -4,6 +4,7 @@ import (
 	"cloud_compliance_checker/config"
 	"context"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -108,21 +109,21 @@ func RunSoftwareExecutionCheck(cfg aws.Config) error {
 	// Access authorized software configuration from the loaded config
 	awsConfig := config.AppConfig.AWS
 
-	fmt.Println("Starting AWS Software Execution Review")
+	log.Println("Starting AWS Software Execution Review")
 	for _, ec2Instance := range awsConfig.EC2Instances {
-		fmt.Printf("Authorized software for instance %s: %v\n",
+		log.Printf("Authorized software for instance %s: %v\n",
 			ec2Instance.InstanceID, ec2Instance.AuthorizedSoftware)
 	}
-	fmt.Println("---------------------------------------")
+	log.Println("---------------------------------------")
 
 	// Check authorized software on EC2 instances
 	err := CheckAuthorizedSoftware(cfg, &awsConfig)
 	if err != nil {
-		fmt.Println("Non-compliant software found:")
-		fmt.Printf("%v\n", err)
+		log.Println("Non-compliant software found:")
+		log.Printf("%v\n", err)
 		return err
 	}
 
-	fmt.Println("AWS Software Execution Review completed successfully")
+	log.Println("AWS Software Execution Review completed successfully")
 	return nil
 }

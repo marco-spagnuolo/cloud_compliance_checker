@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -25,7 +26,7 @@ func SaveBaselineConfig(cfg *config.Config, filename string) error {
 		return err
 	}
 
-	fmt.Println("Baseline configuration saved successfully.")
+	log.Println("Baseline configuration saved successfully.")
 	return nil
 }
 
@@ -89,39 +90,39 @@ func GetCurrentAWSBaseline(awsCfg aws.Config) (*config.AWSConfig, error) {
 func CompareBaseline(current *config.AWSConfig, stored *config.AWSConfig) bool {
 	// Compare S3 Buckets
 	if len(current.S3Buckets) != len(stored.S3Buckets) {
-		fmt.Println("S3 bucket count has changed!")
+		log.Println("S3 bucket count has changed!")
 		return false
 	}
 
 	for i, bucket := range current.S3Buckets {
 		if bucket.Name != stored.S3Buckets[i].Name {
-			fmt.Printf("S3 bucket %s has changed.\n", bucket.Name)
+			log.Printf("S3 bucket %s has changed.\n", bucket.Name)
 			return false
 		}
 	}
 
 	// Compare Security Groups
 	if len(current.SecurityGroups) != len(stored.SecurityGroups) {
-		fmt.Println("Security group count has changed!")
+		log.Println("Security group count has changed!")
 		return false
 	}
 
 	for i, group := range current.SecurityGroups {
 		if group.Name != stored.SecurityGroups[i].Name {
-			fmt.Printf("Security group %s has changed.\n", group.Name)
+			log.Printf("Security group %s has changed.\n", group.Name)
 			return false
 		}
 	}
 
 	// Compare IAM Roles
 	if len(current.CriticalRole) != len(stored.CriticalRole) {
-		fmt.Println("IAM role count has changed!")
+		log.Println("IAM role count has changed!")
 		return false
 	}
 
 	for i, role := range current.CriticalRole {
 		if role.RoleName != stored.CriticalRole[i].RoleName {
-			fmt.Printf("IAM role %s has changed.\n", role.RoleName)
+			log.Printf("IAM role %s has changed.\n", role.RoleName)
 			return false
 		}
 	}
@@ -133,7 +134,7 @@ func CompareBaseline(current *config.AWSConfig, stored *config.AWSConfig) bool {
 
 // RunAWSBaselineCheck performs the baseline check and returns an error if the baseline is outdated.
 func RunAWSBaselineCheck(awsCfg aws.Config, storedBaseline *config.AWSConfig) error {
-	fmt.Println("Starting AWS asset baseline configuration check...")
+	log.Println("Starting AWS asset baseline configuration check...")
 
 	// Retrieve current AWS baseline
 	currentBaseline, err := GetCurrentAWSBaseline(awsCfg)
@@ -144,11 +145,11 @@ func RunAWSBaselineCheck(awsCfg aws.Config, storedBaseline *config.AWSConfig) er
 	// Compare current baseline with stored baseline
 	if !CompareBaseline(currentBaseline, storedBaseline) {
 		errMessage := "AWS asset configuration has changed, baseline is outdated and needs to be updated."
-		fmt.Println(errMessage)
+		log.Println(errMessage)
 		// Return an error indicating the baseline is outdated
 		return fmt.Errorf("%s", errMessage)
 	}
 
-	fmt.Println("AWS asset configuration has not changed. Baseline is up-to-date.")
+	log.Println("AWS asset configuration has not changed. Baseline is up-to-date.")
 	return nil
 }

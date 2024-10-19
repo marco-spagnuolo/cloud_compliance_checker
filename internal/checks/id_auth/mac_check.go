@@ -110,7 +110,7 @@ func CreateQuarantineSecurityGroup(vpcID string, ec2Client *ec2.Client) (string,
 		return "", fmt.Errorf("failed to create quarantine security group: %w", err)
 	}
 
-	fmt.Printf("Created quarantine security group (ID: %s)\n", *result.GroupId)
+	log.Printf("Created quarantine security group (ID: %s)\n", *result.GroupId)
 	return *result.GroupId, nil
 }
 
@@ -127,7 +127,7 @@ func QuarantineInstance(instanceID string, quarantineSecurityGroupID string, ec2
 		return fmt.Errorf("failed to quarantine instance %s: %w", instanceID, err)
 	}
 
-	fmt.Printf("Instance %s has been placed in quarantine (Security Group: %s)\n", instanceID, quarantineSecurityGroupID)
+	log.Printf("Instance %s has been placed in quarantine (Security Group: %s)\n", instanceID, quarantineSecurityGroupID)
 	return nil
 }
 
@@ -140,7 +140,7 @@ func CheckMac(cfg aws.Config) error {
 	quarantineSecurityGroupID, err := GetSecurityGroupIDByName("quarantine", ec2Client)
 	if err != nil {
 		// If the quarantine security group is not found, create it.
-		fmt.Println("Quarantine security group not found, creating it...")
+		log.Println("Quarantine security group not found, creating it...")
 
 		// Retrieve the VPC ID from one of the EC2 instances.
 		instanceIDs, err := ListEC2Instances(ec2Client)
@@ -179,7 +179,7 @@ func CheckMac(cfg aws.Config) error {
 
 		// If no allowed MAC address is found in the config, skip this instance.
 		if allowedMAC == "" {
-			fmt.Printf("No allowed MAC address found for instance %s in the config\n", instanceID)
+			log.Printf("No allowed MAC address found for instance %s in the config\n", instanceID)
 			continue
 		}
 
@@ -194,7 +194,7 @@ func CheckMac(cfg aws.Config) error {
 		err = AuthenticateDeviceByMAC(mac, allowedMAC)
 		if err != nil {
 			// Log the error if MAC is not allowed, displaying both the fetched and allowed MAC addresses.
-			fmt.Printf("Authentication failed for instance %s with fetched MAC address %s: %v\n", instanceID, mac, err)
+			log.Printf("Authentication failed for instance %s with fetched MAC address %s: %v\n", instanceID, mac, err)
 
 			// Quarantine the instance by assigning the quarantine security group.
 			qErr := QuarantineInstance(instanceID, quarantineSecurityGroupID, ec2Client)
@@ -205,7 +205,7 @@ func CheckMac(cfg aws.Config) error {
 			nonCompliant = true
 		} else {
 			// If no error, proceed with authenticated instance.
-			fmt.Printf("Instance %s authenticated with MAC address %s\n", instanceID, mac)
+			log.Printf("Instance %s authenticated with MAC address %s\n", instanceID, mac)
 		}
 	}
 
@@ -214,7 +214,7 @@ func CheckMac(cfg aws.Config) error {
 		return fmt.Errorf("non-compliant: At least one instance failed MAC address authentication and was placed in quarantine")
 	}
 
-	fmt.Println("Compliant: All instances passed MAC address authentication")
+	log.Println("Compliant: All instances passed MAC address authentication")
 	return nil
 }
 

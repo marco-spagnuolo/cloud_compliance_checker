@@ -3,6 +3,7 @@ package config_management
 import (
 	"cloud_compliance_checker/models"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -38,21 +39,21 @@ func DocumentDiscoveredAssets(assets []models.Asset) {
 		}
 
 		cuiComponents = append(cuiComponents, cuiComponent)
-		fmt.Printf("CUI Component Added: Component Name: %s, InstanceID: %s, CUI Type: %s, Location: %s\n", asset.Name, asset.Name, cuiType, location)
+		log.Printf("CUI Component Added: Component Name: %s, InstanceID: %s, CUI Type: %s, Location: %s\n", asset.Name, asset.Name, cuiType, location)
 	}
 }
 
 // Function to display current AWS resources that store/process CUI
 func DisplayCUIComponents() error {
-	fmt.Println("Displaying CUI Components Information...")
+	log.Println("Displaying CUI Components Information...")
 	if len(cuiComponents) == 0 {
 		errMessage := "No CUI components available to display"
-		fmt.Println(errMessage)
+		log.Println(errMessage)
 		return fmt.Errorf("no CUI components available to display")
 	}
 
 	for _, component := range cuiComponents {
-		fmt.Printf("Component: %s, Instance ID: %s, CUI Type: %s, Location: %s, Users with Access: %v, Last Modified: %s\n",
+		log.Printf("Component: %s, Instance ID: %s, CUI Type: %s, Location: %s, Users with Access: %v, Last Modified: %s\n",
 			component.ComponentName, component.InstanceID, component.CUIType, component.Location, component.AccessUsers, component.LastModified)
 	}
 	return nil

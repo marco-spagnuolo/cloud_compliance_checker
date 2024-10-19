@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// IAMCheck è una struttura che implementa i controlli di conformità per le policy IAM e altri controlli AWS
+// IAMCheck is a struct that contains the AWS clients required for the IAM checks
 type IAMCheck struct {
 	EC2Client        *ec2.Client
 	S3Client         *s3.Client
@@ -25,7 +25,7 @@ type IAMCheck struct {
 	CloudTrailClient *cloudtrail.Client
 }
 
-// NewIAMCheck inizializza una nuova istanza di IAMCheck
+// NewIAMCheck initializes a new IAMCheck struct with the provided AWS configuration
 func NewIAMCheck(cfg aws.Config) *IAMCheck {
 	return &IAMCheck{
 		EC2Client: ec2.NewFromConfig(cfg),
@@ -35,23 +35,20 @@ func NewIAMCheck(cfg aws.Config) *IAMCheck {
 }
 
 func (c *IAMCheck) RunCheckPolicies() error {
-	// Elenca gli utenti IAM su AWS
+
 	listUsersOutput, err := c.IAMClient.ListUsers(context.TODO(), &iam.ListUsersInput{})
 	if err != nil {
 		return LogAndReturnError("impossibile elencare gli utenti IAM", err)
 	}
 
-	// Carica la configurazione utenti e policy dal file YAML
-	usersFromConfig, err := LoadUsersFromConfig()
-	if err != nil {
-		return LogAndReturnError("impossibile caricare gli utenti dal file di configurazione", err)
-	}
+	// load users from config
+	usersFromConfig := config.AppConfig.AWS.Users
 
-	// Itera sugli utenti AWS e verifica le policy assegnate
+	var nonConformingUsers []string
+
 	for _, awsUser := range listUsersOutput.Users {
-		fmt.Printf("=======> Verifica dell'utente AWS: %s\n", *awsUser.UserName)
+		log.Printf("=======> Verifica dell'utente AWS: %s\n", *awsUser.UserName)
 
-		// Elenca le policy assegnate all'utente su AWS
 		attachedPoliciesOutput, err := c.IAMClient.ListAttachedUserPolicies(context.TODO(), &iam.ListAttachedUserPoliciesInput{
 			UserName: awsUser.UserName,
 		})
@@ -59,25 +56,36 @@ func (c *IAMCheck) RunCheckPolicies() error {
 			return LogAndReturnError(fmt.Sprintf("impossibile elencare le policy assegnate all'utente %s", *awsUser.UserName), err)
 		}
 
-		// Cerca l'utente nel file di configurazione
-		configUser, ok := usersFromConfig[*awsUser.UserName]
-		if !ok {
-			fmt.Printf("ERRORE: L'utente %s non è presente nel file di configurazione\n", *awsUser.UserName)
-			continue // Se l'utente non è presente nel file di configurazione, continua con il prossimo utente
+		var configUser *config.User
+		for i, user := range usersFromConfig {
+			if user.Name == *awsUser.UserName {
+				configUser = &usersFromConfig[i]
+				break
+			}
+		}
+
+		if configUser == nil {
+			log.Printf("ERRORE: L'utente %s non è presente nel file di configurazione\n", *awsUser.UserName)
+			nonConformingUsers = append(nonConformingUsers, *awsUser.UserName) // Aggiungi l'utente non conforme
+			continue                                                           // Se l'utente non è presente nel file di configurazione, continua con il prossimo utente
 		}
 
 		// Verifica se l'utente ha policy configurate
 		if len(configUser.Policies) == 0 {
-			fmt.Printf("ERRORE: Nessuna policy configurata per l'utente %s nel file YAML\n", configUser.Name)
+			log.Printf("ERRORE: Nessuna policy configurata per l'utente %s nel file YAML\n", configUser.Name)
+			nonConformingUsers = append(nonConformingUsers, configUser.Name) // Aggiungi l'utente non conforme
+			continue
 		}
 
-		// Verifica la conformità delle policy
+		// Verifica la conformità delle policy assegnate su AWS
 		for _, awsPolicy := range attachedPoliciesOutput.AttachedPolicies {
-			fmt.Printf("=======> L'utente %s ha la policy: %s\n", *awsUser.UserName, *awsPolicy.PolicyName)
+			log.Printf("=======> L'utente %s ha la policy: %s\n", *awsUser.UserName, *awsPolicy.PolicyName)
 
 			// Confronta la policy assegnata su AWS con quelle definite nel file YAML
 			if !ContainsString(configUser.Policies, *awsPolicy.PolicyName) {
-				fmt.Printf("ERRORE: La policy %s per l'utente %s non è conforme (non trovata nel file di configurazione)\n", *awsPolicy.PolicyName, *awsUser.UserName)
+				log.Printf("ERRORE: La policy %s per l'utente %s non è conforme (non trovata nel file di configurazione)\n", *awsPolicy.PolicyName, *awsUser.UserName)
+				nonConformingUsers = append(nonConformingUsers, configUser.Name) // Aggiungi l'utente non conforme
+				continue
 			}
 		}
 
@@ -91,9 +99,15 @@ func (c *IAMCheck) RunCheckPolicies() error {
 				}
 			}
 			if !found {
-				fmt.Printf("ERRORE: La policy %s definita per l'utente %s nel file YAML non è assegnata su AWS\n", configPolicy, configUser.Name)
+				log.Printf("ERRORE: La policy %s definita per l'utente %s nel file YAML non è assegnata su AWS\n", configPolicy, configUser.Name)
+				nonConformingUsers = append(nonConformingUsers, configUser.Name)
 			}
 		}
+	}
+
+	// Se ci sono utenti non conformi, restituisci un errore
+	if len(nonConformingUsers) > 0 {
+		return fmt.Errorf("trovati utenti non conformi: %v", nonConformingUsers)
 	}
 
 	return nil
@@ -115,9 +129,9 @@ func (c *IAMCheck) RunCheckAcceptedPolicies() error {
 	}
 
 	// Log per verificare le policy effettivamente presenti su AWS
-	fmt.Printf("INFO: Policy trovate su AWS:")
+	log.Printf("INFO: Policy trovate su AWS:")
 	for _, policy := range listPoliciesOutput.Policies {
-		fmt.Printf("Policy trovata: %s/d", *policy.PolicyName)
+		log.Printf("Policy trovata: %s/d", *policy.PolicyName)
 	}
 
 	policiesOnAWS := MapAWSManagedPolicies(listPoliciesOutput.Policies)
@@ -125,12 +139,12 @@ func (c *IAMCheck) RunCheckAcceptedPolicies() error {
 	// Confronta le policy accettate con quelle effettivamente presenti su AWS
 	for _, acceptedPolicy := range acceptedPolicies {
 		if _, exists := policiesOnAWS[acceptedPolicy]; !exists {
-			fmt.Printf("ERRORE: Policy accettata %s non trovata su AWS", acceptedPolicy)
+			log.Printf("ERRORE: Policy accettata %s non trovata su AWS", acceptedPolicy)
 			return fmt.Errorf("policy accettata %s non trovata su AWS", acceptedPolicy)
 		}
 	}
 
-	fmt.Println("INFO: Tutte le policy accettate sono conformi su AWS")
+	log.Println("INFO: Tutte le policy accettate sono conformi su AWS")
 	return nil
 }
 
@@ -146,13 +160,13 @@ func RunSecurityGroupCheck(securityGroupsFromConfig []config.SecurityGroup, secu
 
 	// Itera su ogni gruppo di sicurezza AWS e confronta con la configurazione
 	for _, awsSG := range securityGroupsFromAWS {
-		fmt.Printf("Verifica del gruppo di sicurezza: %s\n", *awsSG.GroupName)
+		log.Printf("Verifica del gruppo di sicurezza: %s\n", *awsSG.GroupName)
 
 		// Cerca il gruppo di sicurezza nella configurazione
 		configSG, ok := sgMap[*awsSG.GroupName]
 		if !ok {
 			// Se non trovato, segna il gruppo di sicurezza come non conforme
-			fmt.Printf("Gruppo di sicurezza %s non trovato nella configurazione\n", *awsSG.GroupName)
+			log.Printf("Gruppo di sicurezza %s non trovato nella configurazione\n", *awsSG.GroupName)
 			isCompliant = false
 			continue
 		}
@@ -161,7 +175,7 @@ func RunSecurityGroupCheck(securityGroupsFromConfig []config.SecurityGroup, secu
 		if awsSG.IpPermissions != nil {
 			for _, ingress := range awsSG.IpPermissions {
 				if ingress.FromPort != nil && !Contains(configSG.AllowedIngressPorts, int(*ingress.FromPort)) {
-					fmt.Printf("Porta di ingresso %d non consentita per il gruppo %s\n", *ingress.FromPort, *awsSG.GroupName)
+					log.Printf("Porta di ingresso %d non consentita per il gruppo %s\n", *ingress.FromPort, *awsSG.GroupName)
 					isCompliant = false
 				}
 			}
@@ -171,7 +185,7 @@ func RunSecurityGroupCheck(securityGroupsFromConfig []config.SecurityGroup, secu
 		if awsSG.IpPermissionsEgress != nil {
 			for _, egress := range awsSG.IpPermissionsEgress {
 				if egress.FromPort != nil && !Contains(configSG.AllowedEgressPorts, int(*egress.FromPort)) {
-					fmt.Printf("Porta di uscita %d non consentita per il gruppo %s\n", *egress.FromPort, *awsSG.GroupName)
+					log.Printf("Porta di uscita %d non consentita per il gruppo %s\n", *egress.FromPort, *awsSG.GroupName)
 					isCompliant = false
 				}
 			}
@@ -204,7 +218,7 @@ func (c *IAMCheck) RunS3BucketCheck() error {
 
 // RunCheckCUIFlow esegue i controlli di conformità richiesti per NIST SP 800-171 3.1.3
 func (c *IAMCheck) RunCheckCUIFlow() error {
-	fmt.Println("===== Inizio controllo dei gruppi di sicurezza (3.1.3) =====")
+	log.Println("===== Inizio controllo dei gruppi di sicurezza (3.1.3) =====")
 	// Carica i gruppi di sicurezza dalla configurazione
 	securityGroupsFromConfig, err := loadSecurityGroupsFromConfig()
 	if err != nil {
@@ -222,13 +236,13 @@ func (c *IAMCheck) RunCheckCUIFlow() error {
 		return LogAndReturnError("errore durante il controllo dei gruppi di sicurezza", err)
 	}
 
-	fmt.Println("===== Controllo dei gruppi di sicurezza completato =====")
+	log.Println("===== Controllo dei gruppi di sicurezza completato =====")
 
-	fmt.Println("===== Inizio controllo dei bucket S3 (3.1.3) =====")
+	log.Println("===== Inizio controllo dei bucket S3 (3.1.3) =====")
 	if err := c.RunS3BucketCheck(); err != nil {
 		return LogAndReturnError("errore durante il controllo dei bucket S3", err)
 	}
-	fmt.Println("===== Controllo dei bucket S3 completato =====")
+	log.Println("===== Controllo dei bucket S3 completato =====")
 
 	return nil
 }
@@ -267,18 +281,18 @@ func (c *IAMCheck) RunPrivilegeCheck() error {
 
 	// Verifica i privilegi e le funzioni di sicurezza per ogni utente
 	for _, user := range usersFromConfig {
-		fmt.Printf("Verifica dei privilegi per l'utente: %s\n", user.Name)
+		log.Printf("Verifica dei privilegi per l'utente: %s\n", user.Name)
 
 		// Verifica che ogni funzione di sicurezza corrisponda a una policy assegnata
 		for _, sf := range user.SecurityFunctions {
-			fmt.Printf("Verifica della funzione di sicurezza %s per l'utente %s\n", sf, user.Name)
+			log.Printf("Verifica della funzione di sicurezza %s per l'utente %s\n", sf, user.Name)
 
 			// Variabile per determinare se è stata trovata una policy corrispondente
 			found := false
 
 			// Controlla se c'è una policy che copre la funzione di sicurezza
 			for _, policy := range user.Policies {
-				fmt.Printf("Verifica della policy %s per la funzione di sicurezza %s\n", policy, sf)
+				log.Printf("Verifica della policy %s per la funzione di sicurezza %s\n", policy, sf)
 
 				if policy == sf {
 					found = true
@@ -288,7 +302,7 @@ func (c *IAMCheck) RunPrivilegeCheck() error {
 
 			// Se non è stata trovata alcuna policy corrispondente alla funzione di sicurezza, segnala l'errore
 			if !found {
-				fmt.Printf("ERRORE: La funzione di sicurezza %s per l'utente %s non è coperta da alcuna policy\n", sf, user.Name)
+				log.Printf("ERRORE: La funzione di sicurezza %s per l'utente %s non è coperta da alcuna policy\n", sf, user.Name)
 				return fmt.Errorf("funzioni di sicurezza non conformi per l'utente %s", user.Name)
 			}
 		}
@@ -306,32 +320,32 @@ func (c *IAMCheck) RunPrivilegeAccountCheck() error {
 	}
 
 	for _, user := range usersFromConfig {
-		fmt.Printf("Verifica dei privilegi per l'utente: %s\n", user.Name)
+		log.Printf("Verifica dei privilegi per l'utente: %s\n", user.Name)
 
 		// Se l'utente non è privilegiato ma ha funzioni di sicurezza
 		if !user.IsPrivileged && len(user.SecurityFunctions) > 0 {
 			for _, sf := range user.SecurityFunctions {
-				fmt.Printf("ERRORE: L'utente %s non è privilegiato ma ha accesso alla funzione di sicurezza: %s\n", user.Name, sf)
+				log.Printf("ERRORE: L'utente %s non è privilegiato ma ha accesso alla funzione di sicurezza: %s\n", user.Name, sf)
 			}
 			return fmt.Errorf("utente %s non privilegiato con accesso a funzioni di sicurezza", user.Name)
 		}
 
 		// Se l'utente è privilegiato ma non ha funzioni di sicurezza
 		if user.IsPrivileged && len(user.SecurityFunctions) == 0 {
-			fmt.Printf("ERRORE: L'utente privilegiato %s non ha funzioni di sicurezza assegnate\n", user.Name)
+			log.Printf("ERRORE: L'utente privilegiato %s non ha funzioni di sicurezza assegnate\n", user.Name)
 			return fmt.Errorf("utente privilegiato %s senza funzioni di sicurezza", user.Name)
 		}
 
 		// Verifica che le policy corrispondano alle funzioni di sicurezza
 		for _, sf := range user.SecurityFunctions {
 			if !ContainsString(user.Policies, sf) {
-				fmt.Printf("ERRORE: La policy %s per l'utente %s non corrisponde alla funzione di sicurezza %s\n", user.Policies, user.Name, sf)
+				log.Printf("ERRORE: La policy %s per l'utente %s non corrisponde alla funzione di sicurezza %s\n", user.Policies, user.Name, sf)
 				return fmt.Errorf("funzioni di sicurezza non conformi per l'utente %s", user.Name)
 			}
 		}
 	}
 
-	fmt.Println("Verifica dei privilegi completata con successo")
+	log.Println("Verifica dei privilegi completata con successo")
 	return nil
 }
 
@@ -395,20 +409,20 @@ func (c *IAMCheck) RunPrivilegedFunctionCheck() error {
 	}
 
 	for _, user := range usersFromConfig {
-		fmt.Printf("Verifica dei privilegi per l'utente: %s\n", user.Name)
+		log.Printf("Verifica dei privilegi per l'utente: %s\n", user.Name)
 
 		// Controlla se un utente non privilegiato ha accesso a funzioni privilegiate
 		if !user.IsPrivileged && len(user.SecurityFunctions) > 0 {
 			for _, sf := range user.SecurityFunctions {
 				// Se l'utente non privilegiato ha una funzione di sicurezza, segnala un errore
-				fmt.Printf("ERRORE: L'utente non privilegiato %s ha accesso alla funzione di sicurezza: %s\n", user.Name, sf)
+				log.Printf("ERRORE: L'utente non privilegiato %s ha accesso alla funzione di sicurezza: %s\n", user.Name, sf)
 				return fmt.Errorf("utente %s non privilegiato con accesso a funzioni di sicurezza: %s", user.Name, sf)
 			}
 		}
 	}
 
 	// Tutti i controlli sono passati
-	fmt.Println("Verifica delle funzioni privilegiate completata con successo.")
+	log.Println("Verifica delle funzioni privilegiate completata con successo.")
 	return nil
 }
 
@@ -447,10 +461,10 @@ func (c *IAMCheck) RunLoginAttemptCheck(user string, isSuccess bool, loginPolicy
 			// Sblocca l'account dopo il periodo di blocco
 			loginAttempt.IsLocked = false
 			loginAttempt.FailedAttempts = 0
-			fmt.Printf("Account %s sbloccato automaticamente\n", user)
+			log.Printf("Account %s sbloccato automaticamente\n", user)
 		} else {
 			// L'account è ancora bloccato
-			fmt.Printf("Account %s è bloccato fino a %s\n", user, loginAttempt.LockoutTime.Add(time.Duration(loginPolicy.LockoutDurationMinutes)*time.Minute))
+			log.Printf("Account %s è bloccato fino a %s\n", user, loginAttempt.LockoutTime.Add(time.Duration(loginPolicy.LockoutDurationMinutes)*time.Minute))
 			return fmt.Errorf("account %s bloccato", user)
 		}
 	}
@@ -458,7 +472,7 @@ func (c *IAMCheck) RunLoginAttemptCheck(user string, isSuccess bool, loginPolicy
 	// Se l'accesso è fallito, incrementa il conteggio
 	if !isSuccess {
 		loginAttempt.FailedAttempts++
-		fmt.Printf("Tentativo di accesso fallito per l'utente %s. Totale tentativi falliti: %d\n", user, loginAttempt.FailedAttempts)
+		log.Printf("Tentativo di accesso fallito per l'utente %s. Totale tentativi falliti: %d\n", user, loginAttempt.FailedAttempts)
 
 		// Verifica se il numero massimo di tentativi è stato superato
 		if loginAttempt.FailedAttempts >= loginPolicy.MaxUnsuccessfulAttempts {
@@ -469,11 +483,11 @@ func (c *IAMCheck) RunLoginAttemptCheck(user string, isSuccess bool, loginPolicy
 			// Verifica che `ActionOnLockout` sia specificato e applica l'azione
 			switch loginPolicy.ActionOnLockout {
 			case "lock_account":
-				fmt.Printf("Account %s bloccato per %d minuti\n", user, loginPolicy.LockoutDurationMinutes)
+				log.Printf("Account %s bloccato per %d minuti\n", user, loginPolicy.LockoutDurationMinutes)
 			case "notify_admin":
-				fmt.Printf("Amministratore notificato per il blocco dell'account %s\n", user)
+				log.Printf("Amministratore notificato per il blocco dell'account %s\n", user)
 			default:
-				fmt.Printf("Azione sconosciuta per il blocco dell'account %s: %s\n", user, loginPolicy.ActionOnLockout)
+				log.Printf("Azione sconosciuta per il blocco dell'account %s: %s\n", user, loginPolicy.ActionOnLockout)
 				return fmt.Errorf("azione di blocco sconosciuta: %s", loginPolicy.ActionOnLockout)
 			}
 			return fmt.Errorf("raggiunto il limite di tentativi di accesso falliti per l'utente %s", user)
@@ -491,7 +505,7 @@ func (c *IAMCheck) RunSessionTimeoutCheck(cfg aws.Config) error {
 	ssmClient := ssm.NewFromConfig(cfg)
 
 	// Log: Inizio controllo delle sessioni attive
-	fmt.Println("Inizio del controllo delle sessioni attive...")
+	log.Println("Inizio del controllo delle sessioni attive...")
 
 	// Elenca le sessioni attive
 	listSessionsInput := &ssm.DescribeSessionsInput{
@@ -504,14 +518,14 @@ func (c *IAMCheck) RunSessionTimeoutCheck(cfg aws.Config) error {
 	}
 
 	// Log: Numero di sessioni attive trovate
-	fmt.Printf("Numero di sessioni attive trovate: %d\n", len(listSessionsOutput.Sessions))
+	log.Printf("Numero di sessioni attive trovate: %d\n", len(listSessionsOutput.Sessions))
 
 	// Controlla l'inattività di ogni sessione e termina se necessario
 	for _, session := range listSessionsOutput.Sessions {
 		inactivityDuration := time.Since(*session.StartDate)
 
 		// Log: Durata di inattività per la sessione corrente
-		fmt.Printf("Sessione ID: %s, Inattività: %v\n", *session.SessionId, inactivityDuration)
+		log.Printf("Sessione ID: %s, Inattività: %v\n", *session.SessionId, inactivityDuration)
 
 		// Timeout di inattività di 30 minuti
 		if inactivityDuration > time.Duration(30)*time.Minute {
@@ -520,7 +534,7 @@ func (c *IAMCheck) RunSessionTimeoutCheck(cfg aws.Config) error {
 			}
 
 			// Log: Tentativo di terminare la sessione per inattività
-			fmt.Printf("Tentativo di terminare la sessione %s per inattività...\n", *session.SessionId)
+			log.Printf("Tentativo di terminare la sessione %s per inattività...\n", *session.SessionId)
 
 			_, err := ssmClient.TerminateSession(context.TODO(), terminateSessionInput)
 			if err != nil {
@@ -528,15 +542,15 @@ func (c *IAMCheck) RunSessionTimeoutCheck(cfg aws.Config) error {
 			}
 
 			// Log: Conferma che la sessione è stata terminata
-			fmt.Printf("Sessione %s terminata con successo per inattività\n", *session.SessionId)
+			log.Printf("Sessione %s terminata con successo per inattività\n", *session.SessionId)
 		} else {
 			// Log: Sessione ancora attiva e non terminata
-			fmt.Printf("Sessione %s ancora attiva e non terminata per inattività\n", *session.SessionId)
+			log.Printf("Sessione %s ancora attiva e non terminata per inattività\n", *session.SessionId)
 		}
 	}
 
 	// Log: Fine del controllo delle sessioni attive
-	fmt.Println("Controllo delle sessioni attive completato.")
+	log.Println("Controllo delle sessioni attive completato.")
 
 	return nil
 }
@@ -544,7 +558,7 @@ func (c *IAMCheck) RunSessionTimeoutCheck(cfg aws.Config) error {
 func (c *IAMCheck) RunInactivitySessionCheck(cfg aws.Config, username string) error {
 	iamClient := iam.NewFromConfig(cfg)
 
-	fmt.Printf("Inizio controllo delle policy di sessione IAM per l'utente %s...\n", username)
+	log.Printf("Inizio controllo delle policy di sessione IAM per l'utente %s...\n", username)
 
 	listPoliciesInput := &iam.ListAttachedUserPoliciesInput{
 		UserName: &username,
@@ -563,12 +577,12 @@ func (c *IAMCheck) RunInactivitySessionCheck(cfg aws.Config, username string) er
 	}
 
 	if !found {
-		fmt.Printf("ERRORE: La policy ForceSessionTimeout non è associata all'utente %s\n", username)
+		log.Printf("ERRORE: La policy ForceSessionTimeout non è associata all'utente %s\n", username)
 		return fmt.Errorf("policy ForceSessionTimeout non trovata per l'utente %s", username)
 	}
 
-	fmt.Printf("La policy ForceSessionTimeout è stata trovata per l'utente %s\n", username)
-	fmt.Println("Controllo delle policy di sessione IAM completato.")
+	log.Printf("La policy ForceSessionTimeout è stata trovata per l'utente %s\n", username)
+	log.Println("Controllo delle policy di sessione IAM completato.")
 
 	return nil
 }
@@ -580,30 +594,30 @@ func (c *IAMCheck) RunRemoteMonitoringCheck(cfg aws.Config) error {
 	cloudTrailClient := cloudtrail.NewFromConfig(cfg)
 
 	// Log: Inizio del controllo VPC Flow Logs
-	fmt.Println("Verifica se i VPC Flow Logs sono abilitati...")
+	log.Println("Verifica se i VPC Flow Logs sono abilitati...")
 
 	describeFlowLogsInput := &ec2.DescribeFlowLogsInput{}
 	flowLogsOutput, err := c.EC2Client.DescribeFlowLogs(context.TODO(), describeFlowLogsInput)
 	if err != nil {
 		errorMessage := fmt.Sprintf("Errore durante il recupero dei VPC Flow Logs: %v", err)
-		fmt.Println(errorMessage)
+		log.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
 	// Log: Numero di VPC Flow Logs trovati
-	fmt.Printf("Numero di VPC Flow Logs trovati: %d\n", len(flowLogsOutput.FlowLogs))
+	log.Printf("Numero di VPC Flow Logs trovati: %d\n", len(flowLogsOutput.FlowLogs))
 
 	// Se nessun VPC Flow Logs è abilitato, restituisci errore
 	if len(flowLogsOutput.FlowLogs) == 0 {
 		errorMessage := "ERRORE: Nessun VPC Flow Logs abilitato: non conforme"
-		fmt.Println(errorMessage)
+		log.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	fmt.Println("SUCCESSO: I VPC Flow Logs sono abilitati e monitorano il traffico.")
+	log.Println("SUCCESSO: I VPC Flow Logs sono abilitati e monitorano il traffico.")
 
 	// Log: Inizio del controllo CloudTrail
-	fmt.Println("Verifica se CloudTrail è abilitato e monitorando le connessioni remote...")
+	log.Println("Verifica se CloudTrail è abilitato e monitorando le connessioni remote...")
 
 	trailStatusInput := &cloudtrail.GetTrailStatusInput{
 		Name: aws.String("management-events"), // TODO - ask user
@@ -623,10 +637,10 @@ func (c *IAMCheck) RunRemoteMonitoringCheck(cfg aws.Config) error {
 		return fmt.Errorf(errorMessage)
 	}
 
-	fmt.Println("SUCCESSO: CloudTrail è abilitato e sta monitorando le connessioni remote.")
+	log.Println("SUCCESSO: CloudTrail è abilitato e sta monitorando le connessioni remote.")
 
 	// Log: Fine del controllo
-	fmt.Println("Controllo delle connessioni esterne completato con successo.")
+	log.Println("Controllo delle connessioni esterne completato con successo.")
 
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"cloud_compliance_checker/discovery"
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -49,7 +50,7 @@ func getOrCreateSecurityGroup(ec2Client *ec2.Client, groupName, vpcID string) (s
 	}
 
 	// If the security group is not found, create it
-	fmt.Printf("Security group '%s' not found, creating it...\n", groupName)
+	log.Printf("Security group '%s' not found, creating it...\n", groupName)
 
 	createInput := &ec2.CreateSecurityGroupInput{
 		Description: aws.String("Security group for high-risk travel assets"),
@@ -93,7 +94,7 @@ func getOrCreateSecurityGroup(ec2Client *ec2.Client, groupName, vpcID string) (s
 		return "", fmt.Errorf("failed to set security group rules for '%s': %v", groupName, err)
 	}
 
-	fmt.Printf("Security group '%s' created with ID %s\n", groupName, *createResult.GroupId)
+	log.Printf("Security group '%s' created with ID %s\n", groupName, *createResult.GroupId)
 	return *createResult.GroupId, nil
 }
 
@@ -119,7 +120,7 @@ func getVpcIDForInstance(ec2Client *ec2.Client, instanceID string) (string, erro
 func AssignAWSAssetForHighRiskTravel(cfg aws.Config, userID, assetID, assetType, location string) {
 	user := findHighRiskTravelUser(userID)
 	if user == nil {
-		fmt.Printf("User with ID %s not found in the configuration.\n", userID)
+		log.Printf("User with ID %s not found in the configuration.\n", userID)
 		return
 	}
 
@@ -136,7 +137,7 @@ func AssignAWSAssetForHighRiskTravel(cfg aws.Config, userID, assetID, assetType,
 	// Apply pre-travel configurations to the AWS asset
 	applyAWSPreTravelConfigurations(assetID, assetType, cfg)
 
-	fmt.Printf("AWS Asset %s (%s) assigned to user %s (%s) for travel to high-risk location: %s\n", assetID, assetType, user.Name, user.Role, location)
+	log.Printf("AWS Asset %s (%s) assigned to user %s (%s) for travel to high-risk location: %s\n", assetID, assetType, user.Name, user.Role, location)
 }
 
 // findHighRiskTravelUser finds a user by ID from the high-risk travel configuration
@@ -168,14 +169,14 @@ func applyEC2PreTravelConfig(cfg aws.Config, instanceID, securityGroupName strin
 	// Fetch VPC ID for the instance
 	vpcID, err := getVpcIDForInstance(ec2Client, instanceID)
 	if err != nil {
-		fmt.Printf("Failed to fetch VPC ID for instance %s: %v\n", instanceID, err)
+		log.Printf("Failed to fetch VPC ID for instance %s: %v\n", instanceID, err)
 		return
 	}
 
 	// Fetch or create security group
 	securityGroupID, err := getOrCreateSecurityGroup(ec2Client, securityGroupName, vpcID)
 	if err != nil {
-		fmt.Printf("Failed to fetch or create security group ID for group %s: %v\n", securityGroupName, err)
+		log.Printf("Failed to fetch or create security group ID for group %s: %v\n", securityGroupName, err)
 		return
 	}
 
@@ -187,9 +188,9 @@ func applyEC2PreTravelConfig(cfg aws.Config, instanceID, securityGroupName strin
 
 	_, err = ec2Client.ModifyInstanceAttribute(context.TODO(), input)
 	if err != nil {
-		fmt.Printf("Failed to apply security group to EC2 instance %s: %v\n", instanceID, err)
+		log.Printf("Failed to apply security group to EC2 instance %s: %v\n", instanceID, err)
 	} else {
-		fmt.Printf("Applied security group %s (ID: %s) to EC2 instance %s\n", securityGroupName, securityGroupID, instanceID)
+		log.Printf("Applied security group %s (ID: %s) to EC2 instance %s\n", securityGroupName, securityGroupID, instanceID)
 	}
 }
 
@@ -214,9 +215,9 @@ func applyS3PreTravelConfig(cfg aws.Config, bucketName, encryptionType string) {
 
 	_, err := s3Client.PutBucketEncryption(context.TODO(), input)
 	if err != nil {
-		fmt.Printf("Failed to enable encryption for S3 bucket %s: %v\n", bucketName, err)
+		log.Printf("Failed to enable encryption for S3 bucket %s: %v\n", bucketName, err)
 	} else {
-		fmt.Printf("Enabled encryption (%s) for S3 bucket %s\n", encryptionType, bucketName)
+		log.Printf("Enabled encryption (%s) for S3 bucket %s\n", encryptionType, bucketName)
 	}
 }
 
@@ -224,7 +225,7 @@ func applyS3PreTravelConfig(cfg aws.Config, bucketName, encryptionType string) {
 func PerformAWSPostTravelChecks(cfg aws.Config, userID, assetID, assetType string) {
 	postTravelChecks := config.AppConfig.AWS.HighRiskTravelConfig.PostTravelChecks
 
-	fmt.Printf("Performing post-travel security checks for AWS asset %s (%s) assigned to user %s...\n", assetID, assetType, userID)
+	log.Printf("Performing post-travel security checks for AWS asset %s (%s) assigned to user %s...\n", assetID, assetType, userID)
 
 	switch assetType {
 	case "EC2 Instance":
@@ -237,7 +238,7 @@ func PerformAWSPostTravelChecks(cfg aws.Config, userID, assetID, assetType strin
 		}
 	}
 
-	fmt.Printf("Post-travel security checks completed for AWS asset %s.\n", assetID)
+	log.Printf("Post-travel security checks completed for AWS asset %s.\n", assetID)
 }
 
 // Check EC2 CloudTrail logs and restore default security settings
@@ -246,13 +247,13 @@ func checkEC2PostTravel(cfg aws.Config, instanceID string) {
 	ec2Client := ec2.NewFromConfig(cfg)
 
 	// Simulate checking CloudTrail logs
-	fmt.Printf("Checking CloudTrail logs for EC2 instance %s...\n", instanceID)
+	log.Printf("Checking CloudTrail logs for EC2 instance %s...\n", instanceID)
 
 	// Fetch the default security group by name (you should specify the correct name)
 	defaultSecurityGroupName := "default"
 	securityGroupID, err := getOrCreateSecurityGroup(ec2Client, defaultSecurityGroupName, "your-vpc-id") // Replace with actual VPC ID
 	if err != nil {
-		fmt.Printf("Failed to fetch default security group ID for group %s: %v\n", defaultSecurityGroupName, err)
+		log.Printf("Failed to fetch default security group ID for group %s: %v\n", defaultSecurityGroupName, err)
 		return
 	}
 
@@ -264,9 +265,9 @@ func checkEC2PostTravel(cfg aws.Config, instanceID string) {
 
 	_, err = ec2Client.ModifyInstanceAttribute(context.TODO(), input)
 	if err != nil {
-		fmt.Printf("Failed to restore security group for EC2 instance %s: %v\n", instanceID, err)
+		log.Printf("Failed to restore security group for EC2 instance %s: %v\n", instanceID, err)
 	} else {
-		fmt.Printf("Restored default security group (ID: %s) for EC2 instance %s\n", securityGroupID, instanceID)
+		log.Printf("Restored default security group (ID: %s) for EC2 instance %s\n", securityGroupID, instanceID)
 	}
 }
 
@@ -276,7 +277,7 @@ func checkS3PostTravel(cfg aws.Config, bucketName string) {
 	s3Client := s3.NewFromConfig(cfg)
 
 	// Simulate checking CloudTrail logs
-	fmt.Printf("Checking CloudTrail logs for S3 bucket %s...\n", bucketName) // TODO Implement CloudTrail log check
+	log.Printf("Checking CloudTrail logs for S3 bucket %s...\n", bucketName) // TODO Implement CloudTrail log check
 
 	// Verify that encryption is still enabled
 	input := &s3.GetBucketEncryptionInput{
@@ -285,11 +286,11 @@ func checkS3PostTravel(cfg aws.Config, bucketName string) {
 
 	output, err := s3Client.GetBucketEncryption(context.TODO(), input)
 	if err != nil {
-		fmt.Printf("Failed to verify encryption for S3 bucket %s: %v\n", bucketName, err)
+		log.Printf("Failed to verify encryption for S3 bucket %s: %v\n", bucketName, err)
 	} else if len(output.ServerSideEncryptionConfiguration.Rules) > 0 {
-		fmt.Printf("Encryption is enabled for S3 bucket %s\n", bucketName)
+		log.Printf("Encryption is enabled for S3 bucket %s\n", bucketName)
 	} else {
-		fmt.Printf("Encryption is NOT enabled for S3 bucket %s!\n", bucketName)
+		log.Printf("Encryption is NOT enabled for S3 bucket %s!\n", bucketName)
 	}
 }
 

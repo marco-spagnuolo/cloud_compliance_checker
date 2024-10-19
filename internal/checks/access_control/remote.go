@@ -3,6 +3,7 @@ package iampolicy
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -31,7 +32,7 @@ func NewRemoteAccessCheck(cfg aws.Config) *RemoteAccessCheck {
 // RunRemoteAccessCheck esegue il controllo di conformità per l'accesso remoto.
 // req 3.1.12
 func (c *RemoteAccessCheck) RunRemoteAccessCheck() error {
-	fmt.Println("Inizio controllo accesso remoto...")
+	log.Println("Inizio controllo accesso remoto...")
 
 	describeInstancesInput := &ec2.DescribeInstancesInput{}
 	describeInstancesOutput, err := c.EC2Client.DescribeInstances(context.TODO(), describeInstancesInput)
@@ -39,11 +40,11 @@ func (c *RemoteAccessCheck) RunRemoteAccessCheck() error {
 		return fmt.Errorf("impossibile elencare le istanze EC2: %v", err)
 	}
 
-	fmt.Printf("Numero di istanze EC2 trovate: %d\n", len(describeInstancesOutput.Reservations))
+	log.Printf("Numero di istanze EC2 trovate: %d\n", len(describeInstancesOutput.Reservations))
 
 	for _, reservation := range describeInstancesOutput.Reservations {
 		for _, instance := range reservation.Instances {
-			fmt.Printf("Verifica istanza: %s\n", *instance.InstanceId)
+			log.Printf("Verifica istanza: %s\n", *instance.InstanceId)
 
 			securityGroups := instance.SecurityGroups
 			for _, sg := range securityGroups {
@@ -55,16 +56,16 @@ func (c *RemoteAccessCheck) RunRemoteAccessCheck() error {
 				}
 
 				if isRemoteAccessAllowed(sgDetails.SecurityGroups) {
-					fmt.Printf("Accesso remoto autorizzato per l'istanza %s\n", *instance.InstanceId)
+					log.Printf("Accesso remoto autorizzato per l'istanza %s\n", *instance.InstanceId)
 				} else {
-					fmt.Printf("ERRORE: Accesso remoto non autorizzato per l'istanza %s\n", *instance.InstanceId)
+					log.Printf("ERRORE: Accesso remoto non autorizzato per l'istanza %s\n", *instance.InstanceId)
 					return fmt.Errorf("istanza %s non conforme per l'accesso remoto", *instance.InstanceId)
 				}
 			}
 
 			// Verifica che l'accesso remoto passi attraverso un bastion host
 			if !isBastionHostUsed(instance) {
-				fmt.Printf("ERRORE: L'istanza %s non utilizza un bastion host per l'accesso remoto\n", *instance.InstanceId)
+				log.Printf("ERRORE: L'istanza %s non utilizza un bastion host per l'accesso remoto\n", *instance.InstanceId)
 				return fmt.Errorf("istanza %s non conforme per l'accesso remoto", *instance.InstanceId)
 			}
 		}
@@ -76,15 +77,15 @@ func (c *RemoteAccessCheck) RunRemoteAccessCheck() error {
 	}
 
 	for _, user := range listUsersOutput.Users {
-		fmt.Printf("Verifica utente IAM: %s\n", *user.UserName)
+		log.Printf("Verifica utente IAM: %s\n", *user.UserName)
 
 		if !isPrivilegedRemoteAccessAllowed(user, c) {
-			fmt.Printf("ERRORE: L'utente %s non è autorizzato a eseguire comandi remoti privilegiati\n", *user.UserName)
+			log.Printf("ERRORE: L'utente %s non è autorizzato a eseguire comandi remoti privilegiati\n", *user.UserName)
 			return fmt.Errorf("utente %s non conforme per l'accesso remoto privilegiato", *user.UserName)
 		}
 	}
 
-	fmt.Println("Controllo accesso remoto completato con successo.")
+	log.Println("Controllo accesso remoto completato con successo.")
 	return nil
 }
 
@@ -93,7 +94,7 @@ func isBastionHostUsed(instance ec2types.Instance) bool {
 	// Verifica se la subnet dell'istanza è associata a un bastion host
 	if instance.PublicIpAddress != nil {
 		// Supponiamo che un bastion host abbia un IP pubblico e permetta solo accessi tramite VPN o IP autorizzati
-		fmt.Printf("Bastion host rilevato per l'istanza %s con IP pubblico: %s\n", *instance.InstanceId, *instance.PublicIpAddress)
+		log.Printf("Bastion host rilevato per l'istanza %s con IP pubblico: %s\n", *instance.InstanceId, *instance.PublicIpAddress)
 		return true
 	}
 	return false
@@ -108,7 +109,7 @@ func isRemoteAccessAllowed(securityGroups []ec2types.SecurityGroup) bool {
 				for _, ipRange := range permission.IpRanges {
 					// Controlla se l'intervallo di IP è aperto (es. "0.0.0.0/0", che non è sicuro)
 					if *ipRange.CidrIp == "0.0.0.0/0" {
-						fmt.Printf("Accesso SSH/RDP aperto a tutto il mondo nel gruppo di sicurezza %s\n", *sg.GroupId)
+						log.Printf("Accesso SSH/RDP aperto a tutto il mondo nel gruppo di sicurezza %s\n", *sg.GroupId)
 						return false
 					}
 				}
@@ -125,18 +126,18 @@ func isPrivilegedRemoteAccessAllowed(user iamtypes.User, c *RemoteAccessCheck) b
 		UserName: user.UserName,
 	})
 	if err != nil {
-		fmt.Printf("Errore nel recuperare le policy per l'utente %s: %v\n", *user.UserName, err)
+		log.Printf("Errore nel recuperare le policy per l'utente %s: %v\n", *user.UserName, err)
 		return false
 	}
 
 	// Controlla se l'utente ha una policy che consente l'accesso remoto privilegiato
 	for _, policy := range listPoliciesOutput.AttachedPolicies {
 		if *policy.PolicyName == "RemoteAdminPolicy" {
-			fmt.Printf("L'utente %s ha l'autorizzazione per l'accesso remoto privilegiato\n", *user.UserName)
+			log.Printf("L'utente %s ha l'autorizzazione per l'accesso remoto privilegiato\n", *user.UserName)
 			return true
 		}
 	}
 
-	fmt.Printf("L'utente %s non ha l'autorizzazione per l'accesso remoto privilegiato\n", *user.UserName)
+	log.Printf("L'utente %s non ha l'autorizzazione per l'accesso remoto privilegiato\n", *user.UserName)
 	return false
 }

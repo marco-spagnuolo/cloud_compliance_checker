@@ -3,6 +3,7 @@ package id_auth
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
@@ -39,7 +40,7 @@ func CheckAWSUserCompliance(cfg aws.Config, iamClient IAMServiceInterface) error
 			return fmt.Errorf("MFA is not enabled for user %s", *user.UserName)
 
 		}
-		fmt.Printf("User %s is compliant\n", *user.UserName)
+		log.Printf("User %s is compliant\n", *user.UserName)
 
 	}
 	return nil
@@ -52,18 +53,18 @@ func NewIAMClient(cfg aws.Config) IAMServiceInterface {
 }
 
 func RunComplianceCheck(cfg aws.Config) error {
-	fmt.Println("RunComplianceCheck started")
+	log.Println("RunComplianceCheck started")
 
 	iamClient := NewIAMClient(cfg)
 
-	fmt.Println("Running compliance check on IAM users...")
+	log.Println("Running compliance check on IAM users...")
 
 	err := CheckAWSUserCompliance(cfg, iamClient)
 	if err != nil {
-		fmt.Printf("Compliance check failed: %v\n", err)
+		log.Printf("Compliance check failed: %v\n", err)
 		return fmt.Errorf("compliance check failed: %v", err)
 	}
 
-	fmt.Println("All users are compliant with MFA requirements.")
+	log.Println("All users are compliant with MFA requirements.")
 	return nil
 }

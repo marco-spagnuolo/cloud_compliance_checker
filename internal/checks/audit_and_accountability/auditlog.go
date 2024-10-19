@@ -5,6 +5,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -30,7 +31,7 @@ func NewAuditLogCheck(cfg aws.Config, rd int) *AuditLogCheck {
 
 // RunAuditLogCheck esegue il controllo per verificare il contenuto dei record di audit
 func (c *AuditLogCheck) RunAuditLogCheck() error {
-	fmt.Println("Inizio del controllo del contenuto dei record di audit...")
+	log.Println("Inizio del controllo del contenuto dei record di audit...")
 
 	// Recupera gli eventi di CloudTrail nell'ultimo giorno (24 ore)
 	startTime := time.Now().Add(-c.RetentionPeriod)
@@ -44,14 +45,14 @@ func (c *AuditLogCheck) RunAuditLogCheck() error {
 	eventsOutput, err := c.CloudTrailClient.LookupEvents(context.TODO(), input)
 	if err != nil {
 		errorMessage := fmt.Sprintf("Errore durante il recupero degli eventi di CloudTrail: %v", err)
-		fmt.Println(errorMessage)
+		log.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
 	// Se nessun evento è stato trovato, restituisci un errore
 	if len(eventsOutput.Events) == 0 {
 		errorMessage := "ERRORE: Nessun evento trovato nei record di audit"
-		fmt.Println(errorMessage)
+		log.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
@@ -62,11 +63,11 @@ func (c *AuditLogCheck) RunAuditLogCheck() error {
 	err = c.GenerateAuditReport(reducedEvents)
 	if err != nil {
 		errorMessage := fmt.Sprintf("Errore durante la generazione del report di audit: %v", err)
-		fmt.Println(errorMessage)
+		log.Println(errorMessage)
 		return fmt.Errorf(errorMessage)
 	}
 
-	fmt.Println("Controllo del contenuto dei record di audit completato con successo.")
+	log.Println("Controllo del contenuto dei record di audit completato con successo.")
 	return nil
 }
 
@@ -123,7 +124,7 @@ func (c *AuditLogCheck) GenerateAuditReport(reducedEvents []map[string]interface
 		}
 	}
 
-	fmt.Println("Report di audit generato con successo: audit_report.csv")
+	log.Println("Report di audit generato con successo: audit_report.csv")
 	return nil
 }
 

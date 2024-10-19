@@ -71,7 +71,7 @@ func CheckMFAEnabled(userName string, iamClient *iam.Client) (bool, error) {
 // IsPrivilegedUser checks if a user is considered privileged based on their attached policies or roles in the config.
 func IsPrivilegedUser(userName string) bool {
 	// Retrieve privileged status from the configuration.
-	for _, user := range config.AppConfig.AWS.User {
+	for _, user := range config.AppConfig.AWS.Users {
 		if user.Name == userName && user.IsPrivileged {
 			return true
 		}
@@ -114,13 +114,13 @@ func AttachMFAEnforcementPolicy(userName string, iamClient *iam.Client) error {
 		return fmt.Errorf("failed to attach MFA enforcement policy to user %s: %w", userName, err)
 	}
 
-	fmt.Printf("MFA enforcement policy attached to user %s\n", userName)
+	log.Printf("MFA enforcement policy attached to user %s\n", userName)
 	return nil
 }
 
 // EnforceMFAForUsers ensures that all users (privileged and non-privileged) have MFA enabled, and enforces it where necessary.
 func EnforceMFAForUsers(iamClient *iam.Client) error {
-	fmt.Println("Starting MFA enforcement check for all users...")
+	log.Println("Starting MFA enforcement check for all users...")
 
 	// List all IAM users and their MFA status.
 	users, err := ListIAMUsers(iamClient)
@@ -133,21 +133,21 @@ func EnforceMFAForUsers(iamClient *iam.Client) error {
 
 	// Iterate over each user and ensure MFA is enabled.
 	for _, user := range users {
-		fmt.Printf("Checking MFA status for user: %s\n", user.UserName)
+		log.Printf("Checking MFA status for user: %s\n", user.UserName)
 		if !user.MFAEnabled {
-			fmt.Printf("User %s does not have MFA enabled\n", user.UserName)
+			log.Printf("User %s does not have MFA enabled\n", user.UserName)
 
 			// Enforce MFA for all users, regardless of privilege status.
-			fmt.Printf("Enforcing MFA for user %s...\n", user.UserName)
+			log.Printf("Enforcing MFA for user %s...\n", user.UserName)
 			err := AttachMFAEnforcementPolicy(user.UserName, iamClient)
 			if err != nil {
 				log.Printf("Failed to enforce MFA for user %s: %v\n", user.UserName, err)
 				nonCompliant = true
 			} else {
-				fmt.Printf("MFA enforcement successful for user %s\n", user.UserName)
+				log.Printf("MFA enforcement successful for user %s\n", user.UserName)
 			}
 		} else {
-			fmt.Printf("User %s has MFA enabled\n", user.UserName)
+			log.Printf("User %s has MFA enabled\n", user.UserName)
 		}
 	}
 

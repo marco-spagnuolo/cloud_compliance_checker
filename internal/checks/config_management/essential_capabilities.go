@@ -4,6 +4,7 @@ import (
 	"cloud_compliance_checker/config"
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -77,36 +78,36 @@ func MonitorAWSResources(cfg aws.Config, essentialConfig *config.MissionEssentia
 	runningFunctions := GetRunningFunctions()
 
 	// List all running functions and check for non-essential functions
-	fmt.Println("Currently running functions:")
+	log.Println("Currently running functions:")
 	for _, function := range runningFunctions {
 		if contains(essentialConfig.Functions, function) {
-			fmt.Printf("  %s - Compliant\n", function)
+			log.Printf("  %s - Compliant\n", function)
 		} else {
-			fmt.Printf("  %s - Non-Compliant\n", function)
+			log.Printf("  %s - Non-Compliant\n", function)
 			nonCompliantItems = append(nonCompliantItems, fmt.Sprintf("Non-essential function detected: %s", function))
 		}
 	}
 
 	// List and check EC2 instances
-	fmt.Println("\nCurrently running EC2 instances:")
+	log.Println("\nCurrently running EC2 instances:")
 	for instanceID, description := range ec2Instances {
 		if contains(essentialConfig.Functions, description) {
-			fmt.Printf("  %s - Compliant (%s)\n", instanceID, description)
+			log.Printf("  %s - Compliant (%s)\n", instanceID, description)
 		} else {
 			reason := fmt.Sprintf("Purpose: %s does not match mission-essential functions", description)
-			fmt.Printf("  %s - Non-Compliant (%s)\n", instanceID, reason)
+			log.Printf("  %s - Non-Compliant (%s)\n", instanceID, reason)
 			nonCompliantItems = append(nonCompliantItems, fmt.Sprintf("Non-essential EC2 instance detected: %s. Reason: %s", instanceID, reason))
 		}
 	}
 
 	// List and check Security Groups for non-essential open ports
-	fmt.Println("\nOpen ports in Security Groups:")
+	log.Println("\nOpen ports in Security Groups:")
 	for groupID, ports := range securityGroups {
 		for _, port := range ports {
 			if contains(essentialConfig.Ports, fmt.Sprintf("%d", port)) {
-				fmt.Printf("  Security Group %s, Port %d - Compliant\n", groupID, port)
+				log.Printf("  Security Group %s, Port %d - Compliant\n", groupID, port)
 			} else {
-				fmt.Printf("  Security Group %s, Port %d - Non-Compliant\n", groupID, port)
+				log.Printf("  Security Group %s, Port %d - Non-Compliant\n", groupID, port)
 				nonCompliantItems = append(nonCompliantItems, fmt.Sprintf("Non-essential open port detected in security group %s: %d", groupID, port))
 			}
 		}
@@ -135,20 +136,20 @@ func RunAWSResourceReview(cfg aws.Config) error {
 	// Access mission-essential configuration from the loaded config
 	essentialConfig := config.AppConfig.AWS.MissionEssentialConfig
 
-	fmt.Println("Starting AWS Resource Capability Review")
-	fmt.Println("Mission-essential capabilities being enforced...")
-	fmt.Printf("  Functions: %v\n", essentialConfig.Functions)
-	fmt.Printf("  Ports: %v\n", essentialConfig.Ports)
-	fmt.Println("---------------------------------------")
+	log.Println("Starting AWS Resource Capability Review")
+	log.Println("Mission-essential capabilities being enforced...")
+	log.Printf("  Functions: %v\n", essentialConfig.Functions)
+	log.Printf("  Ports: %v\n", essentialConfig.Ports)
+	log.Println("---------------------------------------")
 
 	// Monitor and handle non-essential AWS resources (EC2 instances, open ports)
 	err := MonitorAWSResources(cfg, &essentialConfig)
 	if err != nil {
-		fmt.Println("Non-compliant resources found:")
-		fmt.Printf("%v\n", err)
+		log.Println("Non-compliant resources found:")
+		log.Printf("%v\n", err)
 		return err
 	}
 
-	fmt.Println("AWS Resource Capability Review completed successfully")
+	log.Println("AWS Resource Capability Review completed successfully")
 	return nil
 }

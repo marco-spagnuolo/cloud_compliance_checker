@@ -127,11 +127,11 @@ func CheckSecurityGroupsCompliance(securityGroupsFromConfig []config.SecurityGro
 	}
 
 	for _, awsSG := range securityGroupsFromAWS {
-		fmt.Printf("Verifica del gruppo di sicurezza: %s\n", *awsSG.GroupName)
+		log.Printf("Verifica del gruppo di sicurezza: %s\n", *awsSG.GroupName)
 
 		configSG, ok := sgMap[*awsSG.GroupName]
 		if !ok {
-			fmt.Printf("Gruppo di sicurezza %s non trovato nella configurazione\n", *awsSG.GroupName)
+			log.Printf("Gruppo di sicurezza %s non trovato nella configurazione\n", *awsSG.GroupName)
 			isCompliant = false
 			continue
 		}
@@ -139,7 +139,7 @@ func CheckSecurityGroupsCompliance(securityGroupsFromConfig []config.SecurityGro
 		if awsSG.IpPermissions != nil {
 			for _, ingress := range awsSG.IpPermissions {
 				if ingress.FromPort != nil && !Contains(configSG.AllowedIngressPorts, int(*ingress.FromPort)) {
-					fmt.Printf("Porta di ingresso %d non consentita per il gruppo %s\n", *ingress.FromPort, *awsSG.GroupName)
+					log.Printf("Porta di ingresso %d non consentita per il gruppo %s\n", *ingress.FromPort, *awsSG.GroupName)
 					isCompliant = false
 				}
 			}
@@ -148,7 +148,7 @@ func CheckSecurityGroupsCompliance(securityGroupsFromConfig []config.SecurityGro
 		if awsSG.IpPermissionsEgress != nil {
 			for _, egress := range awsSG.IpPermissionsEgress {
 				if egress.FromPort != nil && !Contains(configSG.AllowedEgressPorts, int(*egress.FromPort)) {
-					fmt.Printf("Porta di uscita %d non consentita per il gruppo %s\n", *egress.FromPort, *awsSG.GroupName)
+					log.Printf("Porta di uscita %d non consentita per il gruppo %s\n", *egress.FromPort, *awsSG.GroupName)
 					isCompliant = false
 				}
 			}
@@ -171,11 +171,11 @@ func CheckS3BucketsCompliance(s3Client *s3.Client, s3BucketsFromConfig []config.
 	}
 
 	for _, awsBucket := range s3BucketsFromAWS {
-		fmt.Printf("Verifica del bucket S3: %s\n", *awsBucket.Name)
+		log.Printf("Verifica del bucket S3: %s\n", *awsBucket.Name)
 
 		configBucket, ok := bucketMap[*awsBucket.Name]
 		if !ok {
-			fmt.Printf("Bucket %s non trovato nella configurazione\n", *awsBucket.Name)
+			log.Printf("Bucket %s non trovato nella configurazione\n", *awsBucket.Name)
 			isCompliant = false
 			continue
 		}
@@ -184,7 +184,7 @@ func CheckS3BucketsCompliance(s3Client *s3.Client, s3BucketsFromConfig []config.
 			Bucket: awsBucket.Name,
 		})
 		if err != nil {
-			fmt.Printf("Impossibile ottenere la crittografia del bucket %s: %v\n", *awsBucket.Name, err)
+			log.Printf("Impossibile ottenere la crittografia del bucket %s: %v\n", *awsBucket.Name, err)
 			isCompliant = false
 			continue
 		}
@@ -192,10 +192,10 @@ func CheckS3BucketsCompliance(s3Client *s3.Client, s3BucketsFromConfig []config.
 		if getBucketEncryptionOutput.ServerSideEncryptionConfiguration != nil {
 			encryption := getBucketEncryptionOutput.ServerSideEncryptionConfiguration.Rules[0].ApplyServerSideEncryptionByDefault.SSEAlgorithm
 			if string(encryption) != configBucket.Encryption {
-				fmt.Printf("Crittografia %s non conforme per il bucket %s (attesa: %s)\n", encryption, *awsBucket.Name, configBucket.Encryption)
+				log.Printf("Crittografia %s non conforme per il bucket %s (attesa: %s)\n", encryption, *awsBucket.Name, configBucket.Encryption)
 				isCompliant = false
 			} else {
-				fmt.Printf("Crittografia conforme per il bucket %s\n", *awsBucket.Name)
+				log.Printf("Crittografia conforme per il bucket %s\n", *awsBucket.Name)
 			}
 		}
 	}
