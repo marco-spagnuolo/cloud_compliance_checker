@@ -88,17 +88,14 @@ func ApproveAndMonitorNonLocalSession(instanceID, command, sessionID, userName s
 	// Execute command
 	output, err := ExecuteMaintenanceCommand(instanceID, command, awsCfg)
 	if err != nil {
-		return fmt.Errorf("Failed to execute nonlocal command: %v", err)
+		return fmt.Errorf("failed to execute nonlocal command: %v", err)
 	}
 	log.Printf("Command output: %s", output)
-	if err != nil {
-		return fmt.Errorf("Failed to execute nonlocal command: %v", err)
-	}
 
 	// Terminate session
 	err = TerminateNonLocalSession(sessionID, awsCfg)
 	if err != nil {
-		return fmt.Errorf("Failed to terminate session: %v", err)
+		return fmt.Errorf("failed to terminate session: %v", err)
 	}
 
 	log.Printf("Nonlocal session completed for instance %s", instanceID)
@@ -328,13 +325,13 @@ func CreateAndTerminateNonLocalSession(instanceID, command, userName string, aws
 	// Step 2: Execute the command
 	_, err = ExecuteMaintenanceCommand(instanceID, command, awsCfg)
 	if err != nil {
-		return fmt.Errorf("Failed to execute nonlocal command: %v", err)
+		return fmt.Errorf("failed to execute nonlocal command: %v", err)
 	}
 
 	// Step 3: Terminate the session
 	err = TerminateNonLocalSession(sessionID, awsCfg)
 	if err != nil {
-		return fmt.Errorf("Failed to terminate session: %v", err)
+		return fmt.Errorf("failed to terminate session: %v", err)
 	}
 
 	log.Printf("Nonlocal session completed for instance %s", instanceID)
