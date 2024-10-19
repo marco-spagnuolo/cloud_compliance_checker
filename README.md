@@ -1,6 +1,3 @@
-Ecco il README aggiornato con le indicazioni per avviare il tool di controllo della conformità poste all'inizio e con una maggiore flessibilità per il nome del file YAML:
-
----
 
 # AWS Security Configuration - NIST SP 800-171 v3 Compliance Checker
 
