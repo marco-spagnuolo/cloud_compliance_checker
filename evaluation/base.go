@@ -2,7 +2,6 @@ package evaluation
 
 import (
 	"cloud_compliance_checker/internal/checks/inc"
-	"cloud_compliance_checker/internal/checks/system_services_acquisition"
 	"cloud_compliance_checker/models"
 	"fmt"
 
@@ -1240,28 +1239,28 @@ func evaluateCriteria(criteria models.Criteria,
 	// 		Impact:      0,
 	// 	}
 	// 03.14.08 Information Management and Reterntion
-	case "CheckSEP":
+	// case "CheckSEP":
 
-		err := system_services_acquisition.CheckSecurityEngineeringPrinciples(cfg)
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			fmt.Printf("\n[ERROR]: %v\n", err)
-			return result
-		}
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
+	// 	err := system_services_acquisition.CheckSecurityEngineeringPrinciples(cfg)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		fmt.Printf("\n[ERROR]: %v\n", err)
+	// 		return result
+	// 	}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
 	case "ch3k":
 
-		err := inc.RunCheck(cfg)
+		err := inc.RunCheckIR(cfg)
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,
