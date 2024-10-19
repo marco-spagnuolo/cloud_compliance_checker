@@ -81,7 +81,7 @@ func GetCurrentAWSBaseline(awsCfg aws.Config) (*config.AWSConfig, error) {
 		}
 		criticalRoles = append(criticalRoles, criticalRole)
 	}
-	awsConfig.CriticalRole = criticalRoles
+	awsConfig.CriticalRoles = criticalRoles
 
 	return &awsConfig, nil
 }
@@ -115,13 +115,13 @@ func CompareBaseline(current *config.AWSConfig, stored *config.AWSConfig) bool {
 	}
 
 	// Compare IAM Roles
-	if len(current.CriticalRole) != len(stored.CriticalRole) {
+	if len(current.CriticalRoles) != len(stored.CriticalRoles) {
 		log.Println("IAM role count has changed!")
 		return false
 	}
 
-	for i, role := range current.CriticalRole {
-		if role.RoleName != stored.CriticalRole[i].RoleName {
+	for i, role := range current.CriticalRoles {
+		if role.RoleName != stored.CriticalRoles[i].RoleName {
 			log.Printf("IAM role %s has changed.\n", role.RoleName)
 			return false
 		}

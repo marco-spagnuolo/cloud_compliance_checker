@@ -20,7 +20,7 @@ type AWSConfig struct {
 	AcceptedPolicies               []string                 `mapstructure:"accepted_policies"`
 	SecurityGroups                 []SecurityGroup          `mapstructure:"security_groups"`
 	S3Buckets                      []S3Bucket               `mapstructure:"s3_buckets"`
-	CriticalRole                   []CriticalRole           `mapstructure:"critical_roles"`
+	CriticalRoles                  []CriticalRole           `mapstructure:"critical_roles"`
 	LoginPolicy                    LoginPolicy              `mapstructure:"login_policy"`
 	MissionEssentialConfig         MissionEssentialConfig   `mapstructure:"mission_essential_capabilities"`
 	EC2Instances                   []EC2Config              `mapstructure:"ec2_instances"`

@@ -55,7 +55,7 @@ func evaluateCriteria(criteria models.Criteria,
 
 	//03.01.01 Account Management
 	case "CheckUsersPolicies":
-		err := check.RunCheckPolicies()
+		err := iampolicy.RunCheckPolicies(cfg)
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,
@@ -92,7 +92,7 @@ func evaluateCriteria(criteria models.Criteria,
 		}
 	// 03.01.03 Information Flow Enforcement
 	case "CheckCUIFlow":
-		err := check.RunCheckCUIFlow()
+		err := check.RunCheckCUIFlow(cfg)
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,
@@ -186,58 +186,48 @@ func evaluateCriteria(criteria models.Criteria,
 			Impact:      0,
 		}
 	// 03.01.08 Limit Unsuccessful Logon Attempts
-	case "CheckLogonAttempts":
-		// Carica gli utenti dal file di configurazione
-		usersFromConfig, err := iampolicy.LoadUsersFromConfig()
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: "Errore nel caricamento degli utenti",
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			fmt.Printf("\n[ERROR]: %v\n", err)
-			return result
-		}
+	// case "CheckLogonAttempts":
+	// 	// Carica gli utenti dal file di configurazione
+	// 	usersFromConfig := config.AppConfig.AWS.Users
 
-		// Cerca specificamente l'utente marco_admin
-		user, ok := usersFromConfig["marco_admin"]
-		if !ok {
-			result = models.ComplianceResult{
-				Description: "Utente marco_admin non trovato nella configurazione",
-				Status:      "NOT COMPLIANT",
-				Response:    "Impossibile eseguire il controllo senza l'utente marco_admin",
-				Impact:      criteria.Value,
-			}
-			fmt.Printf("\n[ERROR]: %v\n", err)
-			return result
-		}
+	// 	// Cerca specificamente l'utente marco_admin
+	// 	user, ok := usersFromConfig["marco_admin"]
+	// 	if !ok {
+	// 		result = models.ComplianceResult{
+	// 			Description: "Utente marco_admin non trovato nella configurazione",
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    "Impossibile eseguire il controllo senza l'utente marco_admin",
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		fmt.Printf("\n[ERROR]: %v\n", err)
+	// 		return result
+	// 	}
 
-		// Carica la politica di accesso definita nel file di configurazione
-		loginPolicy := config.AppConfig.AWS.LoginPolicy
+	// 	// Carica la politica di accesso definita nel file di configurazione
+	// 	loginPolicy := config.AppConfig.AWS.LoginPolicy
 
-		// Esegui il controllo del tentativo di accesso per marco_admin
-		err = check.RunLoginAttemptCheck(user.Name, false, loginPolicy)
-		if err != nil {
-			result = models.ComplianceResult{
-				Description: criteria.Description,
-				Status:      "NOT COMPLIANT",
-				Response:    err.Error(),
-				Impact:      criteria.Value,
-			}
-			fmt.Printf("\n[ERROR]: %v\n", err)
-			return result
-		}
+	// 	// Esegui il controllo del tentativo di accesso per marco_admin
+	// 	err = check.RunLoginAttemptCheck(user.Name, false, loginPolicy)
+	// 	if err != nil {
+	// 		result = models.ComplianceResult{
+	// 			Description: criteria.Description,
+	// 			Status:      "NOT COMPLIANT",
+	// 			Response:    err.Error(),
+	// 			Impact:      criteria.Value,
+	// 		}
+	// 		fmt.Printf("\n[ERROR]: %v\n", err)
+	// 		return result
+	// 	}
 
-		result = models.ComplianceResult{
-			Description: criteria.Description,
-			Status:      "COMPLIANT",
-			Response:    "Check passed",
-			Impact:      0,
-		}
+	// 	result = models.ComplianceResult{
+	// 		Description: criteria.Description,
+	// 		Status:      "COMPLIANT",
+	// 		Response:    "Check passed",
+	// 		Impact:      0,
+	// 	}
 	//03.01.10 Device Lock
 	case "CheckSessionLock":
-		err := check.RunSessionTimeoutCheck(cfg)
+		err := iampolicy.RunSessionTimeoutCheck(cfg)
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,
@@ -256,7 +246,7 @@ func evaluateCriteria(criteria models.Criteria,
 		}
 	// 03.01.11 Session Termination
 	case "CheckSessionTermination":
-		err := check.RunInactivitySessionCheck(cfg, "marco_admin")
+		err := iampolicy.RunInactivitySessionCheck(cfg, "marco_admin")
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,
@@ -295,7 +285,7 @@ func evaluateCriteria(criteria models.Criteria,
 		}
 	// 03.01.20 Use of External Systems
 	case "CheckExternalSystemConnections":
-		err := check.RunRemoteMonitoringCheck(cfg)
+		err := iampolicy.RunRemoteMonitoringCheck(cfg)
 		if err != nil {
 			result = models.ComplianceResult{
 				Description: criteria.Description,
