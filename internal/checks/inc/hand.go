@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatch"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
@@ -25,31 +27,83 @@ type IncidentReport struct {
 	Details   string
 }
 
-// RunCheck esegue un ciclo completo di verifica, simulazione, rilevamento e gestione dell'incidente.
+// LoadCustomConfig carica il profilo specifico per le credenziali nel pacchetto inc
+func LoadCustomConfig() (aws.Config, error) {
+	cfg, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithSharedConfigProfile("attacker-user")) // Usa il profilo configurato
+	if err != nil {
+		return aws.Config{}, fmt.Errorf("errore durante il caricamento delle credenziali personalizzate: %v", err)
+	}
+	return cfg, nil
+}
+
+// RunCheck esegue le operazioni solo con il profilo specifico per il pacchetto `inc`
 func RunCheck(awsCfg aws.Config) error {
+	// Carica la configurazione con il nuovo utente IAM
+	cfg, err := LoadCustomConfig()
+	if err != nil {
+		log.Fatalf("Errore durante il caricamento della configurazione: %v", err)
+		return err
+	}
+
 	// Step 1: Preparazione dell'ambiente
 	cloudTrailClient := cloudtrail.NewFromConfig(awsCfg)
 	cloudWatchClient := cloudwatch.NewFromConfig(awsCfg)
 	snsClient := sns.NewFromConfig(awsCfg)
 	ec2Client := ec2.NewFromConfig(awsCfg)
+	ec2ClientAttacker := ec2.NewFromConfig(cfg)
 
-	// Step 2: Sblocca l'istanza spostandola in un altro security group
+	// Step 2: Tentativo di sblocco dell'istanza da parte dell'attaccante
 	instanceID := "i-063bb3f42843d546a"
-	err := MoveInstanceToSecurityGroup(ec2Client, instanceID, "sg-0117d2e82d65830bd") //default security group
+	err = MoveInstanceToSecurityGroup(ec2ClientAttacker, instanceID, "sg-0117d2e82d65830bd") //default security group
+	if err != nil {
+		if strings.Contains(err.Error(), "UnauthorizedOperation") {
+			unauthorizedError := fmt.Errorf("UnauthorizedOperation: %v", err)
+			log.Printf("Incidente rilevato: Operazione non autorizzata dall'utente attacker-user. Dettagli: %v", err)
+
+			// Notifica l'incidente e continua l'esecuzione
+			NotifyAndContainIncident(unauthorizedError, snsClient, cloudWatchClient)
+
+			// Aggiungi l'incidente a una lista per gestirlo successivamente
+			incident := IncidentReport{
+				Timestamp: time.Now(),
+				EventName: "UnauthorizedOperation",
+				Resource:  instanceID,
+				User:      "attacker-user",
+				Details:   err.Error(),
+			}
+			// Analizza e notifica come incidente
+			AnalyzeIncidents([]IncidentReport{incident})
+			err = NotifyViaSNS(snsClient, "arn:aws:sns:us-east-1:682033472444:IncidentAlert", incident)
+			if err != nil {
+				log.Fatalf("Errore nell'invio della notifica SNS: %v", err)
+				return err
+			}
+		} else {
+			// Se l'errore non riguarda i permessi, interrompe l'esecuzione
+			log.Fatalf("Errore durante lo sblocco dell'istanza da parte di attacker-user: %v", err)
+			return err
+		}
+	} else {
+		log.Println("Attaccante ha spostato l'istanza nel security group sg-0530b0ccad6da9360 (incidente).")
+	}
+
+	// Step 3: Esegue lo sblocco legittimo dell'istanza con l'utente valido
+	err = MoveInstanceToSecurityGroup(ec2Client, instanceID, "sg-0117d2e82d65830bd") //default security group
 	if err != nil {
 		log.Fatalf("Errore durante lo sblocco dell'istanza: %v", err)
 		return err
 	}
-	log.Println("Istanza sbloccata e spostata nel security group sg-0530b0ccad6da9360.")
+	log.Println("Istanza sbloccata correttamente nel security group sg-0530b0ccad6da9360.")
 
-	// Step 3: Verifica della configurazione di sicurezza
+	// Step 4: Verifica della configurazione di sicurezza
 	err = CheckSecuritySetup(cloudTrailClient, cloudWatchClient, snsClient)
 	if err != nil {
 		log.Fatalf("Errore nella verifica della configurazione di sicurezza: %v", err)
 		return err
 	}
 
-	// Step 4: Simulazione di un incidente (modifica al Security Group)
+	// Step 5: Simulazione di un incidente (modifica al Security Group)
 	securityGroupID := "sg-00c5015b6c3fa9161" // attacker security group
 	err = SimulateSecurityGroupIngress(ec2Client, securityGroupID)
 	if err != nil {
@@ -57,18 +111,18 @@ func RunCheck(awsCfg aws.Config) error {
 		return err
 	}
 
-	// Step 5: Attendi che CloudTrail registri l'evento
+	// Step 6: Attendi che CloudTrail registri l'evento
 	log.Println("Aspettando che CloudTrail rilevi l'incidente...")
-	time.Sleep(120 * time.Second) // Attendere 2 minuti affinché CloudTrail registri l'evento.
+	time.Sleep(180 * time.Second) // Attendere 3 minuti affinché CloudTrail registri l'evento.
 
-	// Step 6: Rilevazione degli incidenti
+	// Step 7: Rilevazione degli incidenti
 	incidents, err := DetectIncidents(cloudTrailClient)
 	if err != nil {
 		log.Fatalf("Errore nella rilevazione degli incidenti: %v", err)
 		return err
 	}
 
-	// Step 7: Analisi degli incidenti e notifica
+	// Step 8: Analisi degli incidenti e notifica
 	if len(incidents) > 0 {
 		AnalyzeIncidents(incidents)
 		arn := "arn:aws:sns:us-east-1:682033472444:IncidentAlert"
@@ -80,7 +134,7 @@ func RunCheck(awsCfg aws.Config) error {
 			}
 		}
 
-		// Step 8: Contenimento degli incidenti (Isoliamo l'istanza mettendola nel gruppo di quarantena)
+		// Step 9: Contenimento degli incidenti (Isoliamo l'istanza mettendola nel gruppo di quarantena)
 		err = MoveInstanceToSecurityGroup(ec2Client, instanceID, "sg-0ee645f2ff11d765b") // Quarantena
 		if err != nil {
 			log.Fatalf("Errore nel contenimento dell'incidente: %v", err)
@@ -88,7 +142,7 @@ func RunCheck(awsCfg aws.Config) error {
 		}
 		log.Println("Istanza isolata nel gruppo di sicurezza quarantena (sg-0ee645f2ff11d765b).")
 
-		// Step 9: Eradicazione e ripristino
+		// Step 10: Eradicazione e ripristino
 		err = EradicateAndRecover(ec2Client, securityGroupID, incidents)
 		if err != nil {
 			log.Fatalf("Errore nell'eradicazione e ripristino: %v", err)
@@ -98,6 +152,66 @@ func RunCheck(awsCfg aws.Config) error {
 		log.Println("Nessun incidente rilevato.")
 	}
 	return nil
+}
+
+// NotifyAndContainIncident notifica l'incidente e esegue il contenimento.
+func NotifyAndContainIncident(err error, snsClient *sns.Client, cloudWatchClient *cloudwatch.Client) error {
+	log.Printf("Notifica incidente di autorizzazione non riuscita: %v", err)
+
+	// Invia una notifica SNS
+	arn := "arn:aws:sns:us-east-1:682033472444:IncidentAlert"
+	incident := IncidentReport{
+		Timestamp: time.Now(),
+		EventName: "UnauthorizedOperation",
+		Resource:  "EC2 Instance Operation",
+		User:      "attacker-user",
+		Details:   err.Error(),
+	}
+	message, _ := json.Marshal(incident)
+	_, errSNS := snsClient.Publish(context.TODO(), &sns.PublishInput{
+		Message:  aws.String(string(message)),
+		TopicArn: aws.String(arn),
+	})
+	if errSNS != nil {
+		log.Printf("Errore nell'invio della notifica SNS: %v", errSNS)
+		return errSNS
+	}
+
+	// Contenimento (se richiesto)
+	return nil
+}
+
+// DetectIncidents utilizza CloudTrail per rilevare incidenti basati su tipi di eventi specifici.
+func DetectIncidents(cloudTrailClient *cloudtrail.Client) ([]IncidentReport, error) {
+	startTime := time.Now().Add(-2 * time.Hour) // Estendere il periodo di rilevamento a 2 ore
+
+	resp, err := cloudTrailClient.LookupEvents(context.TODO(), &cloudtrail.LookupEventsInput{
+		StartTime: &startTime,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("impossibile rilevare incidenti: %v", err)
+	}
+
+	var incidents []IncidentReport
+	for _, event := range resp.Events {
+		// Rileva eventi specifici come modifiche ai Security Group o operazioni non autorizzate
+		if *event.EventName == "AuthorizeSecurityGroupIngress" || *event.EventName == "DeleteSecurityGroup" || *event.EventName == "CreateUser" || *event.EventName == "UnauthorizedOperation" {
+			incident := IncidentReport{
+				Timestamp: *event.EventTime,
+				EventName: *event.EventName,
+				User:      *event.Username,
+				Details:   *event.CloudTrailEvent,
+			}
+			if len(event.Resources) > 0 && event.Resources[0].ResourceName != nil {
+				incident.Resource = *event.Resources[0].ResourceName
+			} else {
+				incident.Resource = "Resource Unknown"
+			}
+			incidents = append(incidents, incident)
+		}
+	}
+
+	return incidents, nil
 }
 
 // MoveInstanceToSecurityGroup sposta un'istanza nel security group specificato
@@ -188,7 +302,7 @@ func CheckSecuritySetup(cloudTrailClient *cloudtrail.Client, cloudWatchClient *c
 	return nil
 }
 
-// SimulateSecurityGroupIngress elimina la regola se esiste già e poi la aggiunge
+// SimulateSecurityGroupIngress simula una modifica al Security Group aggiungendo una regola di ingresso non autorizzata.
 func SimulateSecurityGroupIngress(ec2Client *ec2.Client, securityGroupID string) error {
 
 	// Aggiungi la nuova regola di sicurezza
@@ -213,64 +327,6 @@ func SimulateSecurityGroupIngress(ec2Client *ec2.Client, securityGroupID string)
 
 	log.Println("Simulazione di modifica al Security Group eseguita.")
 	return nil
-}
-
-// SecurityGroupRuleExists controlla se una regola di ingresso esiste già nel Security Group
-func SecurityGroupRuleExists(ec2Client *ec2.Client, securityGroupID string, protocol string, port int32, cidr string) (bool, error) {
-	resp, err := ec2Client.DescribeSecurityGroups(context.TODO(), &ec2.DescribeSecurityGroupsInput{
-		GroupIds: []string{securityGroupID},
-	})
-	if err != nil {
-		return false, fmt.Errorf("errore durante la descrizione del security group: %v", err)
-	}
-
-	if len(resp.SecurityGroups) == 0 {
-		return false, fmt.Errorf("security group %s non trovato", securityGroupID)
-	}
-
-	for _, permission := range resp.SecurityGroups[0].IpPermissions {
-		if permission.IpProtocol != nil && *permission.IpProtocol == protocol &&
-			permission.FromPort != nil && *permission.FromPort == port &&
-			permission.ToPort != nil && *permission.ToPort == port {
-			for _, rangeItem := range permission.IpRanges {
-				if rangeItem.CidrIp != nil && *rangeItem.CidrIp == cidr {
-					// La regola esiste già
-					return true, nil
-				}
-			}
-		}
-	}
-
-	// La regola non esiste
-	return false, nil
-}
-
-// DetectIncidents utilizza CloudTrail per rilevare incidenti basati su tipi di eventi specifici (es. modifiche ai gruppi di sicurezza).
-func DetectIncidents(cloudTrailClient *cloudtrail.Client) ([]IncidentReport, error) {
-	startTime := time.Now().Add(-1 * time.Hour)
-
-	resp, err := cloudTrailClient.LookupEvents(context.TODO(), &cloudtrail.LookupEventsInput{
-		StartTime: &startTime,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("impossibile rilevare incidenti: %v", err)
-	}
-
-	var incidents []IncidentReport
-	for _, event := range resp.Events {
-		if *event.EventName == "AuthorizeSecurityGroupIngress" || *event.EventName == "DeleteSecurityGroup" || *event.EventName == "CreateUser" {
-			incident := IncidentReport{
-				Timestamp: *event.EventTime,
-				EventName: *event.EventName,
-				Resource:  *event.Resources[0].ResourceName,
-				User:      *event.Username,
-				Details:   *event.CloudTrailEvent,
-			}
-			incidents = append(incidents, incident)
-		}
-	}
-
-	return incidents, nil
 }
 
 // AnalyzeIncidents logga i dettagli degli incidenti e ritorna un report.
