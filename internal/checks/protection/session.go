@@ -80,7 +80,7 @@ func checkELBTimeouts(ctx context.Context, cfg aws.Config) error {
 		idleTimeoutConfigured := false
 		for _, attr := range attrResult.Attributes {
 			if *attr.Key == "idle_timeout.timeout_seconds" {
-				log.Printf("ALB/NLB %s idle timeout is set to %s seconds.\n", *lb.LoadBalancerName, attr.Value)
+				log.Printf("ALB/NLB %s idle timeout is set to %s seconds.\n", *lb.LoadBalancerName, *attr.Value)
 				idleTimeoutConfigured = true
 				break
 			}

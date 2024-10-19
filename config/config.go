@@ -24,7 +24,7 @@ type AWSConfig struct {
 	LoginPolicy                    LoginPolicy              `mapstructure:"login_policy"`
 	MissionEssentialConfig         MissionEssentialConfig   `mapstructure:"mission_essential_capabilities"`
 	EC2Instances                   []EC2Config              `mapstructure:"ec2_instances"`
-	HighRiskTravelConfig           HighRiskTravelConfig     `mapstructure:"high_risk_travel"`
+	HighRiskTravelConfig           HighRiskTravelConfig     `mapstructure:"high_risk_travel_config"`
 	IdentifierManagement           IdentifierManagement     `mapstructure:"identifier_management"`
 	PasswordPolicy                 PasswordPolicy           `mapstructure:"password_policy"`
 	AttackerInstance               AttackerInstanceConfig   `mapstructure:"attacker_instance"`
@@ -69,6 +69,7 @@ type CriticalRole struct {
 
 // LoginPolicy rappresenta la politica di gestione dei tentativi di accesso falliti
 type LoginPolicy struct {
+	User                    string `mapstructure:"user"`
 	MaxUnsuccessfulAttempts int    `mapstructure:"max_unsuccessful_attempts"`
 	LockoutDurationMinutes  int    `mapstructure:"lockout_duration_minutes"`
 	ActionOnLockout         string `mapstructure:"action_on_lockout"`

@@ -2,16 +2,18 @@ aws:
   access_key: 
   secret_key: 
   region: us-east-1
+  # check 03.01.01 user and his/her relative policies
+  # check 03.01.02 
   users:
     - name: AdminUser
-      policies: [AdministratorAccess]
+      policies: [AdministratorAccess , SNSPublishPolicy]
       security_functions: [AdministratorAccess]
       is_privileged: true
       mfa_required: true
       reauth_conditions: 
         - privileged_operation 
         - role_change 
-        - "time_elapsed: 1h"
+        - "time_elapsed:1h"
       identifier_status: active
     - name: marco_admin
       policies: [AdministratorAccess]
@@ -21,7 +23,7 @@ aws:
       reauth_conditions: 
         - privileged_operation 
         - role_change 
-        - "time_elapsed: 1h"
+        - time_elapsed:1h
       identifier_status: active
     - name: ReadOnlyUser
       policies: [AmazonEC2ReadOnlyAccess]
@@ -29,7 +31,7 @@ aws:
       is_privileged: false
       mfa_required: false
       reauth_conditions: 
-        - time_elapsed: 1h
+        - time_elapsed:1h
       identifier_status: active
     - name: SelfManagedUser
       policies: [IAMSelfManageServiceSpecificCredentials]
@@ -37,7 +39,7 @@ aws:
       is_privileged: false
       mfa_required: false
       reauth_conditions: 
-        - time_elapsed: 1h
+        - time_elapsed:1h
       identifier_status: active
     - name: marco
       policies: [ReadOnlyAccess]
@@ -45,7 +47,7 @@ aws:
       is_privileged: false
       mfa_required: false
       reauth_conditions: 
-        - time_elapsed: 1h
+        - time_elapsed:1h
       identifier_status: active
     - name: SSMUser
       policies: [AmazonSSMManagedInstanceCore]
@@ -54,6 +56,7 @@ aws:
       mfa_required: false
       reauth_conditions: []
       identifier_status: active
+  # 03.01.02 check for policies present on the asset 
   accepted_policies:
     - AdministratorAccess
     - PowerUserAccess
@@ -90,6 +93,7 @@ aws:
     - SecurityAudit
     - AmazonSESFullAccess
     - AmazonSESReadOnlyAccess
+  # 03.01.03 checks the security groups for S3 buckets 
   security_groups:
     - name: default
       allowed_ingress_ports: []
@@ -109,25 +113,31 @@ aws:
     - name: quarantine
       allowed_ingress_ports: []
       allowed_egress_ports: []
+  # your s3 asset with his encryption 
   s3_buckets:
     - name: my-cui-bucket
       encryption: AES256
     - name: another-sensitive-bucket
       encryption: aws:kms
+  # 3.0.4 Separation of Duties
   critical_role:
     - role_name: AdminRole
       sensitive_functions: [ManageIAM, ManageEC2]
     - role_name: EC2SSMRole
       sensitive_functions: [SSMCoreAccess]
+  # 03.01.08 Limit Unsuccessful Logon Attempts
   login_policy:
+    user: "marco_admin"
     max_unsuccessful_attempts: 5
     lockout_duration_minutes: 15
     action_on_lockout: lock_account
+  
   mission_essential_config:
     functions: [SSH Access, HTTP Web Server]
     ports: [22, 443]
     protocols: [TCP, HTTPS]
     services: [sshd, nginx]
+  # 03.01.12 Remote Access Control 03.01.20 Use of External Systems 03.03.01 Event Logging
   ec2_instances:
     - instance_id: i-03feff3c4b19de9d6
       authorized_software: [nginx, docker, sshd]
@@ -135,6 +145,7 @@ aws:
     - instance_id: i-0c693eaede6b16d2d
       authorized_software: [apache2, sshd]
       mac_address: 00:1B:2C:3D:4E:5F
+  # 03.04.12 System and Component Configuration for High-Risk Areas
   high_risk_travel_config:
     pre_travel_config:
       ec2_security_group: restrictive
@@ -150,41 +161,30 @@ aws:
       - user_id: u124
         name: Jane Smith
         role: Admin
+  # 03.05.05 Multi-Factor Authentication
   identifier_management:
     authorized_roles: [AdminUser, marco_admin]
     reuse_prevention_period: 1h
     identifier_characteristics: status
+  # 03.05.04 Replay-Resistant Authentication
   password_policy:
     min_length: 12
     require_numbers: true
     require_symbols: true
     require_uppercase: true
     require_lowercase: true
-  attacker_instance:
-    ami: ami-0fff1b9a61dec8a5f
-    instance_type: t2.micro
-    key_name: attackerkey
-    security_group: sg-0117d2e82d65830bd
-    ssh_user: ec2-user
-    private_key_path: attackerkey.pem
-    target_ip: 54.172.141.85
-  sns_topic_arn: "arn:aws:sns:us-east-1:682033472444:IncidentAlert"
-  test_incident_response_frequency: "weekly"
+  # attacker_instance:
+  #   ami: ami-0fff1b9a61dec8a5f
+  #   instance_type: t2.micro
+  #   key_name: attackerkey
+  #   security_group: sg-0117d2e82d65830bd
+  #   ssh_user: ec2-user
+  #   private_key_path: attackerkey.pem
+  #   target_ip: 54.172.141.85
+  # sns_topic_arn: "arn:aws:sns:us-east-1:682033472444:IncidentAlert"
+  # test_incident_response_frequency: "weekly"
+  #  03.07.4
   maintainance:
-    approved_maintenance_tools: [aws-cli, aws-shell, boto3, s3cmd, aws-nuke]
-    account_id: "682033472444"
-    bucket_name: "my-cui-bucket"
-    guardduty_detector_id: "0cc92f87663077dbdd15ec08a8a1d34c"
-    ec2_monitored_instances:
-      - instance_id: i-0f4e71312063aa936
-        monitoring_tools: [aws-cli, aws-shell, boto3]
-      - instance_id: i-0bd4d11a93aa8d82b
-        monitoring_tools: [aws-cli, aws-shell, s3cmd]
-
-
-
-
-maintainance:
     approved_maintenance_tools: [aws-cli, aws-shell, boto3, s3cmd, aws-nuke]
     account_id: "682033472444"
     bucket_name: "my-cui-bucket"
@@ -198,3 +198,33 @@ maintainance:
       user_names: ["marco"]
     authorized_users:
       user_names: ["maintener1", "maintener2"]
+  # 03.11.1
+  risk_assessment:
+    frequency: "monthly"
+    assessment_template_arn: "arn:aws:inspector:us-east-1:682033472444:target/0-l7O2xGER/template/0-FHzuaYa2"
+    supply_chain_vendors:
+    - "Vendor A"
+    - "Vendor B"
+    vulnerability_scanning:
+      frequency: "weekly"
+      response_time:
+        critical: "24h"
+        high: "48h"
+        medium: "7d"
+      scan_on_new_vulnerability: true
+      assessment_template_arn : "arn:aws:inspector:us-east-1:682033472444:target/0-l7O2xGER/template/0-FHzuaYa2"
+  # 03.12.1
+  security_assessment:
+    s3_bucket_information_exchange : "examplebucketsa1"
+  # 3.13.01
+  protection:
+    managed_services: [IGW]
+    cloud_watch_log_group_name: "VPCFlowLogs"
+    mobile_codes: [javascript]
+    cloud_watch_mobile_codes: [javascript]
+  # 03.14.01 
+  integrity:
+    bucket_names: [my-cui-bucket]
+    lambda_name: "arn:aws:lambda:us-east-1:682033472444:function:SecurityAlertsFunction"
+   
+

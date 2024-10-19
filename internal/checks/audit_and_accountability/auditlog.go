@@ -20,8 +20,8 @@ type AuditLogCheck struct {
 	RetentionPeriod  time.Duration
 }
 
-// NewAuditLogCheck crea una nuova istanza di AuditLogCheck
-// rd è il periodo di retention in giorni
+// NewAuditLogCheck inizialize a new AuditLogCheck struct with the provided AWS configuration
+// rd = retention days
 func NewAuditLogCheck(cfg aws.Config, rd int) *AuditLogCheck {
 	return &AuditLogCheck{
 		CloudTrailClient: cloudtrail.NewFromConfig(cfg),
@@ -29,7 +29,8 @@ func NewAuditLogCheck(cfg aws.Config, rd int) *AuditLogCheck {
 	}
 }
 
-// RunAuditLogCheck esegue il controllo per verificare il contenuto dei record di audit
+// RunAuditLogCheck executes the audit log content check
+// 03.03.02 Audit Record Content
 func (c *AuditLogCheck) RunAuditLogCheck() error {
 	log.Println("Inizio del controllo del contenuto dei record di audit...")
 

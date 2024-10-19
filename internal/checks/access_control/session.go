@@ -1,6 +1,7 @@
 package iampolicy
 
 import (
+	"cloud_compliance_checker/config"
 	"context"
 	"fmt"
 	"log"
@@ -10,6 +11,18 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 )
+
+// LoginAttempt represents a login attempt
+type LoginAttempt struct {
+	Username       string
+	AttemptTime    time.Time
+	IsSuccessful   bool
+	FailedAttempts int
+	IsLocked       bool
+	LockoutTime    time.Time
+}
+
+var failedAttempts = map[string]*LoginAttempt{}
 
 // RunSessionTimeoutCheck performs the check for the NIST 3.1.10 requirement
 func RunSessionTimeoutCheck(cfg aws.Config) error {
@@ -79,6 +92,69 @@ func RunInactivitySessionCheck(cfg aws.Config, username string) error {
 
 	log.Printf("ForceSessionTimeout policy found for user %s\n", username)
 	log.Println("IAM session policy check completed.")
+
+	return nil
+}
+
+// RunLoginAttemptCheck checks failed login attempts and applies defined actions
+func (c *IAMCheck) RunLoginAttemptCheck(isSuccess bool) error {
+	now := time.Now()
+	loginPolicy := config.AppConfig.AWS.LoginPolicy
+	user := config.AppConfig.AWS.LoginPolicy.User
+	// Check if the user has already made failed login attempts
+	if _, exists := failedAttempts[user]; !exists {
+		failedAttempts[user] = &LoginAttempt{
+			Username:       user,
+			AttemptTime:    now,
+			IsSuccessful:   isSuccess,
+			FailedAttempts: 0,
+			IsLocked:       false,
+		}
+	}
+
+	loginAttempt := failedAttempts[user]
+
+	// If the account is locked, check if it should be unlocked
+	if loginAttempt.IsLocked {
+		if now.Sub(loginAttempt.LockoutTime) > time.Duration(loginPolicy.LockoutDurationMinutes)*time.Minute {
+			// Unlock the account after the lockout period
+			loginAttempt.IsLocked = false
+			loginAttempt.FailedAttempts = 0
+			log.Printf("Account %s automatically unlocked\n", user)
+		} else {
+			// The account is still locked
+			log.Printf("Account %s is locked until %s\n", user, loginAttempt.LockoutTime.Add(time.Duration(loginPolicy.LockoutDurationMinutes)*time.Minute))
+			return fmt.Errorf("account %s locked", user)
+		}
+	}
+
+	// If the login attempt failed, increment the count
+	if !isSuccess {
+		loginAttempt.FailedAttempts++
+		log.Printf("Failed login attempt for user %s. Total failed attempts: %d\n", user, loginAttempt.FailedAttempts)
+
+		// Check if the maximum number of attempts has been exceeded
+		if loginAttempt.FailedAttempts >= loginPolicy.MaxUnsuccessfulAttempts {
+			// Apply the lockout action
+			loginAttempt.IsLocked = true
+			loginAttempt.LockoutTime = now
+
+			// Check that `ActionOnLockout` is specified and apply the action
+			switch loginPolicy.ActionOnLockout {
+			case "lock_account":
+				log.Printf("Account %s locked for %d minutes\n", user, loginPolicy.LockoutDurationMinutes)
+			case "notify_admin":
+				log.Printf("Administrator notified for account lockout %s\n", user)
+			default:
+				log.Printf("Unknown action for account lockout %s: %s\n", user, loginPolicy.ActionOnLockout)
+				return fmt.Errorf("unknown lockout action: %s", loginPolicy.ActionOnLockout)
+			}
+			return fmt.Errorf("maximum failed login attempts reached for user %s", user)
+		}
+	} else {
+		// If the login was successful, reset the failed attempts count
+		loginAttempt.FailedAttempts = 0
+	}
 
 	return nil
 }

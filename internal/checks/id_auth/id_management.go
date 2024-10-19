@@ -70,7 +70,7 @@ func checkIdentifierStatus(user *types.User, requiredStatus string) error {
 	return nil
 }
 
-// Main function to perform the IAM checks and return errors for non-compliant users
+// 03.05.05 Multi-Factor Authentication
 func CheckIAM(cfg aws.Config) error {
 
 	iamClient := iam.NewFromConfig(cfg)

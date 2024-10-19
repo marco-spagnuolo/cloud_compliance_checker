@@ -139,7 +139,8 @@ func (c *IAMCheck) RunCheckAcceptedPolicies() error {
 	return nil
 }
 
-// RunCheckCUIFlow performs the compliance checks required for NIST SP 800-171 3.1.3
+// RunCheckCUIFlow checks the security groups and S3 buckets for compliance
+// 03.01.03
 func RunCheckCUIFlow(cfg aws.Config) error {
 
 	securityGroupsFromConfig := config.AppConfig.AWS.SecurityGroups
@@ -166,7 +167,8 @@ func RunCheckCUIFlow(cfg aws.Config) error {
 	return nil
 }
 
-// RunCheckSeparateDuties performs the check for the NIST 3.1.4 requirement
+// RunCheckSeparateDuties performs the check for separation of duties
+// 3.0.4 Separation of Duties
 func (c *IAMCheck) RunCheckSeparateDuties() error {
 	criticalRoles := config.AppConfig.AWS.CriticalRoles
 
@@ -187,7 +189,8 @@ func (c *IAMCheck) RunCheckSeparateDuties() error {
 	return nil
 }
 
-// RunPrivilegeCheck performs the check for privileges 3.1.5
+// RunPrivilegeCheck performs the check for privileges
+// 3.0.5
 func (c *IAMCheck) RunPrivilegeCheck() error {
 	// Load the users and their policies from the configuration
 	usersFromConfig := config.AppConfig.AWS.Users

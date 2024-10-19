@@ -1202,18 +1202,6 @@
         "value": 5
       }
     ]
-  },
-  {
-    "id": "03.06.01",
-    "name": "1",
-    "description": "1.",
-    "criteria": [
-      {
-        "description": "1",
-        "check_function": "ch3k",
-        "value": 5
-      }
-    ]
   }
   ],
   "responses": {
