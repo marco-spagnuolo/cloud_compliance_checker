@@ -180,3 +180,21 @@ aws:
         monitoring_tools: [aws-cli, aws-shell, boto3]
       - instance_id: i-0bd4d11a93aa8d82b
         monitoring_tools: [aws-cli, aws-shell, s3cmd]
+
+
+
+
+maintainance:
+    approved_maintenance_tools: [aws-cli, aws-shell, boto3, s3cmd, aws-nuke]
+    account_id: "682033472444"
+    bucket_name: "my-cui-bucket"
+    guardduty_detector_id: "0cc92f87663077dbdd15ec08a8a1d34c"
+    ec2_monitored_instances:
+      - instance_id: i-0f4e71312063aa936
+        monitoring_tools: [aws-cli, aws-shell, boto3]
+      - instance_id: i-0bd4d11a93aa8d82b
+        monitoring_tools: [aws-cli, aws-shell, s3cmd]
+    non_local_maintenance:
+      user_names: ["marco"]
+    authorized_users:
+      user_names: ["maintener1", "maintener2"]
