@@ -1,4 +1,3 @@
-
 # AWS Security Configuration - NIST SP 800-171 v3 Compliance Checker
 
 ## Overview
@@ -18,13 +17,13 @@ To run the compliance checker and generate the compliance report, follow these s
      region: YOUR_REGION
    ```
 
+   You can use the following example configuration file for reference: [config.yaml](https://github.com/marco-spagnuolo/cloud_compliance_checker/blob/main/config/config.yaml).
+
 2. **Run the Go Script**:
    Execute the following command to run the compliance checker:
    ```bash
    go run main.go --config your_config_file.yaml
    ```
-
-   
 
 3. **Generate Compliance Report**:
    After the script completes execution, a PDF file named `compliance_report.pdf` will be generated in the root directory of the project. This report will contain the results of the compliance checks, detailing any issues or non-compliance found in your AWS environment.
@@ -35,18 +34,18 @@ To run the compliance checker and generate the compliance report, follow these s
 
 1. [Requirements](#requirements)
 2. [Configuration Structure](#configuration-structure)
-    - [AWS Credentials](#aws-credentials)
-    - [User and Policies](#user-and-policies)
-    - [Accepted Policies](#accepted-policies)
-    - [Security Groups](#security-groups)
-    - [S3 Buckets Encryption](#s3-buckets-encryption)
-    - [Separation of Duties](#separation-of-duties)
-    - [Login Policy](#login-policy)
-    - [Remote Access Control](#remote-access-control)
-    - [Risk Assessment](#risk-assessment)
-    - [System Maintenance](#system-maintenance)
-    - [Password Policy](#password-policy)
-    - [Data Integrity](#data-integrity)
+    - [AWS Credentials](#1-aws-credentials)
+    - [User and Policies](#2-user-and-policies)
+    - [Accepted Policies](#3-accepted-policies)
+    - [Security Groups](#4-security-groups)
+    - [S3 Buckets Encryption](#5-s3-buckets-encryption)
+    - [Separation of Duties](#6-separation-of-duties)
+    - [Login Policy](#7-login-policy)
+    - [Remote Access Control](#8-remote-access-control)
+    - [Risk Assessment](#9-risk-assessment)
+    - [System Maintenance](#10-system-maintenance)
+    - [Password Policy](#11-password-policy)
+    - [Data Integrity](#12-data-integrity)
 3. [Best Practices](#best-practices)
 4. [Contact](#contact)
 
@@ -130,7 +129,7 @@ Sets the maximum number of unsuccessful login attempts, the lockout duration, an
 
 ```yaml
 login_policy:
-  user: "marco_admin"
+  user: "marco"
   max_unsuccessful_attempts: 5
   lockout_duration_minutes: 15
 ```

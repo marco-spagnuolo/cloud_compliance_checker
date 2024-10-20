@@ -1,7 +1,7 @@
 cred.yaml
 *.txt
 *.pem
-.gitconfig
-.log
-.pdf
-.csv
+*.gitconfig
+*.log
+*.pdf
+*.csv
