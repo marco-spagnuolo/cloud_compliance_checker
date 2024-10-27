@@ -1,4 +1,4 @@
-# AWS Security Configuration - NIST SP 800-171 v3 Compliance Checker
+# AWS Compliance Auditor - NIST SP 800-171 v3 Compliance Checker
 
 ## Overview
 
